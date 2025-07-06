@@ -74,9 +74,26 @@ class PDFBookmarkGUI:
         self.output_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(10, 5), pady=5)
         ttk.Button(file_frame, text="浏览...", command=self.browse_output_file).grid(row=1, column=2, pady=5)
         
+        # 添加选项框架
+        options_frame = ttk.LabelFrame(main_frame, text="处理选项", padding="10")
+        options_frame.grid(row=2, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=10)
+        options_frame.columnconfigure(1, weight=1)
+        
+        # 字体大小过滤选项
+        self.enable_font_filter_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(options_frame, text="启用字体大小过滤（过滤非标题文本）", 
+                        variable=self.enable_font_filter_var).grid(row=0, column=0, sticky=tk.W, pady=5)
+        
+        # 手动设置字体大小阈值
+        ttk.Label(options_frame, text="字体大小阈值:").grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.font_threshold_var = tk.StringVar()
+        threshold_entry = ttk.Entry(options_frame, textvariable=self.font_threshold_var, width=10)
+        threshold_entry.grid(row=1, column=1, sticky=tk.W, padx=(10, 5), pady=5)
+        ttk.Label(options_frame, text="（可选，留空则自动判断）").grid(row=1, column=2, sticky=tk.W, pady=5)
+        
         # 控制按钮框架
         button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=2, column=0, columnspan=3, pady=20)
+        button_frame.grid(row=3, column=0, columnspan=3, pady=20)
         
         # 开始处理按钮
         self.process_button = ttk.Button(button_frame, text="🚀 开始处理", 
@@ -92,7 +109,7 @@ class PDFBookmarkGUI:
         
         # 进度条框架
         progress_frame = ttk.Frame(main_frame)
-        progress_frame.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        progress_frame.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
         progress_frame.columnconfigure(0, weight=1)
         
         # 进度条
@@ -107,7 +124,7 @@ class PDFBookmarkGUI:
         
         # 日志输出区域
         log_frame = ttk.LabelFrame(main_frame, text="📋 处理日志", padding="5")
-        log_frame.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(10, 0))
+        log_frame.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(10, 0))
         log_frame.columnconfigure(0, weight=1)
         log_frame.rowconfigure(0, weight=1)
         
@@ -121,7 +138,7 @@ class PDFBookmarkGUI:
         status_bar = ttk.Label(main_frame, textvariable=self.status_var, 
                               relief=tk.SUNKEN, anchor=tk.W, 
                               font=("Microsoft YaHei", 9))
-        status_bar.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(10, 0))
+        status_bar.grid(row=6, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(10, 0))
         
     def browse_input_file(self):
         """浏览输入文件"""
@@ -161,6 +178,8 @@ class PDFBookmarkGUI:
         self.output_var.set("")
         self.input_file = ""
         self.output_file = ""
+        self.font_threshold_var.set("")
+        self.enable_font_filter_var.set(True)
         self.log_text.delete(1.0, tk.END)
         self.status_var.set("📌 就绪")
         self.progress_label.config(text="")
@@ -212,6 +231,19 @@ class PDFBookmarkGUI:
             
             # 创建PDF书签工具实例
             tool = PDFBookmarkTool(input_file)
+            
+            # 设置字体大小过滤选项
+            tool.enable_font_size_filter = self.enable_font_filter_var.get()
+            self.log_message(f"字体大小过滤: {'启用' if tool.enable_font_size_filter else '禁用'}")
+            
+            # 设置手动字体大小阈值（如果有）
+            if self.font_threshold_var.get().strip():
+                try:
+                    threshold = float(self.font_threshold_var.get())
+                    tool.font_size_threshold = threshold
+                    self.log_message(f"手动设置字体大小阈值: {threshold}")
+                except ValueError:
+                    self.log_message("警告: 字体大小阈值格式不正确，将使用自动检测")
             
             # 重定向输出到GUI
             original_print = print

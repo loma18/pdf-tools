@@ -46,6 +46,10 @@ class PDFBookmarkTool:
             r'^\d+、\s*.*',  # 1、标题
             r'^（[一二三四五六七八九十\d]+）\s*.*',  # （1）标题 
         ]
+        # 添加字体大小分析相关属性
+        self.font_size_threshold = 0  # 将在分析阶段动态设置
+        self.title_font_sizes = []  # 用于收集标题字体大小
+        self.enable_font_size_filter = True  # 是否启用字体大小过滤
     
     def open_pdf(self) -> bool:
         """
@@ -167,8 +171,79 @@ class PDFBookmarkTool:
                 else:
                     return True, 1
         
+        # 添加对无序号但可能是标题的短文本的支持
+        # 如"后续想法"这类没有序号但是作为标题的文本
+        if len(text) <= 15 and not re.search(r'[,.;:，。；：？！]', text):
+            # 短文本且不包含标点符号，可能是标题
+            # 此处返回level=1，后续会根据字体大小再判断
+            return True, 1
+        
         return False, 0
     
+    def analyze_font_distribution(self, font_sizes: List[float]) -> Dict:
+        """
+        分析字体大小分布，识别可能的标题字体大小
+        
+        Args:
+            font_sizes: 字体大小列表
+            
+        Returns:
+            Dict: 字体分析结果
+        """
+        if not font_sizes:
+            return {"threshold": 0, "clusters": {}}
+        
+        # 对字体大小进行分组
+        font_groups = {}
+        for size in font_sizes:
+            # 将相近的字体大小分到同一组（精确到小数点后1位）
+            key = round(size, 1)
+            if key not in font_groups:
+                font_groups[key] = []
+            font_groups[key].append(size)
+        
+        # 计算每个字体大小组的频率
+        font_frequencies = {size: len(fonts) for size, fonts in font_groups.items()}
+        
+        # 按字体大小排序
+        sorted_sizes = sorted(font_frequencies.keys(), reverse=True)
+        
+        # 识别可能的标题字体大小（通常较大且较少使用）
+        title_sizes = []
+        content_sizes = []
+        
+        # 如果有至少3种不同的字体大小
+        if len(sorted_sizes) >= 3:
+            # 假设最大的1-2种字体大小是标题
+            title_sizes = sorted_sizes[:2]
+            content_sizes = sorted_sizes[2:]
+            
+            # 检查频率 - 标题字体通常出现次数较少
+            for size in sorted_sizes[:3]:  # 检查前三大字体
+                if font_frequencies[size] < len(font_sizes) * 0.1:  # 如果出现频率低于10%
+                    if size not in title_sizes:
+                        title_sizes.append(size)
+        else:
+            # 字体种类较少，假设最大的是标题字体
+            title_sizes = [sorted_sizes[0]] if sorted_sizes else []
+            content_sizes = sorted_sizes[1:] if len(sorted_sizes) > 1 else []
+        
+        # 计算阈值 - 取标题字体中最小值的90%
+        threshold = min(title_sizes) * 0.9 if title_sizes else 0
+        
+        # 构建分析结果
+        result = {
+            "threshold": threshold,
+            "clusters": {
+                "title_sizes": title_sizes,
+                "content_sizes": content_sizes
+            },
+            "frequencies": font_frequencies,
+            "all_sizes": sorted_sizes
+        }
+        
+        return result
+        
     def find_toc_entries(self) -> List[Dict]:
         """
         查找所有目录条目
@@ -177,6 +252,8 @@ class PDFBookmarkTool:
             List[Dict]: 目录条目列表
         """
         toc_entries = []
+        all_font_sizes = []  # 收集所有文本的字体大小
+        potential_title_font_sizes = []  # 收集潜在标题的字体大小
         
         print("正在分析PDF页面...")
         for page_num in range(len(self.doc)):
@@ -184,11 +261,18 @@ class PDFBookmarkTool:
             
             text_blocks = self.extract_text_with_font_info(page_num)
             
+            # 收集当前页面的所有字体大小
+            page_font_sizes = [block["font_size"] for block in text_blocks]
+            all_font_sizes.extend(page_font_sizes)
+            
             for block in text_blocks:
                 text = block["text"]
                 is_toc, level = self.is_likely_toc_text(text)
                 
                 if is_toc:
+                    # 收集潜在标题的字体大小
+                    potential_title_font_sizes.append(block["font_size"])
+                    
                     # 检查是否包含页码引用
                     page_ref_match = re.search(r'\.{3,}(\d+)$|…+(\d+)$|\s+(\d+)$', text)
                     target_page = None
@@ -198,14 +282,75 @@ class PDFBookmarkTool:
                         target_page = int(page_ref_match.group(1) or page_ref_match.group(2) or page_ref_match.group(3))
                         clean_text = re.sub(r'\.{3,}\d+$|…+\d+$|\s+\d+$', '', text).strip()
                     
+                    # 判断是否为数字序列格式的标题（如1.2.3格式）
+                    number_sequence = self.extract_number_sequence(clean_text)
+                    is_numbered_sequence = bool(number_sequence and len(number_sequence) > 1)
+                    
                     toc_entries.append({
                         "title": clean_text,
                         "level": level,
                         "source_page": page_num,
                         "target_page": target_page or page_num,
                         "font_size": block["font_size"],
-                        "font_flags": block["font_flags"]
+                        "font_flags": block["font_flags"],
+                        "has_number": bool(re.match(r'^(\d+(?:\.\d+)*)|^第[一二三四五六七八九十\d]+[章节部分]|^[一二三四五六七八九十]+[、\.]|^[IVXLCDM]+[、\.]|^\d+、', clean_text)),
+                        "is_numbered_sequence": is_numbered_sequence
                     })
+        
+        # 分析字体大小分布
+        if self.enable_font_size_filter and potential_title_font_sizes:
+            # 保存所有潜在标题的字体大小
+            self.title_font_sizes = potential_title_font_sizes
+            
+            # 检查是否已经手动设置了字体大小阈值
+            if self.font_size_threshold <= 0:
+                # 如果没有手动设置，则进行自动分析
+                font_analysis = self.analyze_font_distribution(potential_title_font_sizes)
+                self.font_size_threshold = font_analysis["threshold"]
+                print(f"字体大小分析: 识别到的标题字体大小 = {font_analysis['clusters']['title_sizes']}")
+                print(f"自动计算字体大小阈值设置为: {self.font_size_threshold:.2f}")
+            else:
+                print(f"使用手动设置的字体大小阈值: {self.font_size_threshold:.2f}")
+            
+            # 根据字体大小过滤条目
+            filtered_by_font = []
+            
+            # 首先找出所有有序号的标题及其字体大小
+            numbered_title_font_sizes = set()
+            for entry in toc_entries:
+                if entry["has_number"] and entry["font_size"] >= self.font_size_threshold:
+                    numbered_title_font_sizes.add(round(entry["font_size"], 1))
+            
+            print(f"有序号标题的字体大小: {sorted(numbered_title_font_sizes, reverse=True)}")
+            
+            # 降低多级数字序列标题的字体大小阈值（如3.4.1）
+            sequence_threshold = self.font_size_threshold * 0.9
+            print(f"多级数字序列标题的字体大小阈值: {sequence_threshold:.2f}")
+            
+            # 过滤条目，保留有序号的标题和与有序号标题字体大小相同的无序号标题
+            for entry in toc_entries:
+                should_keep = False
+                
+                # 情况1: 字体大小大于阈值
+                if entry["font_size"] >= self.font_size_threshold:
+                    # 有序号标题或字体大小与有序号标题相同的无序号标题
+                    if entry["has_number"] or round(entry["font_size"], 1) in numbered_title_font_sizes:
+                        should_keep = True
+                        if not entry["has_number"]:
+                            print(f"保留无序号标题: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f}，与有序号标题字体大小相同)")
+                
+                # 情况2: 多级数字序列标题（如3.4.1），使用较低的阈值
+                elif entry["is_numbered_sequence"] and entry["font_size"] >= sequence_threshold:
+                    should_keep = True
+                    print(f"保留多级数字序列标题: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f}，低于标准阈值但符合序列标题阈值)")
+                
+                if should_keep:
+                    filtered_by_font.append(entry)
+                else:
+                    print(f"基于字体大小过滤掉: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f})")
+            
+            print(f"字体大小过滤: 原始 {len(toc_entries)} 条目 -> 过滤后 {len(filtered_by_font)} 条目")
+            toc_entries = filtered_by_font
         
         # 根据字体大小和位置排序
         toc_entries.sort(key=lambda x: (x["source_page"], -x["font_size"]))
@@ -908,11 +1053,27 @@ class PDFBookmarkTool:
                 result.extend(groups[prefix_tuple])
             
             # 添加子层级的条目
-            for key in sorted(groups.keys()):
+            child_keys = []
+            for key in groups.keys():
                 if (isinstance(key, tuple) and 
                     len(key) == len(prefix_tuple) + 1 and 
                     key[:len(prefix_tuple)] == prefix_tuple):
-                    result.extend(build_hierarchy(key, max_depth - 1))
+                    child_keys.append(key)
+            
+            # 自定义排序函数，确保相同类型的键进行比较
+            def safe_sort_key(key):
+                if isinstance(key, tuple):
+                    if key[0] == "no_numbers":
+                        return (2, key[1])  # 无序号条目排在最后
+                    else:
+                        return (1, key)  # 有序号条目排在前面
+                return (0, str(key))  # 其他类型转为字符串
+            
+            # 安全排序子键
+            child_keys.sort(key=safe_sort_key)
+            
+            for key in child_keys:
+                result.extend(build_hierarchy(key, max_depth - 1))
             
             return result
         
@@ -921,17 +1082,28 @@ class PDFBookmarkTool:
         
         # 处理顶层条目（单个数字）
         top_level_keys = [key for key in groups.keys() 
-                         if isinstance(key, tuple) and len(key) == 1]
-        top_level_keys.sort()
+                         if isinstance(key, tuple) and len(key) == 1 and key[0] != "no_numbers"]
+        
+        # 自定义排序函数，确保只比较相同类型
+        def safe_top_level_sort(key):
+            if isinstance(key, tuple) and len(key) == 1 and isinstance(key[0], int):
+                return key[0]
+            return 999999  # 非数字键排在最后
+        
+        # 安全排序顶层键
+        top_level_keys.sort(key=safe_top_level_sort)
         
         for key in top_level_keys:
             reordered_entries.extend(build_hierarchy(key))
         
         # 处理没有数字序列的条目
+        no_number_entries = []
         for key in groups.keys():
-            if not isinstance(key, tuple) or len(key) != 1:
-                if isinstance(key, tuple) and key[0] == "no_numbers":
-                    reordered_entries.extend(groups[key])
+            if isinstance(key, tuple) and key[0] == "no_numbers":
+                no_number_entries.extend(groups[key])
+        
+        # 将无序号条目添加到结果末尾
+        reordered_entries.extend(no_number_entries)
         
         print(f"重新排序: 原始{len(toc_entries)}个条目 -> 排序后{len(reordered_entries)}个条目")
         return reordered_entries
@@ -1128,6 +1300,7 @@ class PDFBookmarkTool:
         try:
             print(f"开始处理PDF文件: {self.pdf_path}")
             print(f"总页数: {len(self.doc)}")
+            print(f"启用字体大小过滤: {self.enable_font_size_filter}")
             
             # 查找目录条目
             toc_entries = self.find_toc_entries()
@@ -1149,10 +1322,33 @@ class PDFBookmarkTool:
             print("\n找到的目录条目:")
             for i, entry in enumerate(toc_entries[:10]):  # 只显示前10个
                 indent = "  " * (entry["level"] - 1)
-                print(f"{i+1:2d}. {indent}{entry['title']} (页面 {entry['target_page'] + 1})")
+                print(f"{i+1:2d}. {indent}{entry['title']} (页面 {entry['target_page'] + 1}, 字体大小 {entry['font_size']:.2f})")
             
             if len(toc_entries) > 10:
                 print(f"... 还有 {len(toc_entries) - 10} 个条目")
+                
+            # 显示字体大小分析结果
+            if self.enable_font_size_filter and self.title_font_sizes:
+                print("\n字体大小分析结果:")
+                
+                # 创建字体大小直方图
+                font_sizes = {}
+                for size in self.title_font_sizes:
+                    key = round(size, 1)
+                    if key not in font_sizes:
+                        font_sizes[key] = 0
+                    font_sizes[key] += 1
+                
+                # 显示字体大小分布
+                print("字体大小分布:")
+                for size in sorted(font_sizes.keys(), reverse=True):
+                    count = font_sizes[size]
+                    bar = "#" * min(count, 50)  # 限制条形图宽度
+                    print(f"{size:5.1f}: {bar} ({count})")
+                
+                print(f"\n标题字体大小范围: {min(self.title_font_sizes):.2f} - {max(self.title_font_sizes):.2f}")
+                print(f"字体大小阈值: {self.font_size_threshold:.2f}")
+                print(f"字体大小低于阈值的条目已被过滤")
             
             # 添加书签
             if self.add_bookmarks(toc_entries):
@@ -1179,6 +1375,8 @@ def main():
     parser = argparse.ArgumentParser(description="PDF自动书签工具")
     parser.add_argument("input_pdf", help="输入PDF文件路径")
     parser.add_argument("-o", "--output", help="输出PDF文件路径（可选，默认覆盖原文件）")
+    parser.add_argument("--disable-font-filter", action="store_true", help="禁用字体大小过滤功能")
+    parser.add_argument("--font-threshold", type=float, help="手动设置字体大小阈值（可选）")
     
     args = parser.parse_args()
     
@@ -1189,6 +1387,16 @@ def main():
     
     # 创建工具实例并处理PDF
     tool = PDFBookmarkTool(args.input_pdf)
+    
+    # 设置字体过滤选项
+    if args.disable_font_filter:
+        tool.enable_font_size_filter = False
+        print("字体大小过滤功能已禁用")
+    
+    # 设置手动字体大小阈值
+    if args.font_threshold is not None:
+        tool.font_size_threshold = args.font_threshold
+        print(f"手动设置字体大小阈值为: {args.font_threshold}")
     
     if tool.process_pdf(args.output):
         print("✅ PDF书签添加完成！")
