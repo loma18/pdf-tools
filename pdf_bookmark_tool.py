@@ -53,7 +53,7 @@ class PDFBookmarkTool:
         self.enable_font_size_filter = True  # 是否启用字体大小过滤
         
         # 大模型API配置
-        self.api_key = "ailab_F4YlwHmeTJbeaPdVs6L0OUyJ80HrDlRQoH4o41UODYjk5/em00RclX1HAq3kQovn64O5hyMvh91FM5ZMrISlFjMCJx1a5hiNYkNYswO+qaG6kpXml5FppXM="
+        self.api_key = "666ailab_F4YlwHmeTJbeaPdVs6L0OUyJ80HrDlRQoH4o41UODYjk5/em00RclX1HAq3kQovn64O5hyMvh91FM5ZMrISlFjMCJx1a5hiNYkNYswO+qaG6kpXml5FppXM="
         self.api_url = "https://lab.iwhalecloud.com/gpt-proxy/v1/chat/completions"
     
     def open_pdf(self) -> bool:
@@ -1565,24 +1565,24 @@ class PDFBookmarkTool:
                 filter_reason = "包含非标准前缀字符"
             
             # 2. 检查是否为表格内容的特征
-            table_indicators = [
-                # 检查是否包含表格特征词汇
-                lambda t: any(keyword in t for keyword in ['思考角度', '有利或不利因素', '优势', '劣势', '优点', '缺点', '分析维度']),
-                # 检查是否为表格中的条目（通常较长且包含描述性内容）
-                lambda t: re.match(r'^\d+\.', t) and len(t) > 30 and ('使用' in t or '操作' in t or '功能' in t or '设计' in t),
-                # 检查是否包含表格中常见的描述性文本
-                lambda t: len(t) > 40 and any(phrase in t for phrase in ['从', '到', '进行', '实现', '提供', '支持']),
-                # 检查是否为表格中的具体条目（包含工具名称、技术术语等）
-                lambda t: re.match(r'^\d+\.', t) and any(tool in t for tool in ['cursor', 'Figma', 'MasterGo', 'MasterGO']),
-                # 检查是否为表格中的功能描述
-                lambda t: re.match(r'^\d+\.', t) and any(desc in t for desc in ['难以', '无法', '不能', '困难', '问题', '缺陷']),
-                # 检查是否包含明显的表格内容特征（技术描述、对比内容等）
-                lambda t: re.match(r'^\d+\.', t) and any(feature in t for feature in ['平台', '内容', '迁移', '对接', '提效', '开发人员']),
-            ]
+            # table_indicators = [
+            #     # 检查是否包含表格特征词汇
+            #     lambda t: any(keyword in t for keyword in ['思考角度', '有利或不利因素', '优势', '劣势', '优点', '缺点', '分析维度']),
+            #     # 检查是否为表格中的条目（通常较长且包含描述性内容）
+            #     lambda t: re.match(r'^\d+\.', t) and len(t) > 30 and ('使用' in t or '操作' in t or '功能' in t or '设计' in t),
+            #     # 检查是否包含表格中常见的描述性文本
+            #     lambda t: len(t) > 40 and any(phrase in t for phrase in ['从', '到', '进行', '实现', '提供', '支持']),
+            #     # 检查是否为表格中的具体条目（包含工具名称、技术术语等）
+            #     lambda t: re.match(r'^\d+\.', t) and any(tool in t for tool in ['cursor', 'Figma', 'MasterGo', 'MasterGO']),
+            #     # 检查是否为表格中的功能描述
+            #     lambda t: re.match(r'^\d+\.', t) and any(desc in t for desc in ['难以', '无法', '不能', '困难', '问题', '缺陷']),
+            #     # 检查是否包含明显的表格内容特征（技术描述、对比内容等）
+            #     lambda t: re.match(r'^\d+\.', t) and any(feature in t for feature in ['平台', '内容', '迁移', '对接', '提效', '开发人员']),
+            # ]
             
-            if any(indicator(title) for indicator in table_indicators):
-                should_filter = True
-                filter_reason = "疑似表格内容"
+            # if any(indicator(title) for indicator in table_indicators):
+            #     should_filter = True
+            #     filter_reason = "疑似表格内容"
             
             # 3. 检查上下文是否为表格环境
             # 通过检查相邻条目是否有相似的结构来判断
@@ -1609,7 +1609,7 @@ class PDFBookmarkTool:
             
             # 4. 检查是否为明显的非标题内容
             non_title_patterns = [
-                r'^.*[，。；：？！].*[，。；：？！].*',  # 包含多个标点符号的长句
+                # r'^.*[，。；：？！].*[，。；：？！].*',  # 包含多个标点符号的长句
                 r'^.{50,}',  # 超长文本（可能是段落内容）
                 r'^.*\d+年\d+月.*',  # 日期格式
                 r'^.*\d+%.*',  # 百分比
@@ -1629,29 +1629,53 @@ class PDFBookmarkTool:
 
     def llm_semantic_filter(self, toc_entries: List[Dict]) -> List[Dict]:
         """
-        使用大模型进行语义过滤，优化书签结构
-        
+        使用大模型进行语义过滤，优化书签结构（分批调用模式，每批100条）
         Args:
             toc_entries: 原始目录条目列表
-            
         Returns:
             List[Dict]: 过滤后的目录条目列表
         """
-        if len(toc_entries) > 1000:
-            print(f"警告：条目数量过多({len(toc_entries)})，跳过大模型过滤")
-            return toc_entries
-        
         if len(toc_entries) == 0:
             return toc_entries
-        
-        print(f"开始使用大模型进行语义过滤，原始条目数: {len(toc_entries)}{toc_entries}")
-        
+        print(f"开始使用大模型进行语义过滤（分批调用模式），原始条目数: {len(toc_entries)}")
+        return self._batched_llm_filter(toc_entries)
+
+    def _batched_llm_filter(self, toc_entries: List[Dict], batch_size: int = 100) -> List[Dict]:
+        """
+        分批调用大模型API，每批batch_size条，最后合并结果
+        """
+        all_filtered = []
+        total = len(toc_entries)
+        batch_count = (total + batch_size - 1) // batch_size
+        print(f"将目录条目分为 {batch_count} 批，每批{batch_size}条")
+        for i in range(batch_count):
+            batch = toc_entries[i*batch_size:(i+1)*batch_size]
+            print(f"\n🚀 调用大模型处理第{i+1}/{batch_count}批（条目{i*batch_size+1}-{min((i+1)*batch_size, total)}）...")
+            filtered = self._single_request_llm_filter(batch)
+            print(f"✅ 第{i+1}批处理完成，保留{len(filtered)}条")
+            all_filtered.extend(filtered)
+        # 合并后去重（标题+页码）
+        def get_title_page_key(entry):
+            return (entry["title"].strip(), entry.get("target_page", entry.get("source_page", 0)))
+        seen = set()
+        deduped = []
+        for entry in all_filtered:
+            key = get_title_page_key(entry)
+            if key not in seen:
+                seen.add(key)
+                deduped.append(entry)
+        print(f"\n📦 分批合并后去重，最终保留{len(deduped)}条")
+        return deduped
+
+    def _single_request_llm_filter(self, toc_entries: List[Dict]) -> List[Dict]:
+        """单次请求的LLM过滤（用于小数据量）"""
         try:
             # 构建提示词
             prompt = self._build_semantic_filter_prompt()
             
             # 格式化候选数据
             candidates_text = self._format_toc_entries_for_llm(toc_entries)
+            print(f"数据长度: {len(candidates_text)} 字符")
             
             # 调用大模型API
             headers = {
@@ -1660,7 +1684,7 @@ class PDFBookmarkTool:
             }
             
             data = {
-                "model": "gpt-4.1",
+                "model": "claude-4-sonnet",
                 "messages": [
                     {
                         "role": "user",
@@ -1668,33 +1692,58 @@ class PDFBookmarkTool:
                     }
                 ],
                 "temperature": 0.1,
-                "max_tokens": 4000
+                "max_tokens": 32768
             }
             
-            
             response = requests.post(self.api_url, headers=headers, json=data, timeout=60)
+            print(f"收到响应，状态码: {response.status_code}")
             
             if response.status_code == 200:
-                result = response.json()
-                if "choices" in result and result["choices"]:
-                    content = result["choices"][0]["message"]["content"]
-                    filtered_entries = self._parse_llm_semantic_response(content, toc_entries)
-                    print(f"大模型语义过滤完成，过滤后条目数: {len(filtered_entries)}")
+                try:
+                    result = response.json()
                     
-                    # 保存调试信息
-                    self._save_semantic_filter_debug(toc_entries, filtered_entries, content)
-                    
-                    return filtered_entries
-                else:
-                    print("大模型响应格式错误，使用原始条目")
-                    return toc_entries
+                    if "choices" in result and result["choices"]:
+                        content = result["choices"][0]["message"]["content"]
+                        print(f"响应内容长度: {len(content)}")
+                        
+                        filtered_entries = self._parse_llm_semantic_response(content, toc_entries)
+                        print(f"语义过滤完成，过滤后条目数: {len(filtered_entries)}")
+                        
+                        # 保存调试信息
+                        self._save_semantic_filter_debug(toc_entries, filtered_entries, content)
+                        
+                        return filtered_entries
+                    else:
+                        print(f"响应格式错误: {result}")
+                        return self._simple_rule_filter(toc_entries)
+                except Exception as json_error:
+                    print(f"解析响应JSON失败: {json_error}")
+                    return self._simple_rule_filter(toc_entries)
             else:
-                print(f"大模型API调用失败，状态码: {response.status_code}{response.text}，使用原始条目")
-                return toc_entries
+                print(f"API调用失败，状态码: {response.status_code}")
+                return self._simple_rule_filter(toc_entries)
                 
         except Exception as e:
-            print(f"大模型语义过滤失败: {e}，使用原始条目")
-            return toc_entries
+            print(f"单次处理失败: {e}")
+            return self._simple_rule_filter(toc_entries)
+    
+    def _simple_rule_filter(self, toc_entries: List[Dict]) -> List[Dict]:
+        """简单的规则过滤，作为LLM过滤失败时的备用方案"""
+        filtered = []
+        for entry in toc_entries:
+            title = entry.get('title', '').strip()
+            # 简单的过滤规则：排除明显的非标题内容
+            if (len(title) < 3 or 
+                '页码' in title or 
+                '页脚' in title or 
+                '页眉' in title or
+                title.isdigit() or
+                len(title) > 200):
+                continue
+            filtered.append(entry)
+        
+        print(f"规则过滤完成: {len(toc_entries)} -> {len(filtered)}")
+        return filtered
     
     def _build_semantic_filter_prompt(self) -> str:
         """构建语义过滤的提示词"""
@@ -1709,25 +1758,27 @@ class PDFBookmarkTool:
 
 条目数据格式：
 - title: 标题文本
-- level: 层级深度(1-5)
-- page_num: 页码
-- font_size: 字体大小
+- level: 层级深度(1-8)
+- 页码: 目标页码
+- 字体: 字体大小
 
-层级判断规则（支持5层结构）：
+层级判断规则（支持8层结构）：
 - 第X章、第X部分 → 1级
 - X、X.Y、第X节 → 2级  
 - X.Y.Z → 3级
 - X.Y.Z.W → 4级
 - X.Y.Z.W.V → 5级
+- X.Y.Z.W.V.U → 6级
+- X.Y.Z.W.V.U.T → 7级
+- X.Y.Z.W.V.U.T.S → 8级
 
-请返回过滤和优化后的目录条目，保持JSON格式：
+请返回过滤和优化后的目录条目，保持JSON格式，**必须保留原始页码信息，支持最多8级标题**：
 ```json
 [
   {
     "title": "标题文本",
     "level": 层级数字,
-    "page_num": 页码,
-    "font_size": 字体大小
+    "page_num": 页码数字
   }
 ]
 ```
@@ -1738,9 +1789,34 @@ class PDFBookmarkTool:
         """格式化目录条目数据供大模型分析"""
         formatted_lines = []
         for i, entry in enumerate(toc_entries):
-            line = f"[{i}] 标题: {entry.get('title', '')}"
+            # 清理标题文本，移除可能导致问题的字符
+            title = str(entry.get('title', '')).replace('"', '\\"').replace('\n', ' ').replace('\r', ' ').strip()
+            # 限制标题长度
+            if len(title) > 100:
+                title = title[:100] + "..."
+            
+            line = f"[{i}] 标题: {title}"
             line += f" | 层级: {entry.get('level', 1)}"
-            line += f" | 页码: {entry.get('page_num', 1)}"
+            line += f" | 页码: {entry.get('target_page', entry.get('source_page', 0)) + 1}"  # 显示1基索引的页码
+            line += f" | 字体: {entry.get('font_size', 12.0)}"
+            formatted_lines.append(line)
+        
+        return "\n".join(formatted_lines)
+    
+    def _format_segment_for_llm(self, segment_entries: List[Dict], segment_num: int) -> str:
+        """格式化单个段落的目录条目数据供大模型分析"""
+        formatted_lines = [f"=== 段落 {segment_num} ==="]
+        
+        for i, entry in enumerate(segment_entries):
+            # 清理标题文本，移除可能导致问题的字符
+            title = str(entry.get('title', '')).replace('"', '\\"').replace('\n', ' ').replace('\r', ' ').strip()
+            # 限制标题长度
+            if len(title) > 100:
+                title = title[:100] + "..."
+            
+            line = f"[{i}] 标题: {title}"
+            line += f" | 层级: {entry.get('level', 1)}"
+            line += f" | 页码: {entry.get('target_page', entry.get('source_page', 0)) + 1}"  # 显示1基索引的页码
             line += f" | 字体: {entry.get('font_size', 12.0)}"
             formatted_lines.append(line)
         
@@ -1752,22 +1828,36 @@ class PDFBookmarkTool:
             import json
             import re
             
+            print("开始解析LLM响应...")
+            
             # 尝试提取JSON数据
             json_match = re.search(r'```json\s*(\[.*?\])\s*```', content, re.DOTALL)
             if json_match:
                 json_str = json_match.group(1)
+                print("从markdown代码块中提取到JSON")
             else:
                 # 查找第一个[到最后一个]
                 start_idx = content.find('[')
                 end_idx = content.rfind(']')
                 if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
                     json_str = content[start_idx:end_idx+1]
+                    print(f"从响应中提取JSON: 起始位置{start_idx}, 结束位置{end_idx}")
                 else:
                     print("无法从响应中提取JSON数据")
+                    print(f"查找'['的位置: {start_idx}, 查找']'的位置: {end_idx}")
                     return original_entries
             
+            print(f"提取的JSON字符串长度: {len(json_str)}")
+            print(f"JSON字符串前200字符: {json_str[:200]}...")
+            
             # 解析JSON
-            filtered_data = json.loads(json_str)
+            try:
+                filtered_data = json.loads(json_str)
+                print("JSON解析成功")
+            except json.JSONDecodeError as json_error:
+                print(f"JSON解析失败: {json_error}")
+                print(f"尝试解析的JSON: {json_str[:500]}...")
+                return original_entries
             
             if not isinstance(filtered_data, list):
                 print("响应数据不是列表格式")
@@ -1778,9 +1868,12 @@ class PDFBookmarkTool:
             
             # 转换为标准格式，保留原始页面信息
             filtered_entries = []
+            kept_titles = set()  # 记录保留的标题
+            
             for item in filtered_data:
                 if isinstance(item, dict):
                     title = item.get("title", "")
+                    kept_titles.add(title)
                     
                     # 从原始条目中查找匹配的条目来获取正确的页面信息
                     original_entry = original_dict.get(title)
@@ -1789,13 +1882,21 @@ class PDFBookmarkTool:
                         entry = original_entry.copy()
                         if "level" in item:
                             entry["level"] = item["level"]
+                        # 如果大模型提供了页码信息，优先使用它
+                        if "page_num" in item:
+                            page_num = item["page_num"] - 1  # 转换为0基索引
+                            entry["target_page"] = page_num
+                            # 如果页码发生了变化，也更新source_page
+                            if page_num != original_entry.get("target_page", original_entry.get("source_page", 0)):
+                                entry["source_page"] = page_num
                     else:
                         # 如果找不到匹配的原始条目，使用大模型提供的信息
+                        page_num = item.get("page_num", 1) - 1  # 转换为0基索引
                         entry = {
                             "title": title,
                             "level": item.get("level", 1),
-                            "source_page": item.get("page_num", 1) - 1,  # 0基索引
-                            "target_page": item.get("page_num", 1) - 1,  # 0基索引
+                            "source_page": page_num,
+                            "target_page": page_num,
                             "font_size": item.get("font_size", 12.0),
                             "font_flags": 0,
                             "has_number": False,
@@ -1803,6 +1904,29 @@ class PDFBookmarkTool:
                         }
                     
                     filtered_entries.append(entry)
+            
+            # 统计被过滤掉的条目（用标题+页码联合精确匹配）
+            def get_title_page_key(entry):
+                return (entry["title"].strip(), entry.get("target_page", entry.get("source_page", 0)))
+            
+            llm_title_page_set = set(get_title_page_key(e) for e in filtered_entries)
+            filtered_out_entries = []
+            for original_entry in original_entries:
+                if get_title_page_key(original_entry) not in llm_title_page_set:
+                    filtered_out_entries.append(original_entry)
+            
+            # 打印过滤统计
+            print(f"\n📊 LLM语义过滤统计:")
+            print(f"✅ 保留条目: {len(filtered_entries)}")
+            print(f"❌ 过滤原始条目: {len(filtered_out_entries)}")
+            
+            if filtered_out_entries:
+                print(f"\n🗑️ 被大模型过滤掉的原始条目:")
+                for i, entry in enumerate(filtered_out_entries, 1):
+                    page_info = entry.get('target_page', entry.get('source_page', 0)) + 1
+                    font_info = entry.get('font_size', 0)
+                    print(f"  {i:2d}. [{page_info:3d}页] '{entry['title'][:60]}{'...' if len(entry['title']) > 60 else ''}' (字体:{font_info:.1f})")
+                print()
             
             return filtered_entries
             
@@ -1814,11 +1938,18 @@ class PDFBookmarkTool:
         """保存语义过滤的调试信息"""
         try:
             import json
+            
+            # 计算被过滤掉的条目
+            filtered_titles = {entry["title"] for entry in filtered_entries}
+            filtered_out_entries = [entry for entry in original_entries if entry["title"] not in filtered_titles]
+            
             debug_data = {
                 "original_count": len(original_entries),
                 "filtered_count": len(filtered_entries),
-                "original_entries": original_entries[:10],  # 只保存前10个原始条目
+                "filtered_out_count": len(filtered_out_entries),
+                "original_entries": original_entries,
                 "filtered_entries": filtered_entries,
+                "filtered_out_entries": filtered_out_entries,
                 "llm_response": llm_response
             }
             
@@ -1828,7 +1959,7 @@ class PDFBookmarkTool:
         except Exception as e:
             print(f"保存调试信息失败: {e}")
 
-    def add_bookmarks(self, toc_entries: List[Dict]) -> bool:
+    def add_bookmarks(self, toc_entries: List[Dict]) -> Tuple[bool, Dict]:
         """
         添加书签到PDF
         
@@ -1836,7 +1967,7 @@ class PDFBookmarkTool:
             toc_entries: 目录条目列表
             
         Returns:
-            bool: 是否成功
+            Tuple[bool, Dict]: (是否成功, 统计信息)
         """
         try:
             # 清除现有书签
@@ -1844,33 +1975,40 @@ class PDFBookmarkTool:
             
             if not toc_entries:
                 print("警告：没有目录条目可添加")
-                return False
+                return False, {}
             
-            print(f"开始处理 {len(toc_entries)} 个原始目录条目")
+            # 收集统计信息
+            original_count = len(toc_entries)
+            print(f"开始处理 {original_count} 个原始目录条目")
             
             # 预过滤：去除表格内容和特殊前缀文本
             print("步骤1: 过滤表格内容和特殊前缀文本...")
             pre_filtered_entries = self.filter_table_and_prefix_entries(toc_entries)
-            print(f"预过滤完成，剩余 {len(pre_filtered_entries)} 个条目")
+            after_pre_filter = len(pre_filtered_entries)
+            print(f"预过滤完成，剩余 {after_pre_filter} 个条目")
             
             # 使用大模型进行语义过滤和结构优化
             print("步骤2: 大模型语义过滤...")
             semantic_filtered_entries = self.llm_semantic_filter(pre_filtered_entries)
-            print(f"语义过滤完成，剩余 {len(semantic_filtered_entries)} 个条目")
+            after_semantic_filter = len(semantic_filtered_entries)
+            print(f"语义过滤完成，剩余 {after_semantic_filter} 个条目")
             
             # 规范化层级结构
             print("步骤3: 规范化层级结构...")
             normalized_entries = self.normalize_toc_levels(semantic_filtered_entries)
+            after_normalize = len(normalized_entries)
             
             # 重新排序以确保父子关系正确
             print("步骤4: 重新排序以确保父子关系正确...")
             reordered_entries = self.reorder_for_hierarchy(normalized_entries)
-            print(f"重新排序完成，条目数: {len(reordered_entries)}")
+            after_reorder = len(reordered_entries)
+            print(f"重新排序完成，条目数: {after_reorder}")
             
             # 进一步调整层级以符合PyMuPDF的严格要求
             print("步骤5: PyMuPDF兼容性调整...")
             final_entries = self.adjust_for_pymupdf(reordered_entries)
-            print(f"PyMuPDF兼容性调整完成，最终条目数: {len(final_entries)}")
+            final_count = len(final_entries)
+            print(f"PyMuPDF兼容性调整完成，最终条目数: {final_count}")
             
             # 构建新的目录结构
             toc = []
@@ -1896,16 +2034,27 @@ class PDFBookmarkTool:
             # 验证TOC结构
             if not self.validate_toc_structure(toc):
                 print("错误：TOC结构验证失败")
-                return False
+                return False, {}
             
             # 设置新的目录
             self.doc.set_toc(toc)
-            return True
+            
+            # 构建统计信息
+            stats = {
+                'original': original_count,
+                'after_pre_filter': after_pre_filter,
+                'after_semantic_filter': after_semantic_filter,
+                'after_normalize': after_normalize,
+                'after_reorder': after_reorder,
+                'final': final_count
+            }
+            
+            return True, stats
             
         except Exception as e:
             print(f"错误：添加书签失败: {e}")
             print(f"错误详情：在处理第 {len(toc) if 'toc' in locals() else 0} 个条目时出错")
-            return False
+            return False, {}
     
     def validate_toc_structure(self, toc: List) -> bool:
         """
@@ -2050,8 +2199,11 @@ class PDFBookmarkTool:
                 print(f"字体大小低于阈值的条目已被过滤")
             
             # 添加书签
-            if self.add_bookmarks(toc_entries):
+            success, bookmark_stats = self.add_bookmarks(toc_entries)
+            if success:
                 print("成功添加书签")
+                if bookmark_stats:
+                    print(f"最终添加了 {bookmark_stats.get('final', 0)} 个书签")
                 
                 # 保存文件
                 if self.save_pdf(output_path):

@@ -1,9 +1,10 @@
 {
-  "original_count": 330,
-  "filtered_count": 330,
+  "original_count": 55,
+  "filtered_count": 11,
+  "filtered_out_count": 49,
   "original_entries": [
     {
-      "title": "1. 规范概述",
+      "title": "1. 分析⽬的",
       "level": 1,
       "source_page": 0,
       "target_page": 0,
@@ -13,99 +14,559 @@
       "is_numbered_sequence": false
     },
     {
-      "title": "1.1 编写⽬的",
-      "level": 2,
-      "source_page": 0,
-      "target_page": 0,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "1.2 适⽤范围",
-      "level": 2,
-      "source_page": 0,
-      "target_page": 0,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "1.2.1 适⽤⼈群",
-      "level": 3,
-      "source_page": 0,
-      "target_page": 0,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "1.2.2 适⽤场景",
-      "level": 3,
-      "source_page": 0,
-      "target_page": 0,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2. 规范详述",
+      "title": "2. 分析对象",
       "level": 1,
-      "source_page": 1,
-      "target_page": 1,
+      "source_page": 0,
+      "target_page": 0,
       "font_size": 19.994998931884766,
       "font_flags": 20,
       "has_number": true,
       "is_numbered_sequence": false
     },
     {
-      "title": "2.1 视觉风格",
+      "title": "3. 分析结果",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 19.994998931884766,
+      "font_flags": 20,
+      "has_number": true,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "3.1 UI设计⻆度",
       "level": 2,
-      "source_page": 1,
-      "target_page": 1,
+      "source_page": 0,
+      "target_page": 0,
       "font_size": 15.997499465942383,
-      "font_flags": 4,
+      "font_flags": 20,
       "has_number": true,
       "is_numbered_sequence": true
     },
     {
-      "title": "2.2 ⾊彩体系（更新）",
-      "level": 2,
+      "title": "Figma",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "解决⽅案",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "基于AI⽣",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "成界⾯提",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "效的考虑",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "基于专业",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "设计的体",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "验考虑",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "迟缓、⾃动布局反常识",
+      "level": 1,
       "source_page": 1,
       "target_page": 1,
-      "font_size": 15.997499465942383,
+      "font_size": 12.0,
       "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "基于UED",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "设计资产",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "的考虑",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "尝试通过团队资产迁移",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "下载⾄本地",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "和设计稿",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "联关系并进⾏",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "资产治理",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "MasterGo ⽀持导⼊",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "导⼊后⽂件可能会",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "有不同程度的变",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "基于开发",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "提效的考",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "3.2 需求设计⻆度",
+      "level": 2,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 15.997499465942383,
+      "font_flags": 20,
       "has_number": true,
       "is_numbered_sequence": true
     },
     {
-      "title": "2.1.1 PC端⻛格要求",
+      "title": "3.3 全链路设计⻆度",
+      "level": 2,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 15.997499465942383,
+      "font_flags": 20,
+      "has_number": true,
+      "is_numbered_sequence": true
+    },
+    {
+      "title": "3.4 其他分析",
+      "level": 2,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 15.997499465942383,
+      "font_flags": 20,
+      "has_number": true,
+      "is_numbered_sequence": true
+    },
+    {
+      "title": "3.4.1 投⼊分析",
       "level": 3,
-      "source_page": 1,
-      "target_page": 1,
+      "source_page": 2,
+      "target_page": 2,
       "font_size": 13.994999885559082,
       "font_flags": 20,
       "has_number": true,
       "is_numbered_sequence": true
     },
     {
-      "title": "2.2.1 主题⼀",
+      "title": "习的时",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 13.994999885559082,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "间投⼊",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 13.994999885559082,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "增加时间与费⽤的投⼊",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "因素分",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "统⼀原型设计⼯",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "获得AI⽣成原型",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "的提效",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "投⼊项",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "综合结论",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 19.994998931884766,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "3.4.2 回迁分析",
       "level": 3,
-      "source_page": 1,
-      "target_page": 1,
+      "source_page": 3,
+      "target_page": 3,
       "font_size": 13.994999885559082,
       "font_flags": 20,
       "has_number": true,
       "is_numbered_sequence": true
+    },
+    {
+      "title": "台的费",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 13.994999885559082,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "莫⾼设计",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "Figma设计",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "思考⻆度",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "有利或不利因素",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "从UI设计⻆度",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "4. 开发⼈员如使⽤cursor，难以与开发提效对接",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": true,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "5. 平台的内容⽆法迁移出去",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": true,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "从需求设计⻆",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "度考虑",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "从全链路设计",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "后续想法",
+      "level": 1,
+      "source_page": 4,
+      "target_page": 4,
+      "font_size": 19.994998931884766,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "作⽅式的统⼀",
+      "level": 1,
+      "source_page": 4,
+      "target_page": 4,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "从国产化使⽤",
+      "level": 1,
+      "source_page": 4,
+      "target_page": 4,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "要求考虑",
+      "level": 1,
+      "source_page": 4,
+      "target_page": 4,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
     }
   ],
   "filtered_entries": [
     {
-      "title": "1. 规范概述",
+      "title": "1. 分析目的",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 0,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "2. 分析对象",
       "level": 1,
       "source_page": 0,
       "target_page": 0,
@@ -115,137 +576,67 @@
       "is_numbered_sequence": false
     },
     {
-      "title": "1.1 编写⽬的",
-      "level": 2,
-      "source_page": 0,
-      "target_page": 0,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "1.2 适⽤范围",
-      "level": 2,
-      "source_page": 0,
-      "target_page": 0,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "1.2.1 适⽤⼈群",
-      "level": 3,
-      "source_page": 0,
-      "target_page": 0,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "1.2.2 适⽤场景",
-      "level": 3,
-      "source_page": 0,
-      "target_page": 0,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2. 规范详述",
+      "title": "3. 分析结果",
       "level": 1,
-      "source_page": 1,
-      "target_page": 1,
+      "source_page": 0,
+      "target_page": 0,
       "font_size": 19.994998931884766,
       "font_flags": 20,
       "has_number": true,
       "is_numbered_sequence": false
     },
     {
-      "title": "2.1 视觉风格",
+      "title": "3.1 UI设计角度",
       "level": 2,
-      "source_page": 1,
-      "target_page": 1,
-      "font_size": 15.997499465942383,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 0,
+      "has_number": false,
+      "is_numbered_sequence": false
     },
     {
-      "title": "2.2 ⾊彩体系（更新）",
+      "title": "3.2 需求设计角度",
       "level": 2,
-      "source_page": 1,
-      "target_page": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 0,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "3.3 全链路设计角度",
+      "level": 2,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 0,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "3.4 其他分析",
+      "level": 2,
+      "source_page": 2,
+      "target_page": 2,
       "font_size": 15.997499465942383,
-      "font_flags": 4,
+      "font_flags": 20,
       "has_number": true,
       "is_numbered_sequence": true
     },
     {
-      "title": "2.1.1 PC端⻛格要求",
+      "title": "3.4.1 投入分析",
       "level": 3,
-      "source_page": 1,
-      "target_page": 1,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.1 主题⼀",
-      "level": 3,
-      "source_page": 1,
-      "target_page": 1,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.1.1 主⾊",
-      "level": 4,
-      "source_page": 1,
-      "target_page": 1,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.1.2 中性⾊",
-      "level": 4,
       "source_page": 2,
       "target_page": 2,
       "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
+      "font_flags": 0,
+      "has_number": false,
+      "is_numbered_sequence": false
     },
     {
-      "title": "2.2.1.3 功能⾊",
-      "level": 4,
-      "source_page": 2,
-      "target_page": 2,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.1.3.1 功能⾊⾊板",
-      "level": 5,
-      "source_page": 2,
-      "target_page": 2,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.2 主题⼆",
+      "title": "3.4.2 回迁分析",
       "level": 3,
       "source_page": 3,
       "target_page": 3,
@@ -255,3155 +646,517 @@
       "is_numbered_sequence": true
     },
     {
-      "title": "2.2.2.1 主⾊",
-      "level": 4,
+      "title": "综合结论",
+      "level": 1,
       "source_page": 3,
       "target_page": 3,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.1.3.2 功能⾊应⽤",
-      "level": 5,
-      "source_page": 3,
-      "target_page": 3,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.2.2 中性⾊",
-      "level": 4,
-      "source_page": 4,
-      "target_page": 4,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.2.3 功能⾊",
-      "level": 4,
-      "source_page": 4,
-      "target_page": 4,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.2.3.1 功能⾊应⽤",
-      "level": 5,
-      "source_page": 4,
-      "target_page": 4,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.3 主题三",
-      "level": 3,
-      "source_page": 5,
-      "target_page": 5,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.2.4 图标⾊",
-      "level": 4,
-      "source_page": 5,
-      "target_page": 5,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.3.1 主⾊",
-      "level": 4,
-      "source_page": 5,
-      "target_page": 5,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.3.2 中性⾊",
-      "level": 4,
-      "source_page": 5,
-      "target_page": 5,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3 字体规范（更新）",
-      "level": 2,
-      "source_page": 6,
-      "target_page": 6,
-      "font_size": 15.997499465942383,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3.1 字体类型",
-      "level": 3,
-      "source_page": 6,
-      "target_page": 6,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3.2 字体版权",
-      "level": 3,
-      "source_page": 6,
-      "target_page": 6,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.2.3.3 功能⾊",
-      "level": 4,
-      "source_page": 6,
-      "target_page": 6,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3.3 字重",
-      "level": 3,
-      "source_page": 7,
-      "target_page": 7,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3.4 ⾏间距",
-      "level": 3,
-      "source_page": 7,
-      "target_page": 7,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3.5 段间距",
-      "level": 3,
-      "source_page": 7,
-      "target_page": 7,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3.6 字间距",
-      "level": 3,
-      "source_page": 7,
-      "target_page": 7,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3.7 字号",
-      "level": 3,
-      "source_page": 7,
-      "target_page": 7,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3.8 阴影",
-      "level": 3,
-      "source_page": 8,
-      "target_page": 8,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.3.9 圆⾓",
-      "level": 3,
-      "source_page": 8,
-      "target_page": 8,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4 组件规范",
-      "level": 2,
-      "source_page": 9,
-      "target_page": 9,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.1 按钮",
-      "level": 3,
-      "source_page": 9,
-      "target_page": 9,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.1.1 基础类型",
-      "level": 4,
-      "source_page": 9,
-      "target_page": 9,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.1.1.1 常规按钮",
-      "level": 5,
-      "source_page": 9,
-      "target_page": 9,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2 按钮组",
-      "level": 3,
-      "source_page": 10,
-      "target_page": 10,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.1 基础类型",
-      "level": 4,
-      "source_page": 10,
-      "target_page": 10,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.1.1.2 图标按钮",
-      "level": 5,
-      "source_page": 10,
-      "target_page": 10,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.1.1.3 ⽂本按钮",
-      "level": 5,
-      "source_page": 10,
-      "target_page": 10,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.1.1.4 特殊按钮",
-      "level": 5,
-      "source_page": 10,
-      "target_page": 10,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.2 按钮顺序",
-      "level": 4,
-      "source_page": 11,
-      "target_page": 11,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.2.1 ⼀般情况",
-      "level": 5,
-      "source_page": 11,
-      "target_page": 11,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.2.2 特殊情况",
-      "level": 5,
-      "source_page": 12,
-      "target_page": 12,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.3 通⽤规则",
-      "level": 4,
-      "source_page": 13,
-      "target_page": 13,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.4 交互规则",
-      "level": 4,
-      "source_page": 13,
-      "target_page": 13,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.3.1 按钮的最⼩尺⼨",
-      "level": 5,
-      "source_page": 13,
-      "target_page": 13,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.3.2 按钮宽度⾃适应",
-      "level": 5,
-      "source_page": 13,
-      "target_page": 13,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.5 视觉规则",
-      "level": 4,
-      "source_page": 15,
-      "target_page": 15,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.6 字符超⻓规则",
-      "level": 4,
-      "source_page": 16,
-      "target_page": 16,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.7 FAQ",
-      "level": 4,
-      "source_page": 16,
-      "target_page": 16,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.2.7.1 按钮组中为何默认重要按钮在右？",
-      "level": 5,
-      "source_page": 16,
-      "target_page": 16,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3 图标\u0001（更新）",
-      "level": 3,
-      "source_page": 17,
-      "target_page": 17,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3.1 基础图标",
-      "level": 4,
-      "source_page": 17,
-      "target_page": 17,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3.1.1 表单操作",
-      "level": 5,
-      "source_page": 17,
-      "target_page": 17,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3.1.2 ⽅向操作",
-      "level": 5,
-      "source_page": 18,
-      "target_page": 18,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3.1.3 示意",
-      "level": 5,
-      "source_page": 18,
-      "target_page": 18,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3.1.4 反馈",
-      "level": 5,
-      "source_page": 18,
-      "target_page": 18,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3.1.5 业务图标",
-      "level": 5,
-      "source_page": 18,
-      "target_page": 18,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.4 缺省图（更新）",
-      "level": 3,
-      "source_page": 19,
-      "target_page": 19,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3.2 图标⻛格",
-      "level": 4,
-      "source_page": 19,
-      "target_page": 19,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3.3 图标规则",
-      "level": 4,
-      "source_page": 19,
-      "target_page": 19,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.4.1 基础类型",
-      "level": 4,
-      "source_page": 19,
-      "target_page": 19,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.3.1.6 ⽂件图标",
-      "level": 5,
-      "source_page": 19,
-      "target_page": 19,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.4.2 示例",
-      "level": 4,
-      "source_page": 20,
-      "target_page": 20,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.4.1.1 ⻚⾯空数据",
-      "level": 5,
-      "source_page": 20,
-      "target_page": 20,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.4.1.2 ⻚⾯异常",
-      "level": 5,
-      "source_page": 20,
-      "target_page": 20,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.4.1.3 组件内空数据",
-      "level": 5,
-      "source_page": 20,
-      "target_page": 20,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.4.1.4 图⽚占位",
-      "level": 5,
-      "source_page": 20,
-      "target_page": 20,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.4.3 视觉规则",
-      "level": 4,
-      "source_page": 21,
-      "target_page": 21,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5 输⼊框",
-      "level": 3,
-      "source_page": 22,
-      "target_page": 22,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.1 基础类型",
-      "level": 4,
-      "source_page": 22,
-      "target_page": 22,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.2 通⽤规则",
-      "level": 4,
-      "source_page": 23,
-      "target_page": 23,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.2.1 尺⼨",
-      "level": 5,
-      "source_page": 23,
-      "target_page": 23,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.2.2 标签、必填、注释",
-      "level": 5,
-      "source_page": 23,
-      "target_page": 23,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3 使⽤说明",
-      "level": 4,
-      "source_page": 24,
-      "target_page": 24,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.2.3 帮助⽂本 \u0001",
-      "level": 5,
-      "source_page": 24,
-      "target_page": 24,
-      "font_size": 10.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.2.4 校验",
-      "level": 5,
-      "source_page": 24,
-      "target_page": 24,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.1 单⾏输⼊框",
-      "level": 5,
-      "source_page": 24,
-      "target_page": 24,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.1.1 字数限制",
-      "level": 6,
-      "source_page": 24,
-      "target_page": 24,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.1.2 多个对象",
-      "level": 6,
-      "source_page": 24,
-      "target_page": 24,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.1.3 ⾃动关联",
-      "level": 6,
-      "source_page": 25,
-      "target_page": 25,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.2 多⾏输⼊框",
-      "level": 5,
-      "source_page": 25,
-      "target_page": 25,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.2.1 固定⾼度（优先推荐）",
-      "level": 6,
-      "source_page": 25,
-      "target_page": 25,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.2.2 ⾃由⾼度",
-      "level": 6,
-      "source_page": 25,
-      "target_page": 25,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.4 交互规则",
-      "level": 4,
-      "source_page": 26,
-      "target_page": 26,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.3 带图标输⼊框",
-      "level": 5,
-      "source_page": 26,
-      "target_page": 26,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.4 数字输⼊框",
-      "level": 5,
-      "source_page": 26,
-      "target_page": 26,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.5 IP输⼊",
-      "level": 5,
-      "source_page": 26,
-      "target_page": 26,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.3.6 微调器",
-      "level": 5,
-      "source_page": 26,
-      "target_page": 26,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.5 视觉规则",
-      "level": 4,
-      "source_page": 27,
-      "target_page": 27,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6 下拉菜单",
-      "level": 3,
-      "source_page": 28,
-      "target_page": 28,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.5.6 FAQ",
-      "level": 4,
-      "source_page": 28,
-      "target_page": 28,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.1 基础类型",
-      "level": 4,
-      "source_page": 28,
-      "target_page": 28,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.2 使⽤说明",
-      "level": 4,
-      "source_page": 29,
-      "target_page": 29,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.2.1 下拉单选",
-      "level": 5,
-      "source_page": 29,
-      "target_page": 29,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.2.2 下拉多选",
-      "level": 5,
-      "source_page": 29,
-      "target_page": 29,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.2.3 单选级联",
-      "level": 5,
-      "source_page": 30,
-      "target_page": 30,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.3 通⽤规则",
-      "level": 4,
-      "source_page": 31,
-      "target_page": 31,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.3.1 尺⼨",
-      "level": 5,
-      "source_page": 31,
-      "target_page": 31,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.3.2 标签、必填、注释",
-      "level": 5,
-      "source_page": 31,
-      "target_page": 31,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.4 交互规则",
-      "level": 4,
-      "source_page": 32,
-      "target_page": 32,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.3.3 帮助⽂本",
-      "level": 5,
-      "source_page": 32,
-      "target_page": 32,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.3.4 校验",
-      "level": 5,
-      "source_page": 32,
-      "target_page": 32,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.4.1 悬停",
-      "level": 5,
-      "source_page": 32,
-      "target_page": 32,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.4.2 点击",
-      "level": 5,
-      "source_page": 33,
-      "target_page": 33,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.4.3 禁⽤",
-      "level": 5,
-      "source_page": 33,
-      "target_page": 33,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.5 视觉规则",
-      "level": 4,
-      "source_page": 34,
-      "target_page": 34,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.4.4 热区",
-      "level": 5,
-      "source_page": 34,
-      "target_page": 34,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.6.6 字符超⻓规则",
-      "level": 4,
-      "source_page": 35,
-      "target_page": 35,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.7 单选",
-      "level": 3,
-      "source_page": 36,
-      "target_page": 36,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.7.1 基础类型",
-      "level": 4,
-      "source_page": 36,
-      "target_page": 36,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.7.2 使⽤说明",
-      "level": 4,
-      "source_page": 36,
-      "target_page": 36,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.7.3 交互规则",
-      "level": 4,
-      "source_page": 36,
-      "target_page": 36,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.7.4 视觉规则",
-      "level": 4,
-      "source_page": 36,
-      "target_page": 36,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.7.2.1 选项排列",
-      "level": 5,
-      "source_page": 36,
-      "target_page": 36,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.8 复选",
-      "level": 3,
-      "source_page": 37,
-      "target_page": 37,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.7.5 字符超⻓规则",
-      "level": 4,
-      "source_page": 37,
-      "target_page": 37,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.8.1 基础类型",
-      "level": 4,
-      "source_page": 38,
-      "target_page": 38,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.8.2 使⽤说明",
-      "level": 4,
-      "source_page": 38,
-      "target_page": 38,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.8.3 交互规则",
-      "level": 4,
-      "source_page": 38,
-      "target_page": 38,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.8.2.1 选项排列",
-      "level": 5,
-      "source_page": 38,
-      "target_page": 38,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.8.2.2 全选与半选",
-      "level": 5,
-      "source_page": 38,
-      "target_page": 38,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.9 标记",
-      "level": 3,
-      "source_page": 39,
-      "target_page": 39,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.8.4 视觉规则",
-      "level": 4,
-      "source_page": 39,
-      "target_page": 39,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.8.5 字符超⻓规则",
-      "level": 4,
-      "source_page": 39,
-      "target_page": 39,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.9.1 基础类型",
-      "level": 4,
-      "source_page": 40,
-      "target_page": 40,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.9.2 使⽤说明",
-      "level": 4,
-      "source_page": 40,
-      "target_page": 40,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.9.3 交互规则",
-      "level": 4,
-      "source_page": 40,
-      "target_page": 40,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.9.4 视觉规则",
-      "level": 4,
-      "source_page": 40,
-      "target_page": 40,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.9.2.1 放置位置",
-      "level": 5,
-      "source_page": 40,
-      "target_page": 40,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.9.2.2 计数规则",
-      "level": 5,
-      "source_page": 40,
-      "target_page": 40,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.10 提示语标签\u0001（更新）",
-      "level": 3,
-      "source_page": 41,
-      "target_page": 41,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.10.1 基础类型",
-      "level": 4,
-      "source_page": 41,
-      "target_page": 41,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.10.2 交互规则",
-      "level": 4,
-      "source_page": 41,
-      "target_page": 41,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.10.3 视觉规则",
-      "level": 4,
-      "source_page": 42,
-      "target_page": 42,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11 分页器",
-      "level": 3,
-      "source_page": 43,
-      "target_page": 43,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.10.4 字符超⻓规则",
-      "level": 4,
-      "source_page": 43,
-      "target_page": 43,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.1 基础类型",
-      "level": 4,
-      "source_page": 44,
-      "target_page": 44,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.2 使⽤说明",
-      "level": 4,
-      "source_page": 44,
-      "target_page": 44,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.2.1 组成元素",
-      "level": 5,
-      "source_page": 44,
-      "target_page": 44,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.2.2 总条数（可选）",
-      "level": 5,
-      "source_page": 44,
-      "target_page": 44,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.2.3 ⾏数选择器(可选)",
-      "level": 5,
-      "source_page": 44,
-      "target_page": 44,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.3 交互规则",
-      "level": 4,
-      "source_page": 45,
-      "target_page": 45,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.2.4 ⻚数选择器（必选）",
-      "level": 5,
-      "source_page": 45,
-      "target_page": 45,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.2.5 快速跳转（可选）",
-      "level": 5,
-      "source_page": 45,
-      "target_page": 45,
-      "font_size": 10.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.3.1 悬停",
-      "level": 5,
-      "source_page": 45,
-      "target_page": 45,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.3.2 点击",
-      "level": 5,
-      "source_page": 46,
-      "target_page": 46,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.3.3 热区",
-      "level": 5,
-      "source_page": 46,
-      "target_page": 46,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.12 时间选择器",
-      "level": 3,
-      "source_page": 47,
-      "target_page": 47,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.11.4 视觉规则",
-      "level": 4,
-      "source_page": 47,
-      "target_page": 47,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.12.1 基础类型",
-      "level": 4,
-      "source_page": 47,
-      "target_page": 47,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.12.2 使⽤说明",
-      "level": 4,
-      "source_page": 47,
-      "target_page": 47,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.12.2.1 ⽇期选择器",
-      "level": 5,
-      "source_page": 47,
-      "target_page": 47,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.12.3 交互规则",
-      "level": 4,
-      "source_page": 48,
-      "target_page": 48,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.12.2.2 ⽇期范围选择",
-      "level": 5,
-      "source_page": 48,
-      "target_page": 48,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.12.3.1 交互样式",
-      "level": 5,
-      "source_page": 48,
-      "target_page": 48,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.12.3.2 热区",
-      "level": 5,
-      "source_page": 48,
-      "target_page": 48,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.12.4 视觉规则",
-      "level": 4,
-      "source_page": 49,
-      "target_page": 49,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13 ⽂件上传（更新）",
-      "level": 3,
-      "source_page": 50,
-      "target_page": 50,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.1 基础类型",
-      "level": 4,
-      "source_page": 50,
-      "target_page": 50,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.2 使⽤说明",
-      "level": 4,
-      "source_page": 51,
-      "target_page": 51,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.2.1 按钮上传",
-      "level": 5,
-      "source_page": 51,
-      "target_page": 51,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.2.2 输⼊框上传",
-      "level": 5,
-      "source_page": 52,
-      "target_page": 52,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.2.3 图⽚上传",
-      "level": 5,
-      "source_page": 52,
-      "target_page": 52,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.3 交互规则",
-      "level": 4,
-      "source_page": 53,
-      "target_page": 53,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.3.1 悬停",
-      "level": 5,
-      "source_page": 53,
-      "target_page": 53,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.3.2 点击",
-      "level": 5,
-      "source_page": 53,
-      "target_page": 53,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.4 视觉规则",
-      "level": 4,
-      "source_page": 54,
-      "target_page": 54,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.3.3 热区",
-      "level": 5,
-      "source_page": 54,
-      "target_page": 54,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.14 查询",
-      "level": 3,
-      "source_page": 55,
-      "target_page": 55,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.13.5 字符超⻓规则",
-      "level": 4,
-      "source_page": 55,
-      "target_page": 55,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.14.1 基础类型",
-      "level": 4,
-      "source_page": 55,
-      "target_page": 55,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.14.1.1 查询表单",
-      "level": 5,
-      "source_page": 56,
-      "target_page": 56,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.14.1.2 通⽤规则",
-      "level": 5,
-      "source_page": 56,
-      "target_page": 56,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.14.1.3 ⻚⾯级主查询",
-      "level": 5,
-      "source_page": 57,
-      "target_page": 57,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.14.1.4 ⻚⾯级辅助查询",
-      "level": 5,
-      "source_page": 57,
-      "target_page": 57,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.15 卡⽚",
-      "level": 3,
-      "source_page": 58,
-      "target_page": 58,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.15.1 折叠卡⽚",
-      "level": 4,
-      "source_page": 58,
-      "target_page": 58,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.14.1.5 弹窗内查询",
-      "level": 5,
-      "source_page": 58,
-      "target_page": 58,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.15.2 ⾃定义卡⽚",
-      "level": 4,
-      "source_page": 59,
-      "target_page": 59,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.15.3 特殊样式卡⽚示例",
-      "level": 4,
-      "source_page": 59,
-      "target_page": 59,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16 表格",
-      "level": 3,
-      "source_page": 60,
-      "target_page": 60,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.1 基础类型",
-      "level": 4,
-      "source_page": 60,
-      "target_page": 60,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.1.1 基础表格",
-      "level": 5,
-      "source_page": 60,
-      "target_page": 60,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.1.2 树形表格",
-      "level": 5,
-      "source_page": 60,
-      "target_page": 60,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.1.3 表头分组表格",
-      "level": 5,
-      "source_page": 60,
-      "target_page": 60,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.2 通⽤规则",
-      "level": 4,
-      "source_page": 61,
-      "target_page": 61,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.1.4 可编辑表格",
-      "level": 5,
-      "source_page": 61,
-      "target_page": 61,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.2.1 列字段对⻬",
-      "level": 5,
-      "source_page": 61,
-      "target_page": 61,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.3 表格组件",
-      "level": 4,
-      "source_page": 63,
-      "target_page": 63,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.3.1 基础表格",
-      "level": 5,
-      "source_page": 63,
-      "target_page": 63,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.3.2 ⽗⼦表格",
-      "level": 5,
-      "source_page": 63,
-      "target_page": 63,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.3.3 可选择表格",
-      "level": 5,
-      "source_page": 64,
-      "target_page": 64,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.3.4 可编辑表格",
-      "level": 5,
-      "source_page": 64,
-      "target_page": 64,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.3.5 极简表格",
-      "level": 5,
-      "source_page": 64,
-      "target_page": 64,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.4 ⽂本超⻓规则",
-      "level": 4,
-      "source_page": 65,
-      "target_page": 65,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.16.3.6 复杂表格",
-      "level": 5,
-      "source_page": 65,
-      "target_page": 65,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17 \u0001弹窗",
-      "level": 3,
-      "source_page": 66,
-      "target_page": 66,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.1 通⽤规则",
-      "level": 4,
-      "source_page": 66,
-      "target_page": 66,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.1.1 尺⼨",
-      "level": 5,
-      "source_page": 66,
-      "target_page": 66,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.1.2 触发",
-      "level": 5,
-      "source_page": 67,
-      "target_page": 67,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.1.3 消失",
-      "level": 5,
-      "source_page": 67,
-      "target_page": 67,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.1.4 模态层",
-      "level": 5,
-      "source_page": 67,
-      "target_page": 67,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.1.5 滚动条",
-      "level": 5,
-      "source_page": 67,
-      "target_page": 67,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.2 使⽤说明",
-      "level": 4,
-      "source_page": 68,
-      "target_page": 68,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.2.1 组成",
-      "level": 5,
-      "source_page": 68,
-      "target_page": 68,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.2.2 按钮",
-      "level": 5,
-      "source_page": 68,
-      "target_page": 68,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.2.3 对话弹窗",
-      "level": 5,
-      "source_page": 68,
-      "target_page": 68,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.3 视觉规则",
-      "level": 4,
-      "source_page": 69,
-      "target_page": 69,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.18 Tabs",
-      "level": 3,
-      "source_page": 70,
-      "target_page": 70,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.17.4 字符超⻓规则",
-      "level": 4,
-      "source_page": 70,
-      "target_page": 70,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.18.1 基础类型",
-      "level": 4,
-      "source_page": 70,
-      "target_page": 70,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.18.2 使⽤说明",
-      "level": 4,
-      "source_page": 71,
-      "target_page": 71,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.18.2.1 标准⻚签",
-      "level": 5,
-      "source_page": 71,
-      "target_page": 71,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.18.3 视觉规则",
-      "level": 4,
-      "source_page": 72,
-      "target_page": 72,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.18.4 示例",
-      "level": 4,
-      "source_page": 72,
-      "target_page": 72,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.18.2.2 可新增和关闭的Tab",
-      "level": 5,
-      "source_page": 72,
-      "target_page": 72,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.19 层级树",
-      "level": 3,
-      "source_page": 73,
-      "target_page": 73,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.18.5 字符超⻓规则",
-      "level": 4,
-      "source_page": 73,
-      "target_page": 73,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.19.1 基础类型",
-      "level": 4,
-      "source_page": 73,
-      "target_page": 73,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.19.2 使⽤说明",
-      "level": 4,
-      "source_page": 74,
-      "target_page": 74,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.19.2.1 基础层级树",
-      "level": 5,
-      "source_page": 74,
-      "target_page": 74,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.19.2.2 带复选框-层级树",
-      "level": 5,
-      "source_page": 75,
-      "target_page": 75,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.19.2.3 带图标-层级树",
-      "level": 5,
-      "source_page": 75,
-      "target_page": 75,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.19.3 视觉规则",
-      "level": 4,
-      "source_page": 76,
-      "target_page": 76,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.19.2.4 带连接线带层级树",
-      "level": 5,
-      "source_page": 76,
-      "target_page": 76,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.20 步骤条（更新）",
-      "level": 3,
-      "source_page": 77,
-      "target_page": 77,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.19.4 字符超⻓规则",
-      "level": 4,
-      "source_page": 77,
-      "target_page": 77,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.21 时间轴",
-      "level": 3,
-      "source_page": 78,
-      "target_page": 78,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.20.1 基础类型",
-      "level": 4,
-      "source_page": 78,
-      "target_page": 78,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.20.1.1 卡⽚式",
-      "level": 5,
-      "source_page": 78,
-      "target_page": 78,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.20.1.2 点线式",
-      "level": 5,
-      "source_page": 78,
-      "target_page": 78,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.22  锚点",
-      "level": 3,
-      "source_page": 79,
-      "target_page": 79,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.21.1 基础类型",
-      "level": 4,
-      "source_page": 79,
-      "target_page": 79,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.21.1.1 图标式",
-      "level": 5,
-      "source_page": 79,
-      "target_page": 79,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.21.1.2 点线式",
-      "level": 5,
-      "source_page": 79,
-      "target_page": 79,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.23 穿梭框",
-      "level": 3,
-      "source_page": 80,
-      "target_page": 80,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.24 图表",
-      "level": 3,
-      "source_page": 80,
-      "target_page": 80,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.22.1 基础类型",
-      "level": 4,
-      "source_page": 80,
-      "target_page": 80,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.22.1.1 垂直式",
-      "level": 5,
-      "source_page": 80,
-      "target_page": 80,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.22.1.2 ⽔平式",
-      "level": 5,
-      "source_page": 80,
-      "target_page": 80,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.24.1 基础类型",
-      "level": 4,
-      "source_page": 81,
-      "target_page": 81,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.24.1.1 折线图",
-      "level": 5,
-      "source_page": 81,
-      "target_page": 81,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.24.1.2 雷达图",
-      "level": 5,
-      "source_page": 81,
-      "target_page": 81,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.24.1.3 柱状图",
-      "level": 5,
-      "source_page": 81,
-      "target_page": 81,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.24.1.1 饼状图",
-      "level": 5,
-      "source_page": 82,
-      "target_page": 82,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.24.1.2 环状图",
-      "level": 5,
-      "source_page": 82,
-      "target_page": 82,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.25 轻提⽰（新增）",
-      "level": 3,
-      "source_page": 83,
-      "target_page": 83,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.26 交互热区",
-      "level": 3,
-      "source_page": 83,
-      "target_page": 83,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.24.2 配⾊",
-      "level": 4,
-      "source_page": 83,
-      "target_page": 83,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.26.1 卡⽚",
-      "level": 4,
-      "source_page": 83,
-      "target_page": 83,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.26.2 纯⽂本",
-      "level": 4,
-      "source_page": 84,
-      "target_page": 84,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.26.3 按钮",
-      "level": 4,
-      "source_page": 84,
-      "target_page": 84,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.26.4 输⼊框/下拉框",
-      "level": 4,
-      "source_page": 84,
-      "target_page": 84,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.26.5 图标",
-      "level": 4,
-      "source_page": 84,
-      "target_page": 84,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.27 ⿏标指针",
-      "level": 3,
-      "source_page": 85,
-      "target_page": 85,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.26.6 超链接⽂本",
-      "level": 4,
-      "source_page": 85,
-      "target_page": 85,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.4.26.7 单/复选框",
-      "level": 4,
-      "source_page": 85,
-      "target_page": 85,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5 布局规范",
-      "level": 2,
-      "source_page": 86,
-      "target_page": 86,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.1 栅格系统",
-      "level": 3,
-      "source_page": 86,
-      "target_page": 86,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.2 ⽹格系统",
-      "level": 3,
-      "source_page": 86,
-      "target_page": 86,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.3 布局",
-      "level": 3,
-      "source_page": 87,
-      "target_page": 87,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.4 分割线",
-      "level": 3,
-      "source_page": 87,
-      "target_page": 87,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.5 间距规则",
-      "level": 3,
-      "source_page": 87,
-      "target_page": 87,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.5.1 主题⼀",
-      "level": 4,
-      "source_page": 88,
-      "target_page": 88,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.5.1.1 边距使⽤",
-      "level": 5,
-      "source_page": 88,
-      "target_page": 88,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.5.1.2 间距使⽤",
-      "level": 5,
-      "source_page": 88,
-      "target_page": 88,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.5.1.3 表单间距",
-      "level": 5,
-      "source_page": 89,
-      "target_page": 89,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.5.2 主题⼆",
-      "level": 4,
-      "source_page": 90,
-      "target_page": 90,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.5.2.1 使⽤说明",
-      "level": 5,
-      "source_page": 90,
-      "target_page": 90,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.5.2.2 使⽤示例",
-      "level": 5,
-      "source_page": 90,
-      "target_page": 90,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6 表单",
-      "level": 3,
-      "source_page": 91,
-      "target_page": 91,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.1 表单布局",
-      "level": 4,
-      "source_page": 91,
-      "target_page": 91,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.5.2.3 组件间距",
-      "level": 5,
-      "source_page": 91,
-      "target_page": 91,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.2 表单分类",
-      "level": 4,
-      "source_page": 92,
-      "target_page": 92,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.3 使⽤场景",
-      "level": 4,
-      "source_page": 93,
-      "target_page": 93,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.3.1 ⻚⾯式",
-      "level": 5,
-      "source_page": 93,
-      "target_page": 93,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.4 通⽤规则（对⻬、按钮组、表单列）",
-      "level": 4,
-      "source_page": 94,
-      "target_page": 94,
-      "font_size": 12.0,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.3.2 弹窗式",
-      "level": 5,
-      "source_page": 94,
-      "target_page": 94,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.3.3 侧滑式",
-      "level": 5,
-      "source_page": 94,
-      "target_page": 94,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.4.1 表单整体对⻬规则",
-      "level": 5,
-      "source_page": 94,
-      "target_page": 94,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.4.2 按钮组规则",
-      "level": 5,
-      "source_page": 95,
-      "target_page": 95,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.5.6.4.4 间距规则：单列、多列表单",
-      "level": 5,
-      "source_page": 95,
-      "target_page": 95,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6 可⽤性原则",
-      "level": 2,
-      "source_page": 97,
-      "target_page": 97,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1 友好易⽤原则",
-      "level": 3,
-      "source_page": 97,
-      "target_page": 97,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.1 感官体系",
-      "level": 4,
-      "source_page": 97,
-      "target_page": 97,
-      "font_size": 12.0,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.1.1 视觉体验",
-      "level": 5,
-      "source_page": 97,
-      "target_page": 97,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.1.2 操作体验",
-      "level": 5,
-      "source_page": 98,
-      "target_page": 98,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.1.2.1 减少操作",
-      "level": 6,
-      "source_page": 98,
-      "target_page": 98,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.2 引导体系",
-      "level": 4,
-      "source_page": 99,
-      "target_page": 99,
-      "font_size": 12.0,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.1.2.2 选择控件合理性",
-      "level": 6,
-      "source_page": 99,
-      "target_page": 99,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.2.1 常规引导",
-      "level": 5,
-      "source_page": 99,
-      "target_page": 99,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.2.2 规则要求",
-      "level": 5,
-      "source_page": 99,
-      "target_page": 99,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.2.2.1 新⼿引导",
-      "level": 6,
-      "source_page": 99,
-      "target_page": 99,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.2.2.2 业务操作引导",
-      "level": 6,
-      "source_page": 99,
-      "target_page": 99,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.2.2.3 复杂信息说明/提示",
-      "level": 6,
-      "source_page": 100,
-      "target_page": 100,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.2.2.4 事前预防错误指引",
-      "level": 6,
-      "source_page": 100,
-      "target_page": 100,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.2.2.5 事中操作引导",
-      "level": 6,
-      "source_page": 100,
-      "target_page": 100,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.3 反馈体系",
-      "level": 4,
-      "source_page": 101,
-      "target_page": 101,
-      "font_size": 12.0,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.3.1 过程反馈",
-      "level": 5,
-      "source_page": 101,
-      "target_page": 101,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.3.2 事后结果反馈",
-      "level": 5,
-      "source_page": 101,
-      "target_page": 101,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.1.3.3 控制反馈、操作可逆",
-      "level": 5,
-      "source_page": 101,
-      "target_page": 101,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2 体验⼀致原则",
-      "level": 3,
-      "source_page": 102,
-      "target_page": 102,
-      "font_size": 13.994999885559082,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.1 视觉感知⼀致",
-      "level": 4,
-      "source_page": 102,
-      "target_page": 102,
-      "font_size": 12.0,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.2 PC端交互操作⼀致",
-      "level": 4,
-      "source_page": 102,
-      "target_page": 102,
-      "font_size": 12.0,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.1.1 规则要求",
-      "level": 5,
-      "source_page": 102,
-      "target_page": 102,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.2.1 输⼊规则要求",
-      "level": 5,
-      "source_page": 103,
-      "target_page": 103,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.2.1.1 交互输⼊规则",
-      "level": 6,
-      "source_page": 103,
-      "target_page": 103,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.2.1.2 ⿏标输⼊规则",
-      "level": 6,
-      "source_page": 103,
-      "target_page": 103,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.2.2 输出规则要求",
-      "level": 5,
-      "source_page": 103,
-      "target_page": 103,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.2.2.1 交互输出规则",
-      "level": 6,
-      "source_page": 103,
-      "target_page": 103,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.2.2.2 ⿏标输出规则",
-      "level": 6,
-      "source_page": 103,
-      "target_page": 103,
-      "font_size": 10.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.3 信息结构⼀致",
-      "level": 4,
-      "source_page": 104,
-      "target_page": 104,
-      "font_size": 12.0,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "2.6.2.4 信息描述⼀致",
-      "level": 4,
-      "source_page": 104,
-      "target_page": 104,
-      "font_size": 12.0,
-      "font_flags": 4,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "3. 规范实施",
-      "level": 1,
-      "source_page": 105,
-      "target_page": 105,
       "font_size": 19.994998931884766,
       "font_flags": 20,
-      "has_number": true,
+      "has_number": false,
       "is_numbered_sequence": false
     },
     {
-      "title": "3.1 设计实施",
-      "level": 2,
-      "source_page": 105,
-      "target_page": 105,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "3.2 开发实施",
-      "level": 2,
-      "source_page": 105,
-      "target_page": 105,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "3.3 测试验收",
-      "level": 2,
-      "source_page": 105,
-      "target_page": 105,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "4. 规范管理",
+      "title": "后续想法",
       "level": 1,
-      "source_page": 109,
-      "target_page": 109,
+      "source_page": 4,
+      "target_page": 4,
       "font_size": 19.994998931884766,
       "font_flags": 20,
-      "has_number": true,
+      "has_number": false,
       "is_numbered_sequence": false
-    },
-    {
-      "title": "5. 更新⽇志",
-      "level": 1,
-      "source_page": 109,
-      "target_page": 109,
-      "font_size": 19.994998931884766,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": false
-    },
-    {
-      "title": "4.1 规范修订",
-      "level": 2,
-      "source_page": 109,
-      "target_page": 109,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "4.2 版本管理",
-      "level": 2,
-      "source_page": 109,
-      "target_page": 109,
-      "font_size": 15.997499465942383,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "4.1.1 触发条件",
-      "level": 3,
-      "source_page": 109,
-      "target_page": 109,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "4.1.2 修订流程",
-      "level": 3,
-      "source_page": 109,
-      "target_page": 109,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "4.2.1 版本号规则",
-      "level": 3,
-      "source_page": 109,
-      "target_page": 109,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
-    },
-    {
-      "title": "4.2.2 更新⽇志",
-      "level": 3,
-      "source_page": 109,
-      "target_page": 109,
-      "font_size": 13.994999885559082,
-      "font_flags": 20,
-      "has_number": true,
-      "is_numbered_sequence": true
     }
   ],
-  "llm_response": "```json\n[\n  {\"title\": \"1. 规范概述\", \"level\": 1, \"page_num\": 1, \"font_size\": 19.994998931884766},\n  {\"title\": \"1.1 编写⽬的\", \"level\": 2, \"page_num\": 1, \"font_size\": 15.997499465942383},\n  {\"title\": \"1.2 适⽤范围\", \"level\": 2, \"page_num\": 1, \"font_size\": 15.997499465942383},\n  {\"title\": \"1.2.1 适⽤⼈群\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"1.2.2 适⽤场景\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2. 规范详述\", \"level\": 1, \"page_num\": 1, \"font_size\": 19.994998931884766},\n  {\"title\": \"2.1 视觉风格\", \"level\": 2, \"page_num\": 1, \"font_size\": 15.997499465942383},\n  {\"title\": \"2.1.1 PC端⻛格要求\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.2 ⾊彩体系\", \"level\": 2, \"page_num\": 1, \"font_size\": 15.997499465942383},\n  {\"title\": \"2.2.1 主题⼀\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.2.1.1 主⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.2.1.2 中性⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.2.1.3 功能⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.2.1.3.1 功能⾊⾊板\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.2.1.3.2 功能⾊应⽤\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.2.2 主题⼆\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.2.2.1 主⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.2.2.2 中性⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.2.2.3 功能⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.2.2.3.1 功能⾊应⽤\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.2.2.4 图标⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.2.3 主题三\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.2.3.1 主⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.2.3.2 中性⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.2.3.3 功能⾊\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.3 字体规范\", \"level\": 2, \"page_num\": 1, \"font_size\": 15.997499465942383},\n  {\"title\": \"2.3.1 字体类型\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.3.2 字体版权\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.3.3 字重\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.3.4 ⾏间距\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.3.5 段间距\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.3.6 字间距\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.3.7 字号\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.3.8 阴影\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.3.9 圆⾓\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.4 组件规范\", \"level\": 2, \"page_num\": 1, \"font_size\": 15.997499465942383},\n  {\"title\": \"2.4.1 按钮\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.4.1.1 基础类型\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.1.1.1 常规按钮\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.1.1.2 图标按钮\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.1.1.3 ⽂本按钮\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.1.1.4 特殊按钮\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.2 按钮组\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.4.2.1 基础类型\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.2.2 按钮顺序\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.2.2.1 ⼀般情况\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.2.2.2 特殊情况\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.2.3 通⽤规则\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.2.3.1 按钮的最⼩尺⼨\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.2.3.2 按钮宽度⾃适应\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.2.4 交互规则\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.2.5 视觉规则\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.2.6 字符超⻓规则\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.2.7 FAQ\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.2.7.1 按钮组中为何默认重要按钮在右？\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.3 图标\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.4.3.1 基础图标\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.3.1.1 表单操作\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.3.1.2 ⽅向操作\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.3.1.3 示意\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.3.1.4 反馈\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.3.1.5 业务图标\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.3.1.6 ⽂件图标\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.3.2 图标⻛格\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.3.3 图标规则\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.4 缺省图\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.4.4.1 基础类型\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.4.1.1 ⻚⾯空数据\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.4.1.2 ⻚⾯异常\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.4.1.3 组件内空数据\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.4.1.4 图⽚占位\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.4.2 示例\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.4.3 视觉规则\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.5 输⼊框\", \"level\": 3, \"page_num\": 1, \"font_size\": 13.994999885559082},\n  {\"title\": \"2.4.5.1 基础类型\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.5.2 通⽤规则\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.5.2.1 尺⼨\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.2.2 标签、必填、注释\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.2.3 帮助⽂本\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.2.4 校验\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3 使⽤说明\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.5.3.1 单⾏输⼊框\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.1.1 字数限制\", \"level\": 6, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.1.2 多个对象\", \"level\": 6, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.1.3 ⾃动关联\", \"level\": 6, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.2 多⾏输⼊框\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.2.1 固定⾼度（优先推荐）\", \"level\": 6, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.2.2 ⾃由⾼度\", \"level\": 6, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.3 带图标输⼊框\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.4 数字输⼊框\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.5 IP输⼊\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.3.6 微调器\", \"level\": 5, \"page_num\": 1, \"font_size\": 10.994999885559082},\n  {\"title\": \"2.4.5.4 交互规则\", \"level\": 4, \"page_num\": 1, \"font_size\": 12.0},\n  {\"title\": \"2.4.5."
+  "filtered_out_entries": [
+    {
+      "title": "1. 分析⽬的",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 19.994998931884766,
+      "font_flags": 20,
+      "has_number": true,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "3.1 UI设计⻆度",
+      "level": 2,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 15.997499465942383,
+      "font_flags": 20,
+      "has_number": true,
+      "is_numbered_sequence": true
+    },
+    {
+      "title": "Figma",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "解决⽅案",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "基于AI⽣",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "成界⾯提",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "效的考虑",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "基于专业",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "设计的体",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "验考虑",
+      "level": 1,
+      "source_page": 0,
+      "target_page": 0,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "迟缓、⾃动布局反常识",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "基于UED",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "设计资产",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "的考虑",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "尝试通过团队资产迁移",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "下载⾄本地",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "和设计稿",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "联关系并进⾏",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "资产治理",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "MasterGo ⽀持导⼊",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "导⼊后⽂件可能会",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "有不同程度的变",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "基于开发",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "提效的考",
+      "level": 1,
+      "source_page": 1,
+      "target_page": 1,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "3.2 需求设计⻆度",
+      "level": 2,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 15.997499465942383,
+      "font_flags": 20,
+      "has_number": true,
+      "is_numbered_sequence": true
+    },
+    {
+      "title": "3.3 全链路设计⻆度",
+      "level": 2,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 15.997499465942383,
+      "font_flags": 20,
+      "has_number": true,
+      "is_numbered_sequence": true
+    },
+    {
+      "title": "3.4.1 投⼊分析",
+      "level": 3,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 13.994999885559082,
+      "font_flags": 20,
+      "has_number": true,
+      "is_numbered_sequence": true
+    },
+    {
+      "title": "习的时",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 13.994999885559082,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "间投⼊",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 13.994999885559082,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "增加时间与费⽤的投⼊",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "因素分",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "统⼀原型设计⼯",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "获得AI⽣成原型",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "的提效",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "投⼊项",
+      "level": 1,
+      "source_page": 2,
+      "target_page": 2,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "台的费",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 13.994999885559082,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "莫⾼设计",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "Figma设计",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "思考⻆度",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "有利或不利因素",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 20,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "从UI设计⻆度",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "4. 开发⼈员如使⽤cursor，难以与开发提效对接",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": true,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "5. 平台的内容⽆法迁移出去",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": true,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "从需求设计⻆",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "度考虑",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "从全链路设计",
+      "level": 1,
+      "source_page": 3,
+      "target_page": 3,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "作⽅式的统⼀",
+      "level": 1,
+      "source_page": 4,
+      "target_page": 4,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "从国产化使⽤",
+      "level": 1,
+      "source_page": 4,
+      "target_page": 4,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    },
+    {
+      "title": "要求考虑",
+      "level": 1,
+      "source_page": 4,
+      "target_page": 4,
+      "font_size": 12.0,
+      "font_flags": 4,
+      "has_number": false,
+      "is_numbered_sequence": false
+    }
+  ],
+  "llm_response": "```json\n[\n  {\n    \"title\": \"1. 分析目的\",\n    \"level\": 1,\n    \"page_num\": 1\n  },\n  {\n    \"title\": \"2. 分析对象\",\n    \"level\": 1,\n    \"page_num\": 1\n  },\n  {\n    \"title\": \"3. 分析结果\",\n    \"level\": 1,\n    \"page_num\": 1\n  },\n  {\n    \"title\": \"3.1 UI设计角度\",\n    \"level\": 2,\n    \"page_num\": 1\n  },\n  {\n    \"title\": \"3.2 需求设计角度\",\n    \"level\": 2,\n    \"page_num\": 3\n  },\n  {\n    \"title\": \"3.3 全链路设计角度\",\n    \"level\": 2,\n    \"page_num\": 3\n  },\n  {\n    \"title\": \"3.4 其他分析\",\n    \"level\": 2,\n    \"page_num\": 3\n  },\n  {\n    \"title\": \"3.4.1 投入分析\",\n    \"level\": 3,\n    \"page_num\": 3\n  },\n  {\n    \"title\": \"3.4.2 回迁分析\",\n    \"level\": 3,\n    \"page_num\": 4\n  },\n  {\n    \"title\": \"综合结论\",\n    \"level\": 1,\n    \"page_num\": 4\n  },\n  {\n    \"title\": \"后续想法\",\n    \"level\": 1,\n    \"page_num\": 5\n  }\n]\n```"
 }
