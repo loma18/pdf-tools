@@ -11,6 +11,7 @@ import os
 import sys
 from typing import List, Tuple, Dict, Optional
 import argparse
+import requests
 
 
 class PDFBookmarkTool:
@@ -50,6 +51,10 @@ class PDFBookmarkTool:
         self.font_size_threshold = 0  # 将在分析阶段动态设置
         self.title_font_sizes = []  # 用于收集标题字体大小
         self.enable_font_size_filter = True  # 是否启用字体大小过滤
+        
+        # 大模型API配置
+        self.api_key = "ailab_F4YlwHmeTJbeaPdVs6L0OUyJ80HrDlRQoH4o41UODYjk5/em00RclX1HAq3kQovn64O5hyMvh91FM5ZMrISlFjMCJx1a5hiNYkNYswO+qaG6kpXml5FppXM="
+        self.api_url = "https://lab.iwhalecloud.com/gpt-proxy/v1/chat/completions"
     
     def open_pdf(self) -> bool:
         """
@@ -486,22 +491,11 @@ class PDFBookmarkTool:
                     should_keep = True
                     print(f"保留多级数字序列标题: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f}，低于标准阈值但符合序列标题阈值)")
                 
-                # 情况3: 无序号标题，需要更严格的条件
+                # 情况3: 无序号标题，宽松保留（由大模型进行精确过滤）
                 elif not entry["has_number"] and entry["font_size"] >= self.font_size_threshold:
-                    # 对于无序号标题，只有当字体大小明显大于有序号标题时才保留
-                    # 这样可以避免"共100条"这样字体大小恰好相同的文本被保留
-                    if numbered_title_font_sizes:
-                        max_numbered_font_size = max(numbered_title_font_sizes)
-                        # 只有字体大小明显大于最大的有序号标题字体大小时才保留
-                        if entry["font_size"] > max_numbered_font_size * 1.05:  # 至少大5%
-                            should_keep = True
-                            print(f"保留字体明显较大的无序号标题: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f} > 最大有序号标题: {max_numbered_font_size:.2f})")
-                        else:
-                            print(f"过滤字体大小相近的无序号文本: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f} 与有序号标题相近)")
-                    else:
-                        # 如果没有有序号标题作为参考，则保留字体较大的无序号标题
-                        should_keep = True
-                        print(f"保留无序号标题(无参考): '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f})")
+                    # 对于无序号标题，采用宽松策略保留，让大模型进行精确的语义过滤
+                    should_keep = True
+                    print(f"保留无序号标题(交由大模型过滤): '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f})")
                 
                 if should_keep:
                     filtered_by_font.append(entry)
@@ -940,40 +934,11 @@ class PDFBookmarkTool:
 
     def validate_font_size_hierarchy_consistency(self, toc_entries: List[Dict], number_sequences: List[List[int]]) -> List[Dict]:
         """
-        验证字体大小与层级一致性，所有一级标题（有无编号）都必须与标准一级标题字体大小一致，否则过滤。
+        验证字体大小与层级一致性（已禁用，交由大模型语义过滤处理）
         """
-        if not toc_entries:
-            return toc_entries
-        
-        # 统计所有一级标题的字体大小（有编号和无编号都算）
-        first_level_font_sizes = []
-        for i, entry in enumerate(toc_entries):
-            current_numbers = number_sequences[i]
-            if (current_numbers and len(current_numbers) == 1) or (not current_numbers and entry.get("level", 1) == 1):
-                first_level_font_sizes.append(entry["font_size"])
-        
-        if not first_level_font_sizes:
-            return toc_entries
-        
-        import statistics
-        # 取最常见的字体大小为标准
-        rounded_sizes = [round(size, 1) for size in first_level_font_sizes]
-        font_size_counts = {}
-        for size in rounded_sizes:
-            font_size_counts[size] = font_size_counts.get(size, 0) + 1
-        standard_font_size = max(font_size_counts.keys(), key=lambda x: font_size_counts[x])
-        print(f"一级标题标准字体大小: {standard_font_size:.1f}")
-        
-        validated_entries = []
-        for i, entry in enumerate(toc_entries):
-            current_numbers = number_sequences[i]
-            is_first_level = (current_numbers and len(current_numbers) == 1) or (not current_numbers and entry.get("level", 1) == 1)
-            if is_first_level:
-                if abs(entry["font_size"] - standard_font_size) > 0.5:
-                    print(f"跳过一级标题字体大小不一致的条目: '{entry['title']}' (字体大小: {entry['font_size']:.1f} ≠ 标准: {standard_font_size:.1f})")
-                    continue
-            validated_entries.append(entry)
-        return validated_entries
+        # 由于已经集成大模型语义过滤，这个验证逻辑容易误判，直接返回原始条目
+        print("跳过字体大小一致性验证（交由大模型语义过滤处理）")
+        return toc_entries
     
     def is_valid_child_sequence(self, parent_numbers: List[int], child_numbers: List[int]) -> bool:
         """
@@ -1559,6 +1524,310 @@ class PDFBookmarkTool:
         
         return adjusted_entries
 
+    def filter_table_and_prefix_entries(self, toc_entries: List[Dict]) -> List[Dict]:
+        """
+        过滤掉表格内容和有其他字符前缀的文本
+        
+        Args:
+            toc_entries: 原始目录条目列表
+            
+        Returns:
+            List[Dict]: 过滤后的目录条目列表
+        """
+        if not toc_entries:
+            return toc_entries
+        
+        print(f"开始过滤表格内容和特殊前缀文本，原始条目数: {len(toc_entries)}")
+        
+        filtered_entries = []
+        
+        for i, entry in enumerate(toc_entries):
+            title = entry["title"]
+            should_filter = False
+            filter_reason = ""
+            
+            # 1. 检查是否有非标准前缀字符
+            # 允许的前缀模式：数字编号、中文编号、罗马数字
+            valid_prefix_patterns = [
+                r'^\d+\..*',  # 1. 2. 3.
+                r'^\d+\.\d+.*',  # 1.1 1.2
+                r'^\d+\.\d+\.\d+.*',  # 1.1.1 1.1.2
+                r'^第[一二三四五六七八九十\d]+[章节部分].*',  # 第一章、第二节
+                r'^[一二三四五六七八九十]+[、\.].*',  # 一、二、
+                r'^[IVXLCDM]+[、\.].*',  # I. II.
+                r'^\d+、.*',  # 1、2、
+                r'^[^0-9一二三四五六七八九十IVXLCDM第].*'  # 无编号的标题（字母开头等）
+            ]
+            
+            # 检查是否有其他字符前缀（如表格中的内容）
+            if re.match(r'^[^\w\u4e00-\u9fff]', title):  # 以非字母数字汉字开头
+                should_filter = True
+                filter_reason = "包含非标准前缀字符"
+            
+            # 2. 检查是否为表格内容的特征
+            table_indicators = [
+                # 检查是否包含表格特征词汇
+                lambda t: any(keyword in t for keyword in ['思考角度', '有利或不利因素', '优势', '劣势', '优点', '缺点', '分析维度']),
+                # 检查是否为表格中的条目（通常较长且包含描述性内容）
+                lambda t: re.match(r'^\d+\.', t) and len(t) > 30 and ('使用' in t or '操作' in t or '功能' in t or '设计' in t),
+                # 检查是否包含表格中常见的描述性文本
+                lambda t: len(t) > 40 and any(phrase in t for phrase in ['从', '到', '进行', '实现', '提供', '支持']),
+                # 检查是否为表格中的具体条目（包含工具名称、技术术语等）
+                lambda t: re.match(r'^\d+\.', t) and any(tool in t for tool in ['cursor', 'Figma', 'MasterGo', 'MasterGO']),
+                # 检查是否为表格中的功能描述
+                lambda t: re.match(r'^\d+\.', t) and any(desc in t for desc in ['难以', '无法', '不能', '困难', '问题', '缺陷']),
+                # 检查是否包含明显的表格内容特征（技术描述、对比内容等）
+                lambda t: re.match(r'^\d+\.', t) and any(feature in t for feature in ['平台', '内容', '迁移', '对接', '提效', '开发人员']),
+            ]
+            
+            if any(indicator(title) for indicator in table_indicators):
+                should_filter = True
+                filter_reason = "疑似表格内容"
+            
+            # 3. 检查上下文是否为表格环境
+            # 通过检查相邻条目是否有相似的结构来判断
+            if i > 0 and i < len(toc_entries) - 1:
+                prev_title = toc_entries[i-1]["title"]
+                next_title = toc_entries[i+1]["title"]
+                
+                # 如果前后条目都是编号开头且内容较长，可能是表格
+                prev_is_numbered_long = re.match(r'^\d+\.', prev_title) and len(prev_title) > 20
+                curr_is_numbered_long = re.match(r'^\d+\.', title) and len(title) > 20
+                next_is_numbered_long = re.match(r'^\d+\.', next_title) and len(next_title) > 20
+                
+                if prev_is_numbered_long and curr_is_numbered_long and next_is_numbered_long:
+                    # 进一步检查是否包含表格特征内容
+                    table_content_patterns = [
+                        r'(从|到|进行|实现|提供|支持|操作|功能|设计|使用|切换|对接)',
+                        r'(平台|工具|系统|模式|方式|方法)',
+                        r'(优势|劣势|优点|缺点|有利|不利)'
+                    ]
+                    
+                    if any(re.search(pattern, title) for pattern in table_content_patterns):
+                        should_filter = True
+                        filter_reason = "疑似表格内容（基于上下文判断）"
+            
+            # 4. 检查是否为明显的非标题内容
+            non_title_patterns = [
+                r'^.*[，。；：？！].*[，。；：？！].*',  # 包含多个标点符号的长句
+                r'^.{50,}',  # 超长文本（可能是段落内容）
+                r'^.*\d+年\d+月.*',  # 日期格式
+                r'^.*\d+%.*',  # 百分比
+            ]
+            
+            if any(re.search(pattern, title) for pattern in non_title_patterns):
+                should_filter = True
+                filter_reason = "疑似非标题内容"
+            
+            if should_filter:
+                print(f"过滤掉: '{title[:50]}...' - {filter_reason}")
+            else:
+                filtered_entries.append(entry)
+        
+        print(f"表格和前缀过滤完成，过滤后条目数: {len(filtered_entries)}")
+        return filtered_entries
+
+    def llm_semantic_filter(self, toc_entries: List[Dict]) -> List[Dict]:
+        """
+        使用大模型进行语义过滤，优化书签结构
+        
+        Args:
+            toc_entries: 原始目录条目列表
+            
+        Returns:
+            List[Dict]: 过滤后的目录条目列表
+        """
+        if len(toc_entries) > 1000:
+            print(f"警告：条目数量过多({len(toc_entries)})，跳过大模型过滤")
+            return toc_entries
+        
+        if len(toc_entries) == 0:
+            return toc_entries
+        
+        print(f"开始使用大模型进行语义过滤，原始条目数: {len(toc_entries)}{toc_entries}")
+        
+        try:
+            # 构建提示词
+            prompt = self._build_semantic_filter_prompt()
+            
+            # 格式化候选数据
+            candidates_text = self._format_toc_entries_for_llm(toc_entries)
+            
+            # 调用大模型API
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            data = {
+                "model": "gpt-4.1",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": f"{prompt}\n\n目录条目数据:\n{candidates_text}"
+                    }
+                ],
+                "temperature": 0.1,
+                "max_tokens": 4000
+            }
+            
+            
+            response = requests.post(self.api_url, headers=headers, json=data, timeout=60)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if "choices" in result and result["choices"]:
+                    content = result["choices"][0]["message"]["content"]
+                    filtered_entries = self._parse_llm_semantic_response(content, toc_entries)
+                    print(f"大模型语义过滤完成，过滤后条目数: {len(filtered_entries)}")
+                    
+                    # 保存调试信息
+                    self._save_semantic_filter_debug(toc_entries, filtered_entries, content)
+                    
+                    return filtered_entries
+                else:
+                    print("大模型响应格式错误，使用原始条目")
+                    return toc_entries
+            else:
+                print(f"大模型API调用失败，状态码: {response.status_code}{response.text}，使用原始条目")
+                return toc_entries
+                
+        except Exception as e:
+            print(f"大模型语义过滤失败: {e}，使用原始条目")
+            return toc_entries
+    
+    def _build_semantic_filter_prompt(self) -> str:
+        """构建语义过滤的提示词"""
+        return """你是一个专业的PDF文档结构分析专家。请分析以下目录条目，进行语义过滤和结构优化。
+
+分析目标：
+1. **过滤无效条目**：去除明显不是标题的内容（如页眉、页脚、正文片段、表格数据等）
+2. **保持结构完整**：确保层级关系合理，编号连续
+3. **语义一致性**：标题应该简洁明了，有明确的主题性
+4. **去除重复**：相同或相似的标题只保留一个
+5. **补全缺失层级**：如果发现2.4.7但缺少2.4，自动补全
+
+条目数据格式：
+- title: 标题文本
+- level: 层级深度(1-5)
+- page_num: 页码
+- font_size: 字体大小
+
+层级判断规则（支持5层结构）：
+- 第X章、第X部分 → 1级
+- X、X.Y、第X节 → 2级  
+- X.Y.Z → 3级
+- X.Y.Z.W → 4级
+- X.Y.Z.W.V → 5级
+
+请返回过滤和优化后的目录条目，保持JSON格式：
+```json
+[
+  {
+    "title": "标题文本",
+    "level": 层级数字,
+    "page_num": 页码,
+    "font_size": 字体大小
+  }
+]
+```
+
+只返回JSON数据，不要任何其他解释。"""
+    
+    def _format_toc_entries_for_llm(self, toc_entries: List[Dict]) -> str:
+        """格式化目录条目数据供大模型分析"""
+        formatted_lines = []
+        for i, entry in enumerate(toc_entries):
+            line = f"[{i}] 标题: {entry.get('title', '')}"
+            line += f" | 层级: {entry.get('level', 1)}"
+            line += f" | 页码: {entry.get('page_num', 1)}"
+            line += f" | 字体: {entry.get('font_size', 12.0)}"
+            formatted_lines.append(line)
+        
+        return "\n".join(formatted_lines)
+    
+    def _parse_llm_semantic_response(self, content: str, original_entries: List[Dict]) -> List[Dict]:
+        """解析大模型的语义过滤响应"""
+        try:
+            import json
+            import re
+            
+            # 尝试提取JSON数据
+            json_match = re.search(r'```json\s*(\[.*?\])\s*```', content, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+            else:
+                # 查找第一个[到最后一个]
+                start_idx = content.find('[')
+                end_idx = content.rfind(']')
+                if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                    json_str = content[start_idx:end_idx+1]
+                else:
+                    print("无法从响应中提取JSON数据")
+                    return original_entries
+            
+            # 解析JSON
+            filtered_data = json.loads(json_str)
+            
+            if not isinstance(filtered_data, list):
+                print("响应数据不是列表格式")
+                return original_entries
+            
+            # 创建原始条目的标题到条目的映射
+            original_dict = {entry["title"]: entry for entry in original_entries}
+            
+            # 转换为标准格式，保留原始页面信息
+            filtered_entries = []
+            for item in filtered_data:
+                if isinstance(item, dict):
+                    title = item.get("title", "")
+                    
+                    # 从原始条目中查找匹配的条目来获取正确的页面信息
+                    original_entry = original_dict.get(title)
+                    if original_entry:
+                        # 保留原始条目的所有信息，只更新level如果大模型提供了不同的值
+                        entry = original_entry.copy()
+                        if "level" in item:
+                            entry["level"] = item["level"]
+                    else:
+                        # 如果找不到匹配的原始条目，使用大模型提供的信息
+                        entry = {
+                            "title": title,
+                            "level": item.get("level", 1),
+                            "source_page": item.get("page_num", 1) - 1,  # 0基索引
+                            "target_page": item.get("page_num", 1) - 1,  # 0基索引
+                            "font_size": item.get("font_size", 12.0),
+                            "font_flags": 0,
+                            "has_number": False,
+                            "is_numbered_sequence": False
+                        }
+                    
+                    filtered_entries.append(entry)
+            
+            return filtered_entries
+            
+        except Exception as e:
+            print(f"解析大模型响应失败: {e}")
+            return original_entries
+    
+    def _save_semantic_filter_debug(self, original_entries: List[Dict], filtered_entries: List[Dict], llm_response: str):
+        """保存语义过滤的调试信息"""
+        try:
+            import json
+            debug_data = {
+                "original_count": len(original_entries),
+                "filtered_count": len(filtered_entries),
+                "original_entries": original_entries[:10],  # 只保存前10个原始条目
+                "filtered_entries": filtered_entries,
+                "llm_response": llm_response
+            }
+            
+            with open("semantic_filter_debug.json", "w", encoding="utf-8") as f:
+                json.dump(debug_data, f, ensure_ascii=False, indent=2)
+            print("已保存语义过滤调试信息到 semantic_filter_debug.json")
+        except Exception as e:
+            print(f"保存调试信息失败: {e}")
+
     def add_bookmarks(self, toc_entries: List[Dict]) -> bool:
         """
         添加书签到PDF
@@ -1577,16 +1846,29 @@ class PDFBookmarkTool:
                 print("警告：没有目录条目可添加")
                 return False
             
+            print(f"开始处理 {len(toc_entries)} 个原始目录条目")
+            
+            # 预过滤：去除表格内容和特殊前缀文本
+            print("步骤1: 过滤表格内容和特殊前缀文本...")
+            pre_filtered_entries = self.filter_table_and_prefix_entries(toc_entries)
+            print(f"预过滤完成，剩余 {len(pre_filtered_entries)} 个条目")
+            
+            # 使用大模型进行语义过滤和结构优化
+            print("步骤2: 大模型语义过滤...")
+            semantic_filtered_entries = self.llm_semantic_filter(pre_filtered_entries)
+            print(f"语义过滤完成，剩余 {len(semantic_filtered_entries)} 个条目")
+            
             # 规范化层级结构
-            normalized_entries = self.normalize_toc_levels(toc_entries)
+            print("步骤3: 规范化层级结构...")
+            normalized_entries = self.normalize_toc_levels(semantic_filtered_entries)
             
             # 重新排序以确保父子关系正确
-            print("开始重新排序以确保父子关系正确...")
+            print("步骤4: 重新排序以确保父子关系正确...")
             reordered_entries = self.reorder_for_hierarchy(normalized_entries)
             print(f"重新排序完成，条目数: {len(reordered_entries)}")
             
             # 进一步调整层级以符合PyMuPDF的严格要求
-            print("开始PyMuPDF兼容性调整...")
+            print("步骤5: PyMuPDF兼容性调整...")
             final_entries = self.adjust_for_pymupdf(reordered_entries)
             print(f"PyMuPDF兼容性调整完成，最终条目数: {len(final_entries)}")
             
@@ -1606,9 +1888,8 @@ class PDFBookmarkTool:
                 
                 toc.append(toc_item)
                 
-                # 添加调试信息
-                if i < 5:  # 只显示前5个条目的调试信息
-                    print(f"调试: 条目 {i+1} - 层级: {entry['level']}, 标题: {entry['title'][:20]}..., 页面: {target_page + 1}")
+                # 添加详细的调试信息
+                print(f"书签 {i+1}: '{entry['title']}' -> 源页面: {entry['source_page']+1}, 目标页面: {target_page+1}")
             
             print(f"准备添加 {len(toc)} 个书签条目")
             

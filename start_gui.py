@@ -6,9 +6,7 @@ PDF自动书签工具启动器
 """
 
 import sys
-import os
 import subprocess
-from pathlib import Path
 
 def check_dependencies():
     """检查依赖包"""
