@@ -86,6 +86,8 @@ class PDFBookmarkTool:
         text_blocks = []
         for block in text_dict["blocks"]:
             if "lines" in block:
+                block_lines = []  # 收集当前块的所有行
+                
                 for line in block["lines"]:
                     line_text = ""
                     font_size = 0
@@ -97,22 +99,35 @@ class PDFBookmarkTool:
                         font_flags = span["flags"]
                     
                     if line_text.strip():
-                        text_blocks.append({
+                        block_lines.append({
                             "text": line_text.strip(),
                             "font_size": font_size,
                             "font_flags": font_flags,
                             "page": page_num,
                             "bbox": line["bbox"]
                         })
+                
+                # 为每行添加上下文信息
+                for i, line_info in enumerate(block_lines):
+                    line_info["context"] = {
+                        "is_first_in_block": i == 0,
+                        "is_last_in_block": i == len(block_lines) - 1,
+                        "is_single_line_block": len(block_lines) == 1,
+                        "prev_line_text": block_lines[i-1]["text"] if i > 0 else None,
+                        "next_line_text": block_lines[i+1]["text"] if i < len(block_lines) - 1 else None,
+                        "block_line_count": len(block_lines)
+                    }
+                    text_blocks.append(line_info)
         
         return text_blocks
     
-    def is_likely_toc_text(self, text: str) -> Tuple[bool, int]:
+    def is_likely_toc_text(self, text: str, context: Dict = None) -> Tuple[bool, int]:
         """
         判断文本是否可能是目录条目
         
         Args:
             text: 文本内容
+            context: 上下文信息
             
         Returns:
             Tuple[bool, int]: (是否为目录, 层级深度)
@@ -139,7 +154,11 @@ class PDFBookmarkTool:
         for skip_pattern in skip_patterns:
             if re.match(skip_pattern, text, re.IGNORECASE):
                 return False, 0
-            
+        
+        # 检查文本独立性（必须是独立的一行，不能前后有其他文字）
+        if context and not self.is_text_independent(text, context):
+            return False, 0
+        
         # 检查各种目录格式并确定层级
         for pattern in self.toc_patterns:
             if re.match(pattern, text):
@@ -175,10 +194,136 @@ class PDFBookmarkTool:
         # 如"后续想法"这类没有序号但是作为标题的文本
         if len(text) <= 15 and not re.search(r'[,.;:，。；：？！]', text):
             # 短文本且不包含标点符号，可能是标题
-            # 此处返回level=1，后续会根据字体大小再判断
+            # 此处返回level=1，后续会根据字体大小和逻辑关系再判断
             return True, 1
         
         return False, 0
+    
+    def is_text_independent(self, text: str, context: Dict) -> bool:
+        """
+        检查文本是否是独立的一行（不是表格或列表的一部分）
+        
+        Args:
+            text: 要检查的文本
+            context: 上下文信息
+            
+        Returns:
+            bool: 是否是独立的文本
+        """
+        if not context:
+            return True
+        
+        # 检查前后文本内容
+        prev_text = context.get("prev_line_text", "")
+        next_text = context.get("next_line_text", "")
+        
+        # 如果是单行块，很可能是独立的
+        if context.get("is_single_line_block", False):
+            return True
+        
+        # 检查是否在表格中
+        if self.is_likely_in_table(text, prev_text, next_text):
+            print(f"跳过表格中的文本: '{text}'")
+            return False
+        
+        # 检查是否在列表中且前后有紧密相关的内容
+        if self.is_likely_in_list(text, prev_text, next_text):
+            print(f"跳过列表中的文本: '{text}'")
+            return False
+        
+        # 检查是否是段落的一部分
+        if self.is_likely_in_paragraph(text, prev_text, next_text):
+            print(f"跳过段落中的文本: '{text}'")
+            return False
+        
+        return True
+    
+    def is_likely_in_table(self, text: str, prev_text: str, next_text: str) -> bool:
+        """
+        检查文本是否在表格中
+        
+        Args:
+            text: 当前文本
+            prev_text: 前一行文本
+            next_text: 后一行文本
+            
+        Returns:
+            bool: 是否在表格中
+        """
+        # 检查常见的表格模式
+        table_indicators = [
+            # 如果前后文本都包含多个制表符或空格分隔的内容
+            lambda t: len(t.split()) > 3 and any(len(word) < 4 for word in t.split()),
+            # 如果文本前后有类似表格标题的内容
+            lambda t: any(keyword in t for keyword in ['思考角度', '有利或不利因素', '优势', '劣势', '优点', '缺点']),
+            # 如果前后文本有相似的结构
+            lambda t: bool(re.search(r'\d+\.', t)) and len(t.split()) > 5,
+        ]
+        
+        # 检查当前文本及前后文本是否符合表格模式
+        texts_to_check = [t for t in [prev_text, next_text] if t]
+        
+        for indicator in table_indicators:
+            if any(indicator(t) for t in texts_to_check):
+                # 如果当前文本是编号开头且相对较长，可能是表格中的条目
+                if re.match(r'^\d+\.', text) and len(text) > 10:
+                    return True
+        
+        return False
+    
+    def is_likely_in_list(self, text: str, prev_text: str, next_text: str) -> bool:
+        """
+        检查文本是否在列表中
+        
+        Args:
+            text: 当前文本
+            prev_text: 前一行文本
+            next_text: 后一行文本
+            
+        Returns:
+            bool: 是否在列表中
+        """
+        # 如果前后文本都是类似的编号格式，可能是列表
+        if prev_text and next_text:
+            # 检查是否都是数字编号
+            current_match = re.match(r'^(\d+)\.', text)
+            prev_match = re.match(r'^(\d+)\.', prev_text)
+            next_match = re.match(r'^(\d+)\.', next_text)
+            
+            if current_match and prev_match and next_match:
+                current_num = int(current_match.group(1))
+                prev_num = int(prev_match.group(1))
+                next_num = int(next_match.group(1))
+                
+                # 如果是连续的编号，且不是常见的章节编号模式
+                if (current_num == prev_num + 1 and next_num == current_num + 1):
+                    # 检查是否是表格或列表的一部分而不是标题
+                    if len(text) > 20 and not re.search(r'[第章节]', text):
+                        return True
+        
+        return False
+    
+    def is_likely_in_paragraph(self, text: str, prev_text: str, next_text: str) -> bool:
+        """
+        检查文本是否是段落的一部分
+        
+        Args:
+            text: 当前文本
+            prev_text: 前一行文本
+            next_text: 后一行文本
+            
+        Returns:
+            bool: 是否是段落的一部分
+        """
+        # 如果前后文本都比较长且没有明显的标题特征，可能是段落的一部分
+        if prev_text and next_text:
+            if (len(prev_text) > 15 and len(next_text) > 15 and
+                not re.match(r'^\d+\.', prev_text) and not re.match(r'^\d+\.', next_text)):
+                # 当前文本如果也比较长且不是明显的标题格式，可能是段落
+                if len(text) > 20 and not re.search(r'^[第\d]', text):
+                    return True
+        
+        return False
     
     def analyze_font_distribution(self, font_sizes: List[float]) -> Dict:
         """
@@ -267,7 +412,8 @@ class PDFBookmarkTool:
             
             for block in text_blocks:
                 text = block["text"]
-                is_toc, level = self.is_likely_toc_text(text)
+                context = block.get("context", {})
+                is_toc, level = self.is_likely_toc_text(text, context)
                 
                 if is_toc:
                     # 收集潜在标题的字体大小
@@ -327,22 +473,35 @@ class PDFBookmarkTool:
             sequence_threshold = self.font_size_threshold * 0.9
             print(f"多级数字序列标题的字体大小阈值: {sequence_threshold:.2f}")
             
-            # 过滤条目，保留有序号的标题和与有序号标题字体大小相同的无序号标题
+            # 过滤条目，主要保留有序号的标题，对无序号标题采用更严格的条件
             for entry in toc_entries:
                 should_keep = False
                 
-                # 情况1: 字体大小大于阈值
-                if entry["font_size"] >= self.font_size_threshold:
-                    # 有序号标题或字体大小与有序号标题相同的无序号标题
-                    if entry["has_number"] or round(entry["font_size"], 1) in numbered_title_font_sizes:
-                        should_keep = True
-                        if not entry["has_number"]:
-                            print(f"保留无序号标题: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f}，与有序号标题字体大小相同)")
+                # 情况1: 有序号的标题，字体大小大于阈值
+                if entry["has_number"] and entry["font_size"] >= self.font_size_threshold:
+                    should_keep = True
                 
                 # 情况2: 多级数字序列标题（如3.4.1），使用较低的阈值
                 elif entry["is_numbered_sequence"] and entry["font_size"] >= sequence_threshold:
                     should_keep = True
                     print(f"保留多级数字序列标题: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f}，低于标准阈值但符合序列标题阈值)")
+                
+                # 情况3: 无序号标题，需要更严格的条件
+                elif not entry["has_number"] and entry["font_size"] >= self.font_size_threshold:
+                    # 对于无序号标题，只有当字体大小明显大于有序号标题时才保留
+                    # 这样可以避免"共100条"这样字体大小恰好相同的文本被保留
+                    if numbered_title_font_sizes:
+                        max_numbered_font_size = max(numbered_title_font_sizes)
+                        # 只有字体大小明显大于最大的有序号标题字体大小时才保留
+                        if entry["font_size"] > max_numbered_font_size * 1.05:  # 至少大5%
+                            should_keep = True
+                            print(f"保留字体明显较大的无序号标题: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f} > 最大有序号标题: {max_numbered_font_size:.2f})")
+                        else:
+                            print(f"过滤字体大小相近的无序号文本: '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f} 与有序号标题相近)")
+                    else:
+                        # 如果没有有序号标题作为参考，则保留字体较大的无序号标题
+                        should_keep = True
+                        print(f"保留无序号标题(无参考): '{entry['title'][:30]}...' (字体大小: {entry['font_size']:.2f})")
                 
                 if should_keep:
                     filtered_by_font.append(entry)
@@ -399,6 +558,7 @@ class PDFBookmarkTool:
         
         # 第二步：验证顶层数字连续性
         toc_entries = self.validate_top_level_continuity(toc_entries, number_sequences)
+        print(f"第二步后剩余条目数: {len(toc_entries)}")
         
         # 重新构建序列索引
         number_sequences = []
@@ -408,6 +568,7 @@ class PDFBookmarkTool:
         
         # 第三步：验证父子层级一致性
         toc_entries = self.validate_parent_child_consistency(toc_entries, number_sequences)
+        print(f"第三步后剩余条目数: {len(toc_entries)}")
         
         # 重新构建序列索引
         number_sequences = []
@@ -417,6 +578,7 @@ class PDFBookmarkTool:
         
         # 第四步：强制排序验证
         toc_entries = self.validate_numeric_ordering(toc_entries, number_sequences)
+        print(f"第四步后剩余条目数: {len(toc_entries)}")
         
         # 重新构建序列索引
         number_sequences = []
@@ -424,7 +586,27 @@ class PDFBookmarkTool:
             numbers = self.extract_number_sequence(entry["title"])
             number_sequences.append(numbers)
         
-        # 第五步：其他逻辑验证
+        # 第五步：验证无编号标题的层级规则
+        toc_entries = self.validate_unnumbered_title_hierarchy(toc_entries, number_sequences)
+        print(f"第五步后剩余条目数: {len(toc_entries)}")
+        
+        # 重新构建序列索引
+        number_sequences = []
+        for entry in toc_entries:
+            numbers = self.extract_number_sequence(entry["title"])
+            number_sequences.append(numbers)
+        
+        # 第六步：字体大小与层级一致性验证
+        toc_entries = self.validate_font_size_hierarchy_consistency(toc_entries, number_sequences)
+        print(f"第六步后剩余条目数: {len(toc_entries)}")
+        
+        # 重新构建序列索引
+        number_sequences = []
+        for entry in toc_entries:
+            numbers = self.extract_number_sequence(entry["title"])
+            number_sequences.append(numbers)
+        
+        # 第七步：其他逻辑验证
         validated_entries = []
         
         for i, entry in enumerate(toc_entries):
@@ -584,6 +766,242 @@ class PDFBookmarkTool:
             number_str = match.group(1)
             return [int(x) for x in number_str.split('.')]
         return []
+    
+    def validate_unnumbered_title_hierarchy(self, toc_entries: List[Dict], number_sequences: List[List[int]]) -> List[Dict]:
+        """
+        验证无编号标题的层级规则
+        1. 无编号标题只能出现在第一层级或者父级是无编号标题的子级
+        2. 第一层级的字体大小要保持全部相同大小
+        
+        Args:
+            toc_entries: 目录条目列表
+            number_sequences: 对应的数字序列列表
+            
+        Returns:
+            List[Dict]: 验证后的目录条目列表
+        """
+        if not toc_entries:
+            return toc_entries
+        
+        validated_entries = []
+        
+        # 第一步：收集第一层级条目的字体大小，验证一致性
+        first_level_font_sizes = []
+        for i, entry in enumerate(toc_entries):
+            current_numbers = number_sequences[i]
+            
+            # 判断是否为第一层级
+            is_first_level = False
+            if current_numbers and len(current_numbers) == 1:  # 有编号的第一层级
+                is_first_level = True
+            elif not current_numbers:  # 无编号，可能是第一层级
+                # 检查前面是否有编号条目，如果没有或者前面的都是第一层级，则认为是第一层级
+                is_first_level = True
+                for j in range(i):
+                    prev_numbers = number_sequences[j]
+                    if prev_numbers and len(prev_numbers) > 1:  # 前面有深层级编号
+                        is_first_level = False
+                        break
+            
+            if is_first_level:
+                first_level_font_sizes.append(entry["font_size"])
+        
+        # 验证第一层级字体大小一致性
+        if first_level_font_sizes:
+            # 计算字体大小的标准差，判断是否基本一致
+            import statistics
+            if len(set(round(size, 1) for size in first_level_font_sizes)) > 2:  # 允许最多2种字体大小
+                # 找出最常见的字体大小作为标准
+                font_size_counts = {}
+                for size in first_level_font_sizes:
+                    rounded_size = round(size, 1)
+                    font_size_counts[rounded_size] = font_size_counts.get(rounded_size, 0) + 1
+                
+                standard_font_size = max(font_size_counts.keys(), key=lambda x: font_size_counts[x])
+                print(f"第一层级标准字体大小: {standard_font_size:.1f}")
+            else:
+                standard_font_size = round(statistics.mean(first_level_font_sizes), 1)
+                print(f"第一层级字体大小: {standard_font_size:.1f}")
+        else:
+            standard_font_size = None
+        
+        # 第二步：验证每个条目的层级规则
+        for i, entry in enumerate(toc_entries):
+            should_include = True
+            current_numbers = number_sequences[i]
+            
+            # 如果是无编号标题
+            if not current_numbers:
+                # 检查是否违反层级规则
+                violation_reason = self.check_unnumbered_title_violation(i, toc_entries, number_sequences)
+                
+                if violation_reason:
+                    print(f"跳过违反无编号标题层级规则的条目: '{entry['title']}' ({violation_reason})")
+                    should_include = False
+                
+                # 如果是第一层级，检查字体大小一致性
+                elif standard_font_size and self.is_first_level_unnumbered(i, toc_entries, number_sequences):
+                    if abs(entry["font_size"] - standard_font_size) > 0.5:  # 允许0.5的误差
+                        print(f"跳过第一层级字体大小不一致的条目: '{entry['title']}' "
+                              f"(字体大小: {entry['font_size']:.1f} ≠ 标准: {standard_font_size:.1f})")
+                        should_include = False
+            
+            if should_include:
+                validated_entries.append(entry)
+        
+        return validated_entries
+    
+    def check_unnumbered_title_violation(self, index: int, toc_entries: List[Dict], number_sequences: List[List[int]]) -> str:
+        """
+        检查无编号标题是否违反层级规则
+        
+        Args:
+            index: 当前条目索引
+            toc_entries: 目录条目列表
+            number_sequences: 数字序列列表
+            
+        Returns:
+            str: 违反原因，如果没有违反返回空字符串
+        """
+        current_entry = toc_entries[index]
+        
+        # 查找前一个条目作为潜在的父级
+        prev_entry = None
+        prev_numbers = None
+        
+        for i in range(index - 1, -1, -1):
+            if i >= 0:
+                prev_entry = toc_entries[i]
+                prev_numbers = number_sequences[i]
+                break
+        
+        if not prev_entry:
+            # 如果是第一个条目，肯定是第一层级，合法
+            return ""
+        
+        # 检查前一个条目的层级
+        if prev_numbers and len(prev_numbers) > 1:
+            # 前一个条目是深层级的有编号标题，无编号标题不能作为其子级
+            return f"不能作为深层级有编号标题 '{prev_entry['title']}' 的子级"
+        
+        if prev_numbers and len(prev_numbers) == 1:
+            # 前一个条目是第一层级有编号标题
+            # 检查后续是否有同级的有编号标题
+            for j in range(index + 1, len(toc_entries)):
+                next_numbers = number_sequences[j]
+                if next_numbers and len(next_numbers) == 1:
+                    # 发现后续有第一层级有编号标题，说明当前无编号标题夹在有编号标题中间
+                    return f"出现在第一层级有编号标题之间，违反层级规则"
+                elif next_numbers and len(next_numbers) > 1:
+                    # 如果后续是深层级标题，则当前无编号标题可能是合法的
+                    break
+        
+        # 如果前一个条目也是无编号标题，则当前条目可以作为其子级
+        if not prev_numbers:
+            return ""
+        
+        return ""
+    
+    def is_first_level_unnumbered(self, index: int, toc_entries: List[Dict], number_sequences: List[List[int]]) -> bool:
+        """
+        判断无编号标题是否为第一层级
+        
+        Args:
+            index: 当前条目索引
+            toc_entries: 目录条目列表
+            number_sequences: 数字序列列表
+            
+        Returns:
+            bool: 是否为第一层级
+        """
+        # 检查前面是否有深层级编号条目
+        for i in range(index):
+            prev_numbers = number_sequences[i]
+            if prev_numbers and len(prev_numbers) > 1:
+                return False
+        
+        # 检查后面是否有第一层级编号条目
+        for i in range(index + 1, len(toc_entries)):
+            next_numbers = number_sequences[i]
+            if next_numbers and len(next_numbers) == 1:
+                # 如果后面有第一层级编号条目，且中间没有深层级条目，则当前是第一层级
+                has_deep_level_between = False
+                for j in range(index + 1, i):
+                    between_numbers = number_sequences[j]
+                    if between_numbers and len(between_numbers) > 1:
+                        has_deep_level_between = True
+                        break
+                
+                if not has_deep_level_between:
+                    return True
+        
+        # 如果前面只有第一层级或无编号条目，则认为是第一层级
+        return True
+
+    def validate_font_size_hierarchy_consistency(self, toc_entries: List[Dict], number_sequences: List[List[int]]) -> List[Dict]:
+        """
+        验证字体大小与层级一致性，所有一级标题（有无编号）都必须与标准一级标题字体大小一致，否则过滤。
+        """
+        if not toc_entries:
+            return toc_entries
+        
+        # 统计所有一级标题的字体大小（有编号和无编号都算）
+        first_level_font_sizes = []
+        for i, entry in enumerate(toc_entries):
+            current_numbers = number_sequences[i]
+            if (current_numbers and len(current_numbers) == 1) or (not current_numbers and entry.get("level", 1) == 1):
+                first_level_font_sizes.append(entry["font_size"])
+        
+        if not first_level_font_sizes:
+            return toc_entries
+        
+        import statistics
+        # 取最常见的字体大小为标准
+        rounded_sizes = [round(size, 1) for size in first_level_font_sizes]
+        font_size_counts = {}
+        for size in rounded_sizes:
+            font_size_counts[size] = font_size_counts.get(size, 0) + 1
+        standard_font_size = max(font_size_counts.keys(), key=lambda x: font_size_counts[x])
+        print(f"一级标题标准字体大小: {standard_font_size:.1f}")
+        
+        validated_entries = []
+        for i, entry in enumerate(toc_entries):
+            current_numbers = number_sequences[i]
+            is_first_level = (current_numbers and len(current_numbers) == 1) or (not current_numbers and entry.get("level", 1) == 1)
+            if is_first_level:
+                if abs(entry["font_size"] - standard_font_size) > 0.5:
+                    print(f"跳过一级标题字体大小不一致的条目: '{entry['title']}' (字体大小: {entry['font_size']:.1f} ≠ 标准: {standard_font_size:.1f})")
+                    continue
+            validated_entries.append(entry)
+        return validated_entries
+    
+    def is_valid_child_sequence(self, parent_numbers: List[int], child_numbers: List[int]) -> bool:
+        """
+        检查是否是合理的父子层级关系
+        
+        Args:
+            parent_numbers: 父级数字序列
+            child_numbers: 子级数字序列
+            
+        Returns:
+            bool: 是否为合理的父子关系
+        """
+        if not parent_numbers or not child_numbers:
+            return False
+        
+        # 子级应该比父级多一层
+        if len(child_numbers) != len(parent_numbers) + 1:
+            return False
+        
+        # 子级的前缀应该与父级完全相同
+        if child_numbers[:-1] != parent_numbers:
+            return False
+        
+        # 子级的最后一个数字应该合理（通常从1开始）
+        if child_numbers[-1] < 1:
+            return False
+        
+        return True
     
     def is_unreasonable_jump(self, prev_numbers: List[int], current_numbers: List[int]) -> bool:
         """
