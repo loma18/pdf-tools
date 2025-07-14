@@ -12,6 +12,8 @@ import sys
 from typing import List, Tuple, Dict, Optional
 import argparse
 import requests
+# 新增dotenv导入
+from dotenv import load_dotenv
 
 
 class PDFBookmarkTool:
@@ -53,7 +55,8 @@ class PDFBookmarkTool:
         self.enable_font_size_filter = True  # 是否启用字体大小过滤
         
         # 大模型API配置
-        self.api_key = "666ailab_F4YlwHmeTJbeaPdVs6L0OUyJ80HrDlRQoH4o41UODYjk5/em00RclX1HAq3kQovn64O5hyMvh91FM5ZMrISlFjMCJx1a5hiNYkNYswO+qaG6kpXml5FppXM="
+        load_dotenv()
+        self.api_key = os.environ.get("API_KEY", "")
         self.api_url = "https://lab.iwhalecloud.com/gpt-proxy/v1/chat/completions"
     
     def open_pdf(self) -> bool:
