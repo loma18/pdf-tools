@@ -162,7 +162,7 @@ jobs:
         
         if [ "${{ needs.build.result }}" == "success" ]; then
           echo "✅ 所有平台构建成功"
-          if startsWith(github.ref, 'refs/tags/v'); then
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             echo "🚀 已自动发布到GitHub Releases"
           fi
         else
