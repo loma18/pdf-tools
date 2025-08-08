@@ -126,70 +126,45 @@ jobs:
           # 暂时跳过，使用默认图标
           echo "使用默认Windows图标"
 
-      - name: 🏗️ 构建应用 (${{ matrix.platform }})
-        run: ${{ matrix.build_script }}
+          - name: 🏗️ 构建应用 (${{ matrix.platform }})
+      env:
+        GH_TOKEN: ${{ secrets.BUILDACTION }}
+      run: ${{ matrix.build_script }}
 
-      - name: 📝 列出构建产物
-        shell: bash
-        run: |
-          echo "构建产物列表："
-          ls -la dist/ || echo "dist目录不存在"
-          echo ""
-          echo "查找构建文件："
-          find dist -type f -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" 2>/dev/null || echo "未找到构建文件"
+    - name: 📝 列出构建产物
+      shell: bash
+      run: |
+        echo "构建产物列表："
+        ls -la dist/ || echo "dist目录不存在"
+        echo ""
+        echo "查找构建文件："
+        find dist -type f -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" 2>/dev/null || echo "未找到构建文件"
 
-      - name: 📤 上传构建产物
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ${{ matrix.artifact_name }}
-          path: ${{ matrix.artifact_pattern }}
-          retention-days: 30
+    - name: 📤 上传构建产物
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: ${{ matrix.artifact_pattern }}
+        retention-days: 30
 
-  # 创建Release（仅在打tag时）
-  release:
+    # 构建状态通知
+  notify:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    steps:
-      - name: 📥 下载所有构建产物
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts/
-          merge-multiple: true
-
-      - name: 📝 列出下载的文件
-        run: |
-          echo "下载的构建产物："
-          find artifacts -type f -exec ls -la {} \;
-
-      - name: 🚀 创建Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            artifacts/*
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # 构建状态通知
-  notify:
-    needs: [build, release]
-    runs-on: ubuntu-latest
     if: always()
-
+    
     steps:
-      - name: 📊 构建状态汇总
-        run: |
-          echo "构建状态汇总："
-          echo "Build job: ${{ needs.build.result }}"
-          echo "Release job: ${{ needs.release.result }}"
-
-          if [ "${{ needs.build.result }}" == "success" ]; then
-            echo "✅ 所有平台构建成功"
-          else
-            echo "❌ 构建过程中出现问题"
+    - name: 📊 构建状态汇总
+      run: |
+        echo "构建状态汇总："
+        echo "Build job: ${{ needs.build.result }}"
+        
+        if [ "${{ needs.build.result }}" == "success" ]; then
+          echo "✅ 所有平台构建成功"
+          if startsWith(github.ref, 'refs/tags/v'); then
+            echo "🚀 已自动发布到GitHub Releases"
           fi
+        else
+          echo "❌ 构建过程中出现问题"
+        fi
