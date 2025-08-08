@@ -95,6 +95,66 @@ files: |
 
 ---
 
+---
+
+## 2024年修复 - 包管理器切换
+
+### 🐛 问题描述
+GitHub Actions构建失败，npm ci报错：
+```
+npm error The `npm ci` command can only install with an existing package-lock.json or
+npm error npm-shrinkwrap.json with lockfileVersion >= 1
+```
+
+### 🔍 根本原因
+项目使用Yarn作为包管理器（存在yarn.lock文件），但GitHub Actions中使用了npm命令。
+
+### ✅ 解决方案
+将GitHub Actions从npm切换到yarn：
+
+| 修改项      | 原配置            | 新配置                           |
+| ----------- | ----------------- | -------------------------------- |
+| Node.js缓存 | `cache: 'npm'`    | `cache: 'yarn'`                  |
+| 安装依赖    | `npm ci`          | `yarn install --frozen-lockfile` |
+| 构建命令    | `npm run build-*` | `yarn build-*`                   |
+
+### 🔧 详细更改
+
+**1. Node.js设置**
+```yaml
+- name: 🟢 设置Node.js
+  uses: actions/setup-node@v4
+  with:
+    node-version: '18'
+    cache: 'yarn'  # 从npm改为yarn
+```
+
+**2. 依赖安装**
+```yaml
+- name: 📦 安装Node.js依赖
+  run: yarn install --frozen-lockfile  # 替代npm ci
+```
+
+**3. 构建命令**
+```yaml
+# Windows构建
+build_script: yarn build-win
+
+# macOS构建  
+build_script: yarn build-mac
+
+# Linux构建
+build_script: yarn build-linux
+```
+
+### 💡 yarn install --frozen-lockfile 说明
+- 等效于npm ci的yarn命令
+- 确保严格按照yarn.lock安装依赖
+- 如果yarn.lock与package.json不匹配会失败
+- 适合CI/CD环境使用
+
+---
+
 **更新时间**: 2024年
 **状态**: ✅ 已修复
 **测试状态**: 待验证 
