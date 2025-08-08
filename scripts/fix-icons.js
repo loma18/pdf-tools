@@ -10,7 +10,7 @@ console.log('🖼️ 开始图标修复检查...');
 
 // 检查图标文件
 const iconPngPath = path.join(__dirname, '..', 'assets', 'icon.png');
-const iconIcnsPath = path.join(__dirname, '..', 'assets', 'icon.png');
+const iconIcnsPath = path.join(__dirname, "..", "assets", "icon.icns");
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
 
 // 检查PNG图标
