@@ -20,7 +20,7 @@
 2. **添加到仓库Secrets**：
    - 进入您的仓库 → Settings → Secrets and variables → Actions
    - 点击 "New repository secret"
-   - 名称：`GH_TOKEN`
+   - 名称：`BUILDACTION`
    - 值：粘贴刚才复制的Token
    - 点击 "Add secret"
 
@@ -83,7 +83,7 @@ git push origin main
 ```
 Error: GitHub Personal Access Token is not set
 ```
-- 检查 `GH_TOKEN` secret是否正确设置
+- 检查 `BUILDACTION` secret是否正确设置
 - 确认Token有足够的权限（repo, workflow）
 
 **2. 构建失败**
