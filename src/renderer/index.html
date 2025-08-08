@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF书签工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PDF书签工具</h1>
+            <p class="subtitle">自动识别PDF标题并生成书签目录</p>
+        </div>
+
+        <!-- 标签页导航 -->
+        <div class="tab-nav">
+            <button class="tab-button active" data-tab="add-bookmarks">自动加书签</button>
+            <button class="tab-button" data-tab="extract-bookmarks">自动提取书签</button>
+        </div>
+
+        <!-- 自动加书签标签页 -->
+        <div id="add-bookmarks" class="tab-content active">
+            <div class="input-section">
+                <div class="file-input-group">
+                    <label for="input-file">选择PDF文件：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="input-file" placeholder="请选择PDF文件..." readonly>
+                        <button id="browse-input" class="btn btn-secondary">浏览...</button>
+                    </div>
+                </div>
+
+                <div class="file-input-group">
+                    <label for="output-file">输出文件路径：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="output-file" placeholder="自动生成输出路径...">
+                        <button id="browse-output" class="btn btn-secondary">浏览...</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="options-section">
+                <h3>处理选项</h3>
+                
+                <!-- 基础过滤选项 -->
+                <div class="option-category">
+                    <h4>基础过滤</h4>
+                    <div class="options-grid">
+                        <div class="option-group" style="display: none;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-llm">
+                                <span class="checkmark"></span>
+                                启用大模型语义过滤
+                            </label>
+                        </div>
+
+                        <div class="option-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-enhanced-filter" checked>
+                                <span class="checkmark"></span>
+                                启用增强本地过滤
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 字体过滤选项 -->
+                <div class="option-category">
+                    <h4>字体过滤</h4>
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-font-filter" checked>
+                                <span class="checkmark"></span>
+                                启用字体大小过滤
+                            </label>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="font-threshold">字体大小阈值：</label>
+                            <input type="number" id="font-threshold" value="12" step="0.1" min="8" max="72">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 位置过滤选项 -->
+                <div class="option-category">
+                    <h4>位置过滤</h4>
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-x-filter" checked>
+                                <span class="checkmark"></span>
+                                启用X坐标过滤
+                            </label>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="x-tolerance">X坐标容差(px)：</label>
+                            <input type="number" id="x-tolerance" value="2.0" step="0.5" min="0" max="20">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 调试选项 -->
+                <div class="option-category">
+                    <h4>调试选项</h4>
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-debug">
+                                <span class="checkmark"></span>
+                                启用调试模式
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 手动控制模块 -->
+            <div class="manual-control-section">
+                <h3>手动控制</h3>
+                
+                <div class="control-category">
+                    <h4>排除标题</h4>
+                    <p class="help-text">指定不应该加为书签的标题文本</p>
+                    <div class="title-list" id="exclude-titles">
+                        <!-- 动态添加的排除标题 -->
+                    </div>
+                    <div class="add-title-group">
+                        <input type="text" id="exclude-title-input" placeholder="输入要排除的标题...">
+                        <button type="button" id="add-exclude-title" class="btn btn-secondary">添加排除</button>
+                    </div>
+                </div>
+
+                <div class="control-category">
+                    <h4>包含标题</h4>
+                    <p class="help-text">指定应该要加为书签的标题文本</p>
+                    <div class="title-list" id="include-titles">
+                        <!-- 动态添加的包含标题 -->
+                    </div>
+                    <div class="add-title-group">
+                        <input type="text" id="include-title-input" placeholder="输入要包含的标题...">
+                        <button type="button" id="add-include-title" class="btn btn-secondary">添加包含</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button id="start-process" class="btn btn-primary">
+                    <span class="btn-text">开始处理</span>
+                </button>
+                <button id="stop-process" class="btn btn-danger" disabled>
+                    <span class="btn-text">停止处理</span>
+                </button>
+                <button id="open-folder" class="btn btn-secondary" disabled>
+                    <span class="btn-text">打开文件夹</span>
+                </button>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="progress-text">准备就绪</div>
+            </div>
+
+            <div class="log-section">
+                <div class="log-header">
+                    <h3>处理日志</h3>
+                    <button id="clear-log" class="btn btn-secondary btn-small">清空日志</button>
+                </div>
+                <div id="log-output" class="log-output"></div>
+            </div>
+        </div>
+
+        <!-- 自动提取书签标签页 -->
+        <div id="extract-bookmarks" class="tab-content">
+            <div class="input-section">
+                <div class="file-input-group">
+                    <label for="extract-input-file">选择PDF文件：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="extract-input-file" placeholder="请选择包含书签的PDF文件..." readonly>
+                        <button id="browse-extract-input" class="btn btn-secondary">浏览...</button>
+                    </div>
+                </div>
+
+                <div class="file-input-group">
+                    <label for="extract-output-file">书签文件路径：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="extract-output-file" placeholder="自动生成书签文件路径...">
+                        <button id="browse-extract-output" class="btn btn-secondary">浏览...</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="options-section">
+                <h3>提取选项</h3>
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-page-info" checked>
+                            <span class="checkmark"></span>
+                            包含页面信息
+                        </label>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-level-info" checked>
+                            <span class="checkmark"></span>
+                            包含层级信息
+                        </label>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="export-format">导出格式：</label>
+                        <select id="export-format">
+                            <option value="json">JSON</option>
+                            <option value="txt">文本</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button id="start-extract" class="btn btn-primary">
+                    <span class="btn-text">开始提取</span>
+                </button>
+                <button id="stop-extract" class="btn btn-danger" disabled>
+                    <span class="btn-text">停止提取</span>
+                </button>
+                <button id="open-extract-folder" class="btn btn-secondary" disabled>
+                    <span class="btn-text">打开文件夹</span>
+                </button>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="progress-text">准备就绪</div>
+            </div>
+
+            <div class="log-section">
+                <div class="log-header">
+                    <h3>提取日志</h3>
+                    <button id="clear-extract-log" class="btn btn-secondary btn-small">清空日志</button>
+                </div>
+                <div id="extract-log-output" class="log-output"></div>
+            </div>
+
+            <div class="preview-section" style="display: none;">
+                <h3>书签预览</h3>
+                <div id="bookmark-preview" class="bookmark-preview"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="app-info">
+                <span id="app-version">v1.0.0</span>
+                <span class="separator">|</span>
+                <span>PDF书签工具</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html> 
