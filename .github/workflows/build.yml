@@ -1,0 +1,168 @@
+name: 🏗️ 构建跨平台应用
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            build_script: npm run build-win
+            artifact_pattern: "dist/*.exe"
+            artifact_name: windows-installer
+
+          - os: macos-latest
+            platform: macos
+            build_script: npm run build-mac
+            artifact_pattern: "dist/*.dmg"
+            artifact_name: macos-installer
+
+          - os: ubuntu-latest
+            platform: linux
+            build_script: npm run build-linux
+            artifact_pattern: "dist/*.AppImage"
+            artifact_name: linux-appimage
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 🟢 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: 🐍 设置Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: 📦 安装Node.js依赖
+        run: npm ci
+
+      - name: 🐍 安装Python依赖
+        run: |
+          cd python-backend
+          pip install -r requirements.txt
+          cd ..
+
+      - name: 🔧 准备构建环境
+        run: node build-setup.js
+
+      - name: 🍎 生成Mac图标 (仅macOS)
+        if: matrix.platform == 'macos'
+        run: |
+          if [ ! -f "assets/icon.icns" ]; then
+            echo "正在生成Mac图标..."
+            mkdir -p tmp.iconset
+            
+            # 生成不同尺寸的图标
+            sips -z 16 16 assets/icon.png --out tmp.iconset/icon_16x16.png
+            sips -z 32 32 assets/icon.png --out tmp.iconset/icon_16x16@2x.png
+            sips -z 32 32 assets/icon.png --out tmp.iconset/icon_32x32.png
+            sips -z 64 64 assets/icon.png --out tmp.iconset/icon_32x32@2x.png
+            sips -z 128 128 assets/icon.png --out tmp.iconset/icon_128x128.png
+            sips -z 256 256 assets/icon.png --out tmp.iconset/icon_128x128@2x.png
+            sips -z 256 256 assets/icon.png --out tmp.iconset/icon_256x256.png
+            sips -z 512 512 assets/icon.png --out tmp.iconset/icon_256x256@2x.png
+            sips -z 512 512 assets/icon.png --out tmp.iconset/icon_512x512.png
+            sips -z 1024 1024 assets/icon.png --out tmp.iconset/icon_512x512@2x.png
+            
+            # 生成icns文件
+            iconutil -c icns tmp.iconset -o assets/icon.icns
+            
+            # 清理临时文件
+            rm -rf tmp.iconset
+            
+            echo "Mac图标生成完成"
+          else
+            echo "Mac图标文件已存在"
+          fi
+
+      - name: 🪟 生成Windows图标 (仅Windows)
+        if: matrix.platform == 'windows'
+        run: |
+          # 这里可以添加Windows图标生成逻辑
+          # 暂时跳过，使用默认图标
+          echo "使用默认Windows图标"
+
+      - name: 🏗️ 构建应用 (${{ matrix.platform }})
+        run: ${{ matrix.build_script }}
+
+      - name: 📝 列出构建产物
+        shell: bash
+        run: |
+          echo "构建产物列表："
+          ls -la dist/ || echo "dist目录不存在"
+          echo ""
+          echo "查找构建文件："
+          find dist -type f -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" 2>/dev/null || echo "未找到构建文件"
+
+      - name: 📤 上传构建产物
+        uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_pattern }}
+          retention-days: 30
+
+  # 创建Release（仅在打tag时）
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: 📥 下载所有构建产物
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts/
+
+      - name: 📝 列出下载的文件
+        run: |
+          echo "下载的构建产物："
+          find artifacts -type f -exec ls -la {} \;
+
+      - name: 🚀 创建Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.dmg
+            artifacts/**/*.AppImage
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 构建状态通知
+  notify:
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: 📊 构建状态汇总
+        run: |
+          echo "构建状态汇总："
+          echo "Build job: ${{ needs.build.result }}"
+          echo "Release job: ${{ needs.release.result }}"
+
+          if [ "${{ needs.build.result }}" == "success" ]; then
+            echo "✅ 所有平台构建成功"
+          else
+            echo "❌ 构建过程中出现问题"
+          fi

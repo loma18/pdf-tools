@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 
 // 构建前的准备工作
 function setupBuild() {

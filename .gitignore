@@ -70,4 +70,4 @@ test_*.pdf
 *_with_bookmarks.pdf
 
 # 调试文件
-semantic_filter_debug.json
+*.pdf

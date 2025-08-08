@@ -1,4 +1,0 @@
-PyMuPDF==1.23.14
-pdfplumber==0.10.3
-requests>=2.25.0
-tkinterdnd2>=0.3.0 

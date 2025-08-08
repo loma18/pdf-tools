@@ -136,9 +136,6 @@ ipcMain.handle("process-pdf", async (event, options) => {
     if (options.outputPath) {
       args.push("-o", options.outputPath);
     }
-    if (options.enableEnhancedFilter) {
-      args.push("--enable-enhanced-filter");
-    }
     if (options.disableFontFilter) {
       args.push("--disable-font-filter");
     }
@@ -183,11 +180,37 @@ ipcMain.handle("process-pdf", async (event, options) => {
     let error = "";
 
     pythonProcess.stdout.on("data", (data) => {
-      output += data.toString("utf8");
+      const text = data.toString("utf8");
+      output += text;
+
+      // 实时发送日志到渲染进程
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        // 按行分割并发送每一行
+        const lines = text.split("\n").filter((line) => line.trim());
+        lines.forEach((line) => {
+          mainWindow.webContents.send("process-log", {
+            message: line.trim(),
+            timestamp: new Date().toISOString(),
+          });
+        });
+      }
     });
 
     pythonProcess.stderr.on("data", (data) => {
-      error += data.toString("utf8");
+      const text = data.toString("utf8");
+      error += text;
+
+      // 实时发送错误日志到渲染进程
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        const lines = text.split("\n").filter((line) => line.trim());
+        lines.forEach((line) => {
+          mainWindow.webContents.send("process-log", {
+            message: line.trim(),
+            timestamp: new Date().toISOString(),
+            type: "error",
+          });
+        });
+      }
     });
 
     pythonProcess.on("close", (code) => {
@@ -263,11 +286,37 @@ ipcMain.handle("extract-bookmarks", async (event, options) => {
     let error = "";
 
     pythonProcess.stdout.on("data", (data) => {
-      output += data.toString("utf8");
+      const text = data.toString("utf8");
+      output += text;
+
+      // 实时发送日志到渲染进程
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        // 按行分割并发送每一行
+        const lines = text.split("\n").filter((line) => line.trim());
+        lines.forEach((line) => {
+          mainWindow.webContents.send("extract-log", {
+            message: line.trim(),
+            timestamp: new Date().toISOString(),
+          });
+        });
+      }
     });
 
     pythonProcess.stderr.on("data", (data) => {
-      error += data.toString("utf8");
+      const text = data.toString("utf8");
+      error += text;
+
+      // 实时发送错误日志到渲染进程
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        const lines = text.split("\n").filter((line) => line.trim());
+        lines.forEach((line) => {
+          mainWindow.webContents.send("extract-log", {
+            message: line.trim(),
+            timestamp: new Date().toISOString(),
+            type: "error",
+          });
+        });
+      }
     });
 
     pythonProcess.on("close", (code) => {

@@ -133,7 +133,6 @@ class PDFBookmarkTool:
         self.enable_font_size_filter = True  # 是否启用字体大小过滤
         
         # 新增配置选项
-        self.enable_enhanced_filter = False  # 是否启用增强本地过滤
         self.enable_debug = False  # 是否启用调试模式
         self.enable_x_coordinate_filter = True  # 是否启用X坐标过滤
         self.title_x_coordinate = None  # 文档标题的X坐标参考值
@@ -3180,14 +3179,11 @@ class PDFBookmarkTool:
             success, bookmark_stats = self._add_tree_bookmarks(treeList)
             
             if success:
-                print("成功添加书签")
                 if bookmark_stats:
-                    print(f"最终添加了 {bookmark_stats.get('final', 0)} 个书签")
+                    print(f"最终添加了 {bookmark_stats.get('final', 0)} 个书签， 共 {bookmark_stats.get('levels', 0)} 个层级")
                 
                 # 保存文件
                 if self.save_pdf(output_path):
-                    save_path = output_path or self.pdf_path
-                    print(f"文件已保存: {save_path}")
                     return True
                 else:
                     return False
@@ -3241,6 +3237,15 @@ class PDFBookmarkTool:
             # 基本的文本过滤
             if not self._is_potential_title_text(text):
                 continue
+            
+            # 检查是否为文档标题，如果是则跳过
+            if self.document_title_text:
+                # 双向检查：文档标题包含当前文本，或当前文本包含文档标题
+                text_clean = text.strip()
+                title_clean = self.document_title_text.strip()
+                if (text_clean in title_clean) or (title_clean in text_clean) or (text_clean == title_clean):
+                    print(f"    跳过文档标题: '{text[:30]}...'")
+                    continue
             
             # 数字开头过滤检查
             if self._should_filter_by_numeric_start(text):
@@ -3590,8 +3595,6 @@ class PDFBookmarkTool:
                 'final': len(toc_list),
                 'levels': len(set(entry[0] for entry in toc_list))
             }
-            
-            print(f"  成功添加 {stats['final']} 个书签，共 {stats['levels']} 个层级")
             return True, stats
             
         except Exception as e:
@@ -3783,7 +3786,6 @@ def main():
     parser.add_argument("--no-level-info", action="store_true", help="不包含层级信息")
     
     # 书签创建相关参数
-    parser.add_argument("--enable-enhanced-filter", action="store_true", help="启用增强本地过滤")
     parser.add_argument("--disable-font-filter", action="store_true", help="禁用字体大小过滤")
     parser.add_argument("--font-threshold", type=float, help="字体大小阈值")
     parser.add_argument("--debug", action="store_true", help="启用调试模式")
@@ -3804,7 +3806,6 @@ def main():
         tool = PDFBookmarkTool(args.input_file)
         
         # 设置工具选项
-        tool.enable_enhanced_filter = args.enable_enhanced_filter
         tool.enable_debug = args.debug
         tool.enable_x_coordinate_filter = not args.disable_x_filter
         tool.x_coordinate_tolerance = args.x_tolerance

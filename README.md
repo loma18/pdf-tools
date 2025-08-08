@@ -1,215 +1,418 @@
-# PDF自动书签工具
+# PDF自动书签工具 - Electron桌面版
 
-这是一个强大的Python工具，可以自动为PDF文件添加书签。工具采用**传统规则+AI语义过滤**的混合架构，智能识别PDF中的目录结构，只针对真实的标题添加书签，不会对普通段落、表格内容添加书签。
+## 🚀 项目概述
 
-## ✨ 功能特性
+这是PDF自动书签工具的Electron桌面版本，提供现代化的图形界面和跨平台支持。用户无需安装Python环境，即可直接使用打包好的可执行文件。
 
-### 🎯 核心功能
-- 🔍 **智能目录识别** - 自动识别PDF中的目录结构
-- 📑 **多格式支持** - 支持各种中文目录格式（第X章、X.X、一、等）
-- 🎯 **深层级支持** - 支持最多8层深度的标题结构（如2.6.2.1.1.1.1.1）
-- 📖 **自动书签** - 自动添加分层书签到PDF文件，支持正确的页面跳转
-- ⚡ **批量处理** - 支持命令行批量处理
+## ✨ 特性
 
-### 🧠 AI智能过滤
-- 🤖 **大模型语义过滤** - 使用GPT-4进行高级语义理解和结构优化
-- 🚫 **表格内容过滤** - 自动识别并过滤表格中的编号内容
-- 🔧 **智能预过滤** - 基于规则的快速预过滤，去除明显的非标题内容
-- 🧹 **智能去重** - 自动过滤重复和不合理的条目
-- 📊 **调试支持** - 保存详细的过滤过程数据到JSON文件
-
-### 🔄 严格逻辑验证
-- **顶层连续性验证**：顶层数字必须连续（1、2、3...）
-- **父子一致性验证**：子级必须包含父级完整数字前缀
-- **排序验证**：确保同层级数字严格递增
-- **前瞻性分析**：基于后续条目判断合理性
-- **深层级智能策略**：对5层以上标题采用适度宽松验证
-
-### 🖥️ 用户界面
-- 🎨 **现代GUI界面** - 基于tkinter的美观图形界面
-- 📝 **实时日志显示** - 处理过程实时可见
-- ⚙️ **灵活配置选项** - 支持字体大小阈值等参数调整
-- 🚀 **一键启动** - 提供批处理文件和启动器
-
-## 📋 支持的目录格式
-
-工具可以识别以下目录格式：
-
-### 中文格式
-- 第X章、第X节、第X部分
-- 一、标题、二、标题（中文数字）
-- （1）标题、（2）标题
-
-### 数字编号格式（支持最多8层）
-- 1. 标题、2. 标题
-- 1.1 标题、1.2 标题
-- 1.1.1 标题、1.1.2 标题
-- 1.1.1.1 标题、1.1.1.2 标题
-- 1.1.1.1.1 标题（支持到8层深度）
-- 1、标题、2、标题
-
-### 字母和罗马数字格式
-- I、标题、II、标题（罗马数字）
-- A. 标题、B. 标题
-- a) 标题、b) 标题
-- (1) 标题、(2) 标题
-
-### 特殊格式
-- 【标题】格式
-
-## 🚀 快速开始
-
-### 方式一：使用GUI界面（推荐）
-
-```bash
-# Windows用户双击运行
-run_gui.bat
-
-# 或者直接运行
-python start_gui.py
-```
-
-### 方式二：命令行使用
-
-```bash
-# 基本用法
-python pdf_bookmark_tool.py your_document.pdf
-
-# 指定输出文件
-python pdf_bookmark_tool.py your_document.pdf -o output_with_bookmarks.pdf
-
-# 设置字体大小阈值
-python pdf_bookmark_tool.py your_document.pdf --font-threshold 12
-```
-
-## 📦 安装依赖
-
-### 自动安装（推荐）
-运行启动器会自动检查并安装依赖：
-```bash
-python start_gui.py
-```
-
-### 手动安装
-```bash
-pip install -r requirements.txt
-```
-
-## 📖 使用方法
-
-### GUI界面使用
-
-1. **启动程序**：双击 `run_gui.bat` 或运行 `python start_gui.py`
-2. **选择文件**：点击"浏览"按钮选择PDF文件
-3. **配置选项**：
-   - 启用/禁用字体大小过滤
-   - 设置字体大小阈值（可选）
-4. **开始处理**：点击"开始处理"按钮
-5. **查看结果**：在日志区域查看处理进度和结果
-
-### 命令行参数
-
-- `input_pdf`: 输入的PDF文件路径（必需）
-- `-o, --output`: 输出PDF文件路径（可选，默认添加_bookmarked后缀）
-- `--font-threshold`: 手动设置字体大小阈值（可选）
-
-### 使用示例
-
-```bash
-# 示例1：处理学术论文
-python pdf_bookmark_tool.py 学术论文.pdf -o 学术论文_带书签.pdf
-
-# 示例2：处理技术文档（自动生成输出文件名）
-python pdf_bookmark_tool.py 技术手册.pdf
-
-# 示例3：设置字体阈值处理教材
-python pdf_bookmark_tool.py 教材.pdf --font-threshold 12
-```
-
-## 🔧 工作原理
-
-### 处理流程
-1. **文本提取**: 使用PyMuPDF提取PDF中的文本和字体信息
-2. **基础过滤**: 基于字体大小和格式特征进行初步筛选
-3. **预过滤**: 过滤表格内容和非标准前缀文本
-4. **AI语义过滤**: 使用大模型进行高级语义理解和结构优化
-5. **逻辑验证**: 多重验证确保目录结构的逻辑合理性
-6. **书签生成**: 创建分层书签结构并嵌入PDF
-
-### 混合架构优势
-- **传统规则**：快速处理基础格式识别和物理特征过滤
-- **AI语义**：深度理解文档语义，过滤碎片化和无意义文本
-- **双重保障**：确保既有高准确率又有良好的处理速度
-
-## 🛡️ 验证规则
-
-工具采用严格的多重验证确保书签结构的逻辑合理性：
-
-### 1. 表格内容过滤
-- 自动识别表格环境中的编号文本
-- 过滤包含工具名称、技术术语的编号条目
-- 检测并排除功能描述类文本
-
-### 2. 顶层连续性验证
-- 顶层数字必须连续（如1、2、3、4、5...）
-- 不连续的数字将被过滤（如跳过6直接到10）
-- 支持从任意数字开始，但必须保持连续性
-
-### 3. 父子一致性验证
-- 子级必须包含父级的完整数字前缀
-- ✅ 正确：1.2 → 1.2.1 → 1.2.1.1
-- ❌ 错误：1.2 → 3.1（子级未包含父级前缀）
-
-### 4. 数字递增验证
-- 同层级数字必须严格递增
-- ✅ 正确：1.1、1.2、1.3
-- ❌ 错误：1.1、1.3、1.2（顺序错误）
-
-### 5. 深层级智能策略
-- 对5层以上标题采用更宽松的验证
-- 允许适度的重复以避免过度过滤
-- 支持最多8层深度的复杂结构
+- 🖥️ **现代化界面** - 基于Web技术的美观用户界面
+- 📦 **开箱即用** - 无需安装Python，内置所有依赖
+- 🔄 **拖拽支持** - 支持拖拽PDF文件到应用窗口
+- 📊 **实时进度** - 显示处理进度和详细日志
+- 🌐 **跨平台** - 支持Windows、macOS和Linux
+- ⚡ **高性能** - 基于Electron和Node.js
 
 ## 📁 项目结构
 
 ```
 pdf-tools/
-├── pdf_bookmark_tool.py    # 核心处理引擎
-├── pdf_bookmark_gui.py     # GUI界面
-├── start_gui.py           # 启动器（自动检查依赖）
-├── run_gui.bat           # Windows批处理启动脚本
-├── requirements.txt      # 依赖包列表
-└── README.md            # 项目文档
+├── src/                          # Electron源代码
+│   ├── main.js                   # 主进程
+│   └── renderer/                 # 渲染进程
+│       ├── index.html           # 主界面
+│       ├── styles.css           # 样式文件
+│       └── renderer.js          # 前端逻辑
+├── python-backend/               # Python后端
+│   ├── pdf_bookmark_tool.py     # 核心处理引擎
+│   └── requirements.txt         # Python依赖
+├── assets/                       # 资源文件
+│   └── icon.png                 # 应用图标
+├── scripts/                      # 构建脚本
+│   └── build.bat                # Windows构建脚本
+├── package.json                 # Node.js配置
+├── build-setup.js               # 构建准备脚本
+└── README.md           # 本文档
 ```
 
-## ⚠️ 注意事项
+## 🛠️ 开发环境设置
 
-- 工具主要针对包含结构化目录的PDF文档
-- 对于图片扫描版PDF，可能需要先进行OCR处理
-- 建议在处理重要文档前先备份原文件
-- 某些加密或受保护的PDF可能无法处理
-- AI语义过滤需要网络连接（使用内部GPT-4接口）
+### 前提条件
 
-## 🛠️ 技术依赖
+1. **Node.js** (v16或更高版本)
+2. **Python** (v3.7或更高版本)
+3. **Git** (可选，用于版本控制)
 
-- **PyMuPDF**: PDF文档处理和书签操作
-- **pdfplumber**: 文本提取和分析
-- **tkinter**: GUI界面框架
-- **requests**: HTTP请求（AI接口调用）
-- **re**: 正则表达式匹配
-- **threading**: 多线程处理
+### 安装步骤
 
-## 🎯 适用场景
+1. **克隆或下载项目**
+   ```bash
+   git clone <repository-url>
+   cd pdf-tools
+   ```
 
-- 📚 **学术论文**: 自动为论文添加章节书签
-- 📖 **技术文档**: 为API文档、用户手册添加导航
-- 📝 **报告文档**: 为分析报告、研究报告添加目录书签
-- 📋 **规范文档**: 为标准规范、操作手册添加结构化书签
+2. **安装Node.js依赖**
+   ```bash
+   npm install
+   ```
 
-## 🤝 贡献
+3. **安装Python依赖**
+   ```bash
+   cd python-backend
+   pip install -r requirements.txt
+   cd ..
+   ```
 
-欢迎提交问题报告和功能请求！如果您想贡献代码，请fork本项目并提交pull request。
+4. **运行开发版本**
+   ```bash
+   npm run dev
+   ```
+
+## 🏗️ 构建可执行文件
+
+### Windows构建
+
+**方法一：使用批处理脚本（推荐）**
+```bash
+# 双击运行或在命令行执行
+scripts\build.bat
+```
+
+**方法二：手动构建**
+```bash
+# 安装依赖
+npm install
+
+# 构建Windows版本
+npm run build-win
+```
+
+### macOS构建
+
+**方法一：使用专用脚本（推荐）**
+```bash
+# 在macOS系统上运行
+./scripts/build-mac.sh
+```
+
+**方法二：手动构建**
+```bash
+# 确保在macOS系统上运行
+npm install
+npm run build-mac
+```
+
+**注意事项**：
+- Mac应用构建建议在macOS系统上进行，以确保最佳兼容性
+- 需要icon.icns文件（脚本会自动从icon.png生成）
+- 首次运行构建的应用时，可能需要在系统偏好设置中允许运行
+
+### Linux构建
+
+```bash
+# 在任何系统上都可以构建Linux版本
+npm install
+npm run build-linux
+```
+
+### 跨平台构建
+
+**使用快速开始脚本（全平台支持）**：
+
+Windows用户：
+```cmd
+# 双击运行
+快速开始.bat
+```
+
+macOS/Linux用户：
+```bash
+# 添加执行权限（首次运行）
+chmod +x 快速开始.sh
+
+# 运行脚本
+./快速开始.sh
+```
+
+**手动构建所有平台**：
+```bash
+npm run build
+```
+
+### 🚀 自动化构建（GitHub Actions）
+
+如果您的项目托管在GitHub上，可以使用自动化构建：
+
+**功能特性**：
+- ✅ 自动构建Windows、macOS、Linux三个平台
+- ✅ 自动生成Mac图标文件（从PNG转换）
+- ✅ 在推送代码或创建标签时自动触发
+- ✅ 支持手动触发构建
+- ✅ 自动创建Release并上传安装包
+
+**使用方法**：
+1. 确保项目已推送到GitHub
+2. 创建标签触发Release构建：
+   ```bash
+   git tag v2.0.0
+   git push origin v2.0.0
+   ```
+3. 或者在GitHub界面手动触发：
+   - 进入Actions页面
+   - 选择"构建跨平台应用"工作流
+   - 点击"Run workflow"
+
+**构建产物**：
+- Windows: 在Actions的Artifacts中下载
+- macOS: 自动生成.dmg安装包
+- Linux: 生成AppImage便携应用
+
+## 🖼️ 图标文件说明
+
+不同平台需要不同格式的图标文件：
+
+| 平台    | 文件名             | 格式 | 自动生成         |
+| ------- | ------------------ | ---- | ---------------- |
+| Windows | `assets/icon.ico`  | ICO  | ❌ 需手动准备     |
+| macOS   | `assets/icon.icns` | ICNS | ✅ 从icon.png生成 |
+| Linux   | `assets/icon.png`  | PNG  | ✅ 已存在         |
+
+**Mac图标自动生成**：
+- 构建脚本会自动检查是否存在`icon.icns`文件
+- 如果不存在，会尝试从`icon.png`生成（需要macOS系统的`sips`和`iconutil`工具）
+- 生成的图标包含所有必需的尺寸（16x16到1024x1024）
+
+**Windows图标准备**：
+- 需要手动创建`assets/icon.ico`文件
+- 可以使用在线工具将PNG转换为ICO格式
+- 推荐尺寸：16x16, 32x32, 48x48, 256x256
+
+## 📦 打包输出
+
+构建完成后，可执行文件将在 `dist/` 目录中：
+
+- **Windows**: `PDF自动书签工具 Setup 2.0.0.exe` (安装包)
+- **macOS**: `PDF自动书签工具-2.0.0.dmg` (磁盘映像)
+- **Linux**: `PDF自动书签工具-2.0.0.AppImage` (便携应用)
+
+## 🚨 构建故障排除
+
+### 常见问题
+
+**1. Mac构建失败**
+```
+Error: Application entry file "dist/electron/main.js" does not exist
+```
+**解决方案**：确保在macOS系统上运行，或使用GitHub Actions等CI服务
+
+**2. Windows图标缺失警告**
+```
+Warning: icon.ico not found
+```
+**解决方案**：
+- 下载PNG to ICO转换工具或使用在线服务
+- 将`assets/icon.png`转换为`assets/icon.ico`
+- 或临时注释掉package.json中的Windows图标配置
+
+**3. Python依赖问题**
+```
+Error: Python script failed to run
+```
+**解决方案**：
+- 确保Python已正确安装
+- 在`python-backend`目录运行`pip install -r requirements.txt`
+- 检查PyMuPDF等关键依赖是否安装成功
+
+**4. 权限问题（macOS/Linux）**
+```
+Permission denied: ./快速开始.sh
+```
+**解决方案**：
+```bash
+chmod +x 快速开始.sh
+chmod +x scripts/build-mac.sh
+```
+
+### 获得帮助
+
+如果遇到其他构建问题：
+1. 检查Node.js和npm版本是否满足要求
+2. 清理node_modules并重新安装：`rm -rf node_modules && npm install`
+3. 查看Electron Builder文档：https://www.electron.build/
+4. 在项目Issues中搜索类似问题
+
+## 🎯 使用方法
+
+### 开发模式
+```bash
+npm run dev
+```
+
+### 生产模式
+```bash
+npm start
+```
+
+### 构建发布版
+```bash
+npm run build
+```
+
+## 🔧 配置选项
+
+### Electron Builder配置
+
+在 `package.json` 中的 `build` 字段可以配置：
+
+- **应用信息** - 名称、版本、描述
+- **图标设置** - 不同平台的图标文件
+- **打包选项** - 输出格式、架构支持
+- **安装程序** - NSIS配置、快捷方式等
+
+### 主要配置项
+
+```json
+{
+  "build": {
+    "appId": "com.pdftools.bookmark",
+    "productName": "PDF自动书签工具",
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  }
+}
+```
+
+## 🐛 故障排除
+
+### 常见问题
+
+1. **构建失败 - 缺少Python**
+   ```
+   解决方案：确保系统已安装Python 3.7+并添加到PATH
+   ```
+
+2. **依赖安装失败**
+   ```bash
+   # 清除缓存重新安装
+   npm cache clean --force
+   rm -rf node_modules
+   npm install
+   ```
+
+3. **Python后端无法运行**
+   ```bash
+   # 检查Python依赖
+   cd python-backend
+   pip install -r requirements.txt
+   python pdf_bookmark_tool.py --help
+   ```
+
+4. **图标不显示**
+   ```
+   解决方案：确保assets/目录下有正确格式的图标文件
+   - Windows: icon.ico
+   - macOS: icon.icns  
+   - Linux: icon.png
+   ```
+
+### 调试模式
+
+启用开发者工具进行调试：
+```bash
+npm run dev
+```
+
+## 📋 开发指南
+
+### 添加新功能
+
+1. **前端功能** - 修改 `src/renderer/` 下的文件
+2. **后端功能** - 修改 `python-backend/` 下的Python脚本
+3. **主进程功能** - 修改 `src/main.js`
+
+### IPC通信
+
+前端与主进程通过IPC通信：
+
+```javascript
+// 渲染进程 -> 主进程
+const result = await ipcRenderer.invoke('process-pdf', options);
+
+// 主进程 -> 渲染进程
+mainWindow.webContents.send('process-output', data);
+```
+
+### 样式自定义
+
+修改 `src/renderer/styles.css` 来自定义界面样式。
+
+## 🚀 部署发布
+
+### 发布检查清单
+
+- [ ] 更新版本号 (`package.json`)
+- [ ] 测试所有功能
+- [ ] 检查图标文件
+- [ ] 构建所有目标平台
+- [ ] 测试安装包
+- [ ] 准备发布说明
+
+### 自动化发布
+
+可以配置GitHub Actions或其他CI/CD工具自动构建和发布：
+
+```yaml
+# .github/workflows/build.yml
+name: Build and Release
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - run: npm install
+      - run: npm run build
+```
 
 ## 📄 许可证
 
-本项目采用MIT许可证。 
+本项目采用MIT许可证。详见LICENSE文件。
+
+## 🤝 贡献
+
+欢迎提交问题报告和功能请求！如果您想贡献代码：
+
+1. Fork本项目
+2. 创建功能分支
+3. 提交更改
+4. 推送到分支
+5. 创建Pull Request
+
+## 📞 支持
+
+如有问题或需要帮助，请：
+
+1. 查看本文档的故障排除部分
+2. 搜索已有的Issues
+3. 创建新的Issue描述问题
+
+---
+
+**开发团队**: PDF Tools Team  
+**最后更新**: 2024年1月 
