@@ -47,7 +47,10 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "ia32"]
+          "arch": [
+            "x64",
+            "ia32"
+          ]
         }
       ],
       "icon": "assets/icon.ico",
@@ -55,7 +58,7 @@
     },
     "mac": {
       "target": "dmg",
-      "icon": "assets/icon.icns",
+      "icon": "assets/icon.png",
       "category": "public.app-category.productivity"
     },
     "linux": {
@@ -71,4 +74,4 @@
       "shortcutName": "PDF自动书签工具"
     }
   }
-} 
+}

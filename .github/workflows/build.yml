@@ -58,38 +58,66 @@ jobs:
           pip install -r requirements.txt
           cd ..
 
-      - name: 🔧 准备构建环境
-        run: node build-setup.js
+          - name: 🔧 准备构建环境
+      run: node build-setup.js
 
-      - name: 🍎 生成Mac图标 (仅macOS)
-        if: matrix.platform == 'macos'
-        run: |
-          if [ ! -f "assets/icon.icns" ]; then
-            echo "正在生成Mac图标..."
-            mkdir -p tmp.iconset
+    - name: 🖼️ 修复图标配置
+      run: node scripts/fix-icons.js
+
+          - name: 🍎 生成Mac图标 (仅macOS)
+      if: matrix.platform == 'macos'
+      run: |
+        if [ ! -f "assets/icon.icns" ]; then
+          echo "正在检查PNG图标文件..."
+          
+          # 检查icon.png文件是否存在且有效
+          if [ -f "assets/icon.png" ]; then
+            # 检查文件大小（小于1KB可能是无效文件）
+            file_size=$(stat -f%z "assets/icon.png" 2>/dev/null || stat -c%s "assets/icon.png" 2>/dev/null || echo "0")
+            echo "图标文件大小: ${file_size} 字节"
             
-            # 生成不同尺寸的图标
-            sips -z 16 16 assets/icon.png --out tmp.iconset/icon_16x16.png
-            sips -z 32 32 assets/icon.png --out tmp.iconset/icon_16x16@2x.png
-            sips -z 32 32 assets/icon.png --out tmp.iconset/icon_32x32.png
-            sips -z 64 64 assets/icon.png --out tmp.iconset/icon_32x32@2x.png
-            sips -z 128 128 assets/icon.png --out tmp.iconset/icon_128x128.png
-            sips -z 256 256 assets/icon.png --out tmp.iconset/icon_128x128@2x.png
-            sips -z 256 256 assets/icon.png --out tmp.iconset/icon_256x256.png
-            sips -z 512 512 assets/icon.png --out tmp.iconset/icon_256x256@2x.png
-            sips -z 512 512 assets/icon.png --out tmp.iconset/icon_512x512.png
-            sips -z 1024 1024 assets/icon.png --out tmp.iconset/icon_512x512@2x.png
-            
-            # 生成icns文件
-            iconutil -c icns tmp.iconset -o assets/icon.icns
-            
-            # 清理临时文件
-            rm -rf tmp.iconset
-            
-            echo "Mac图标生成完成"
+            if [ "$file_size" -gt 1000 ]; then
+              echo "开始生成Mac图标..."
+              mkdir -p tmp.iconset
+              
+              # 使用错误处理生成不同尺寸的图标
+              if sips -z 16 16 assets/icon.png --out tmp.iconset/icon_16x16.png 2>/dev/null && \
+                 sips -z 32 32 assets/icon.png --out tmp.iconset/icon_16x16@2x.png 2>/dev/null && \
+                 sips -z 32 32 assets/icon.png --out tmp.iconset/icon_32x32.png 2>/dev/null && \
+                 sips -z 64 64 assets/icon.png --out tmp.iconset/icon_32x32@2x.png 2>/dev/null && \
+                 sips -z 128 128 assets/icon.png --out tmp.iconset/icon_128x128.png 2>/dev/null && \
+                 sips -z 256 256 assets/icon.png --out tmp.iconset/icon_128x128@2x.png 2>/dev/null && \
+                 sips -z 256 256 assets/icon.png --out tmp.iconset/icon_256x256.png 2>/dev/null && \
+                 sips -z 512 512 assets/icon.png --out tmp.iconset/icon_256x256@2x.png 2>/dev/null && \
+                 sips -z 512 512 assets/icon.png --out tmp.iconset/icon_512x512.png 2>/dev/null && \
+                 sips -z 1024 1024 assets/icon.png --out tmp.iconset/icon_512x512@2x.png 2>/dev/null; then
+                
+                # 生成icns文件
+                if iconutil -c icns tmp.iconset -o assets/icon.icns 2>/dev/null; then
+                  echo "✅ Mac图标生成成功"
+                else
+                  echo "⚠️ iconutil失败，将使用默认图标"
+                fi
+              else
+                echo "⚠️ sips命令失败，PNG文件可能无效，将使用默认图标"
+              fi
+              
+              # 清理临时文件
+              rm -rf tmp.iconset
+            else
+              echo "⚠️ PNG图标文件太小或无效（${file_size}字节），将使用默认图标"
+            fi
           else
-            echo "Mac图标文件已存在"
+            echo "⚠️ PNG图标文件不存在，将使用默认图标"
           fi
+          
+          # 如果图标生成失败，继续构建（使用默认图标）
+          if [ ! -f "assets/icon.icns" ]; then
+            echo "ℹ️ 将使用Electron默认图标进行构建"
+          fi
+        else
+          echo "✅ Mac图标文件已存在"
+        fi
 
       - name: 🪟 生成Windows图标 (仅Windows)
         if: matrix.platform == 'windows'
