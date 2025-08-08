@@ -27,6 +27,7 @@ class PDFBookmarkApp {
     this.enableDebug = document.getElementById("enable-debug");
     this.enableXFilter = document.getElementById("enable-x-filter");
     this.xTolerance = document.getElementById("x-tolerance");
+    this.requireNumericStart = document.getElementById("require-numeric-start");
     this.startProcess = document.getElementById("start-process");
     this.stopProcess = document.getElementById("stop-process");
     this.openFolder = document.getElementById("open-folder");
@@ -233,6 +234,7 @@ class PDFBookmarkApp {
         enableDebug: this.enableDebug.checked,
         enableXFilter: this.enableXFilter.checked,
         xTolerance: parseFloat(this.xTolerance.value) || 2.0,
+        requireNumericStart: this.requireNumericStart.checked,
         excludeTitles: excludeTitles,
         includeTitles: includeTitles,
       };

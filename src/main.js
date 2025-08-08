@@ -136,10 +136,6 @@ ipcMain.handle("process-pdf", async (event, options) => {
     if (options.outputPath) {
       args.push("-o", options.outputPath);
     }
-
-    if (!options.enableLlm) {
-      args.push("--disable-llm");
-    }
     if (options.enableEnhancedFilter) {
       args.push("--enable-enhanced-filter");
     }
@@ -163,6 +159,9 @@ ipcMain.handle("process-pdf", async (event, options) => {
     }
     if (options.includeTitles && options.includeTitles.length > 0) {
       args.push("--include-titles", JSON.stringify(options.includeTitles));
+    }
+    if (options.requireNumericStart) {
+      args.push("--require-numeric-start");
     }
 
     console.log("Spawning Python process with args:", args);

@@ -9,6 +9,14 @@ PDF自动书签工具
 import sys
 import os
 
+import fitz  # PyMuPDF
+import re
+import json
+from typing import List, Tuple, Dict, Optional
+import argparse
+# 新增dotenv导入
+from dotenv import load_dotenv
+
 # 设置环境变量确保UTF-8输出
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 
@@ -23,15 +31,6 @@ if sys.platform == 'win32':
     except:
         # 如果编码设置失败，继续执行
         pass
-
-import fitz  # PyMuPDF
-import re
-import json
-from typing import List, Tuple, Dict, Optional
-import argparse
-import requests
-# 新增dotenv导入
-from dotenv import load_dotenv
 
 
 def safe_json_parse(json_str, param_name):
@@ -134,7 +133,6 @@ class PDFBookmarkTool:
         self.enable_font_size_filter = True  # 是否启用字体大小过滤
         
         # 新增配置选项
-        self.enable_llm = True  # 是否启用大模型
         self.enable_enhanced_filter = False  # 是否启用增强本地过滤
         self.enable_debug = False  # 是否启用调试模式
         self.enable_x_coordinate_filter = True  # 是否启用X坐标过滤
@@ -144,6 +142,9 @@ class PDFBookmarkTool:
         # 手动控制选项
         self.exclude_titles = []  # 手动排除的标题列表
         self.include_titles = []  # 手动包含的标题列表
+        
+        # 标题格式过滤选项
+        self.require_numeric_start = False  # 是否要求标题必须以数字开头
         
         # 大模型API配置
         load_dotenv()
@@ -956,8 +957,8 @@ class PDFBookmarkTool:
             return True
         
         # 标点符号太多（可能是段落）
-        punctuation_count = len(re.findall(r'[,，。.！!？?；;：:()（）]', text))
-        if punctuation_count > 3:  # 标点超过3个很可能是段落
+        punctuation_count = len(re.findall(r'[,，。！!？?；;：:()（）]', text))
+        if punctuation_count > 4:  # 标点超过3个很可能是段落
             return True
         
         # 全是标点符号或分隔符
@@ -2434,321 +2435,7 @@ class PDFBookmarkTool:
         
         print(f"表格和前缀过滤完成，过滤后条目数: {len(filtered_entries)}")
         return filtered_entries
-
-    def llm_semantic_filter(self, toc_entries: List[Dict]) -> List[Dict]:
-        """
-        使用大模型进行语义过滤，优化书签结构（分批调用模式，每批100条）
-        Args:
-            toc_entries: 原始目录条目列表
-        Returns:
-            List[Dict]: 过滤后的目录条目列表
-        """
-        if len(toc_entries) == 0:
-            return toc_entries
-        print(f"开始使用大模型进行语义过滤（分批调用模式），原始条目数: {len(toc_entries)}")
-        return self._batched_llm_filter(toc_entries)
-
-    def _batched_llm_filter(self, toc_entries: List[Dict], batch_size: int = 100) -> List[Dict]:
-        """
-        分批调用大模型API，每批batch_size条，最后合并结果
-        """
-        all_filtered = []
-        total = len(toc_entries)
-        batch_count = (total + batch_size - 1) // batch_size
-        print(f"将目录条目分为 {batch_count} 批，每批{batch_size}条")
-        for i in range(batch_count):
-            batch = toc_entries[i*batch_size:(i+1)*batch_size]
-            print(f"\n🚀 调用大模型处理第{i+1}/{batch_count}批（条目{i*batch_size+1}-{min((i+1)*batch_size, total)}）...")
-            filtered = self._single_request_llm_filter(batch)
-            print(f"✅ 第{i+1}批处理完成，保留{len(filtered)}条")
-            all_filtered.extend(filtered)
-        # 合并后去重（标题+页码）
-        def get_title_page_key(entry):
-            return (entry["title"].strip(), entry.get("target_page", entry.get("source_page", 0)))
-        seen = set()
-        deduped = []
-        for entry in all_filtered:
-            key = get_title_page_key(entry)
-            if key not in seen:
-                seen.add(key)
-                deduped.append(entry)
-        print(f"\n📦 分批合并后去重，最终保留{len(deduped)}条")
-        return deduped
-
-    def _single_request_llm_filter(self, toc_entries: List[Dict]) -> List[Dict]:
-        """单次请求的LLM过滤（用于小数据量）"""
-        try:
-            # 构建提示词
-            prompt = self._build_semantic_filter_prompt()
-            
-            # 格式化候选数据
-            candidates_text = self._format_toc_entries_for_llm(toc_entries)
-            print(f"数据长度: {len(candidates_text)} 字符")
-            
-            # 调用大模型API
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            data = {
-                "model": "claude-4-sonnet",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": f"{prompt}\n\n目录条目数据:\n{candidates_text}"
-                    }
-                ],
-                "temperature": 0.1,
-                "max_tokens": 32768
-            }
-            
-            response = requests.post(self.api_url, headers=headers, json=data, timeout=60)
-            print(f"收到响应，状态码: {response.status_code}")
-            
-            if response.status_code == 200:
-                try:
-                    result = response.json()
-                    
-                    if "choices" in result and result["choices"]:
-                        content = result["choices"][0]["message"]["content"]
-                        print(f"响应内容长度: {len(content)}")
-                        
-                        filtered_entries = self._parse_llm_semantic_response(content, toc_entries)
-                        print(f"语义过滤完成，过滤后条目数: {len(filtered_entries)}")
-                        
-                        # 保存调试信息
-                        self._save_semantic_filter_debug(toc_entries, filtered_entries, content)
-                        
-                        return filtered_entries
-                    else:
-                        print(f"响应格式错误: {result}")
-                        return self._simple_rule_filter(toc_entries)
-                except Exception as json_error:
-                    print(f"解析响应JSON失败: {json_error}")
-                    return self._simple_rule_filter(toc_entries)
-            else:
-                print(f"API调用失败，状态码: {response.status_code}")
-                return self._simple_rule_filter(toc_entries)
-                
-        except Exception as e:
-            print(f"单次处理失败: {e}")
-            return self._simple_rule_filter(toc_entries)
     
-    def _build_semantic_filter_prompt(self) -> str:
-        """构建语义过滤的提示词"""
-        return """你是一个专业的PDF文档结构分析专家。请分析以下目录条目，进行语义过滤和结构优化。
-
-分析目标：
-1. **过滤无效条目**：去除明显不是标题的内容（如页眉、页脚、正文片段、表格数据等）
-2. **保持结构完整**：确保层级关系合理，编号连续
-3. **语义一致性**：标题应该简洁明了，有明确的主题性
-4. **去除重复**：相同或相似的标题只保留一个
-5. **补全缺失层级**：如果发现2.4.7但缺少2.4，自动补全
-
-条目数据格式：
-- title: 标题文本
-- level: 层级深度(1-8)
-- 页码: 目标页码
-- 字体: 字体大小
-
-层级判断规则（支持8层结构）：
-- 第X章、第X部分 → 1级
-- X、X.Y、第X节 → 2级  
-- X.Y.Z → 3级
-- X.Y.Z.W → 4级
-- X.Y.Z.W.V → 5级
-- X.Y.Z.W.V.U → 6级
-- X.Y.Z.W.V.U.T → 7级
-- X.Y.Z.W.V.U.T.S → 8级
-
-请返回过滤和优化后的目录条目，保持JSON格式，**必须保留原始页码信息，支持最多8级标题**：
-```json
-[
-  {
-    "title": "标题文本",
-    "level": 层级数字,
-    "page_num": 页码数字
-  }
-]
-```
-
-只返回JSON数据，不要任何其他解释。"""
-    
-    def _format_toc_entries_for_llm(self, toc_entries: List[Dict]) -> str:
-        """格式化目录条目数据供大模型分析"""
-        formatted_lines = []
-        for i, entry in enumerate(toc_entries):
-            # 清理标题文本，移除可能导致问题的字符
-            title = str(entry.get('title', '')).replace('"', '\\"').replace('\n', ' ').replace('\r', ' ').strip()
-            # 限制标题长度
-            if len(title) > 100:
-                title = title[:100] + "..."
-            
-            line = f"[{i}] 标题: {title}"
-            line += f" | 层级: {entry.get('level', 1)}"
-            line += f" | 页码: {entry.get('target_page', entry.get('source_page', 0)) + 1}"  # 显示1基索引的页码
-            line += f" | 字体: {entry.get('font_size', 12.0)}"
-            formatted_lines.append(line)
-        
-        return "\n".join(formatted_lines)
-    
-    def _format_segment_for_llm(self, segment_entries: List[Dict], segment_num: int) -> str:
-        """格式化单个段落的目录条目数据供大模型分析"""
-        formatted_lines = [f"=== 段落 {segment_num} ==="]
-        
-        for i, entry in enumerate(segment_entries):
-            # 清理标题文本，移除可能导致问题的字符
-            title = str(entry.get('title', '')).replace('"', '\\"').replace('\n', ' ').replace('\r', ' ').strip()
-            # 限制标题长度
-            if len(title) > 100:
-                title = title[:100] + "..."
-            
-            line = f"[{i}] 标题: {title}"
-            line += f" | 层级: {entry.get('level', 1)}"
-            line += f" | 页码: {entry.get('target_page', entry.get('source_page', 0)) + 1}"  # 显示1基索引的页码
-            line += f" | 字体: {entry.get('font_size', 12.0)}"
-            formatted_lines.append(line)
-        
-        return "\n".join(formatted_lines)
-    
-    def _parse_llm_semantic_response(self, content: str, original_entries: List[Dict]) -> List[Dict]:
-        """解析大模型的语义过滤响应"""
-        try:
-            import json
-            import re
-            
-            print("开始解析LLM响应...")
-            
-            # 尝试提取JSON数据
-            json_match = re.search(r'```json\s*(\[.*?\])\s*```', content, re.DOTALL)
-            if json_match:
-                json_str = json_match.group(1)
-                print("从markdown代码块中提取到JSON")
-            else:
-                # 查找第一个[到最后一个]
-                start_idx = content.find('[')
-                end_idx = content.rfind(']')
-                if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
-                    json_str = content[start_idx:end_idx+1]
-                    print(f"从响应中提取JSON: 起始位置{start_idx}, 结束位置{end_idx}")
-                else:
-                    print("无法从响应中提取JSON数据")
-                    print(f"查找'['的位置: {start_idx}, 查找']'的位置: {end_idx}")
-                    return original_entries
-            
-            print(f"提取的JSON字符串长度: {len(json_str)}")
-            print(f"JSON字符串前200字符: {json_str[:200]}...")
-            
-            # 解析JSON
-            try:
-                filtered_data = json.loads(json_str)
-                print("JSON解析成功")
-            except json.JSONDecodeError as json_error:
-                print(f"JSON解析失败: {json_error}")
-                print(f"尝试解析的JSON: {json_str[:500]}...")
-                return original_entries
-            
-            if not isinstance(filtered_data, list):
-                print("响应数据不是列表格式")
-                return original_entries
-            
-            # 创建原始条目的标题到条目的映射
-            original_dict = {entry["title"]: entry for entry in original_entries}
-            
-            # 转换为标准格式，保留原始页面信息
-            filtered_entries = []
-            kept_titles = set()  # 记录保留的标题
-            
-            for item in filtered_data:
-                if isinstance(item, dict):
-                    title = item.get("title", "")
-                    kept_titles.add(title)
-                    
-                    # 从原始条目中查找匹配的条目来获取正确的页面信息
-                    original_entry = original_dict.get(title)
-                    if original_entry:
-                        # 保留原始条目的所有信息，只更新level如果大模型提供了不同的值
-                        entry = original_entry.copy()
-                        if "level" in item:
-                            entry["level"] = item["level"]
-                        # 如果大模型提供了页码信息，优先使用它
-                        if "page_num" in item:
-                            page_num = item["page_num"] - 1  # 转换为0基索引
-                            entry["target_page"] = page_num
-                            # 如果页码发生了变化，也更新source_page
-                            if page_num != original_entry.get("target_page", original_entry.get("source_page", 0)):
-                                entry["source_page"] = page_num
-                    else:
-                        # 如果找不到匹配的原始条目，使用大模型提供的信息
-                        page_num = item.get("page_num", 1) - 1  # 转换为0基索引
-                        entry = {
-                            "title": title,
-                            "level": item.get("level", 1),
-                            "source_page": page_num,
-                            "target_page": page_num,
-                            "font_size": item.get("font_size", 12.0),
-                            "font_flags": 0,
-                            "has_number": False,
-                            "is_numbered_sequence": False
-                        }
-                    
-                    filtered_entries.append(entry)
-            
-            # 统计被过滤掉的条目（用标题+页码联合精确匹配）
-            def get_title_page_key(entry):
-                return (entry["title"].strip(), entry.get("target_page", entry.get("source_page", 0)))
-            
-            llm_title_page_set = set(get_title_page_key(e) for e in filtered_entries)
-            filtered_out_entries = []
-            for original_entry in original_entries:
-                if get_title_page_key(original_entry) not in llm_title_page_set:
-                    filtered_out_entries.append(original_entry)
-            
-            # 打印过滤统计
-            print(f"\n📊 LLM语义过滤统计:")
-            print(f"✅ 保留条目: {len(filtered_entries)}")
-            print(f"❌ 过滤原始条目: {len(filtered_out_entries)}")
-            
-            if filtered_out_entries:
-                print(f"\n🗑️ 被大模型过滤掉的原始条目:")
-                for i, entry in enumerate(filtered_out_entries, 1):
-                    page_info = entry.get('target_page', entry.get('source_page', 0)) + 1
-                    font_info = entry.get('font_size', 0)
-                    print(f"  {i:2d}. [{page_info:3d}页] '{entry['title'][:60]}{'...' if len(entry['title']) > 60 else ''}' (字体:{font_info:.1f})")
-                print()
-            
-            return filtered_entries
-            
-        except Exception as e:
-            print(f"解析大模型响应失败: {e}")
-            return original_entries
-    
-    def _save_semantic_filter_debug(self, original_entries: List[Dict], filtered_entries: List[Dict], llm_response: str):
-        """保存语义过滤的调试信息"""
-        try:
-            import json
-            
-            # 计算被过滤掉的条目
-            filtered_titles = {entry["title"] for entry in filtered_entries}
-            filtered_out_entries = [entry for entry in original_entries if entry["title"] not in filtered_titles]
-            
-            debug_data = {
-                "original_count": len(original_entries),
-                "filtered_count": len(filtered_entries),
-                "filtered_out_count": len(filtered_out_entries),
-                "original_entries": original_entries,
-                "filtered_entries": filtered_entries,
-                "filtered_out_entries": filtered_out_entries,
-                "llm_response": llm_response
-            }
-            
-            with open("semantic_filter_debug.json", "w", encoding="utf-8") as f:
-                json.dump(debug_data, f, ensure_ascii=False, indent=2)
-            print("已保存语义过滤调试信息到 semantic_filter_debug.json")
-        except Exception as e:
-            print(f"保存调试信息失败: {e}")
-
     def add_bookmarks(self, toc_entries: List[Dict]) -> Tuple[bool, Dict]:
         """
         添加书签到PDF
@@ -2776,13 +2463,6 @@ class PDFBookmarkTool:
             pre_filtered_entries = self.filter_table_and_prefix_entries(toc_entries)
             after_pre_filter = len(pre_filtered_entries)
             print(f"预过滤完成，剩余 {after_pre_filter} 个条目")
-            
-            # 使用大模型进行语义过滤和结构优化
-            # if self.enable_llm:
-            #     print("步骤2: 大模型语义过滤...")
-            #     semantic_filtered_entries = self.llm_semantic_filter(pre_filtered_entries)
-            #     after_semantic_filter = len(semantic_filtered_entries)
-            #     print(f"语义过滤完成，剩余 {after_semantic_filter} 个条目")
             
             # 规范化层级结构
             print("步骤3: 规范化层级结构...")
@@ -3562,6 +3242,11 @@ class PDFBookmarkTool:
             if not self._is_potential_title_text(text):
                 continue
             
+            # 数字开头过滤检查
+            if self._should_filter_by_numeric_start(text):
+                print(f"    跳过非数字开头的文本: '{text[:30]}...'")
+                continue
+            
             # X坐标过滤
             if self.enable_x_coordinate_filter and self.title_x_coordinate is not None:
                 x_diff = abs(x_coordinate - self.title_x_coordinate)
@@ -3642,6 +3327,38 @@ class PDFBookmarkTool:
         
         return sorted_list
     
+    def _validate_numeric_hierarchy_relationship(self, current_title: str, potential_parent_title: str) -> bool:
+        """
+        当require_numeric_start为true时，根据数字序列验证层级关系
+        
+        Args:
+            current_title: 当前标题
+            potential_parent_title: 潜在父级标题
+            
+        Returns:
+            bool: 是否为有效的父子关系
+        """
+        if not self.require_numeric_start:
+            return True  # 如果未启用数字开头要求，则不进行数字序列验证
+        
+        current_numbers = self.extract_number_sequence(current_title)
+        parent_numbers = self.extract_number_sequence(potential_parent_title)
+        
+        # 如果任一标题没有数字序列，使用默认字体大小层级判断
+        if not current_numbers or not parent_numbers:
+            return False
+        
+        # 检查是否为有效的父子关系
+        # 规则1: 子级的数字序列应该比父级多一层
+        if len(current_numbers) != len(parent_numbers) + 1:
+            return False
+            
+        # 规则2: 子级的前n-1层数字应该与父级完全匹配
+        if current_numbers[:-1] != parent_numbers:
+            return False
+            
+        return True
+    
     def _build_hierarchy_tree(self, data_list: List[Dict]) -> List[Dict]:
         """
         步骤4: 根据字体大小对dataList3构建出有层级的treeList
@@ -3701,24 +3418,30 @@ class PDFBookmarkTool:
             if level == 1:
                 # 顶级节点
                 node['parent_index'] = -1
+                tree_list.append(node)
             else:
                 # 查找最近的较小层级作为父节点
-                parent_found = False
+                # parent_found = False
                 for j in range(len(tree_list) - 1, -1, -1):
-                    if tree_list[j]['level'] < level:
+                    if tree_list[j]['level'] < level and self.require_numeric_start and not self._validate_numeric_hierarchy_relationship(node['title'], tree_list[j]['title']):
+                        break
+                    if tree_list[j]['level'] < level or (self.require_numeric_start and self._validate_numeric_hierarchy_relationship(node['title'], tree_list[j]['title'])):
                         # 找到父节点
                         node['parent_index'] = j
-                        parent_found = True
+                        if tree_list[j]['level'] == level and (self.require_numeric_start and self._validate_numeric_hierarchy_relationship(node['title'], tree_list[j]['title'])):
+                            node['level'] = level + 1
+                        # parent_found = True
+                        tree_list.append(node)
                         print(f"    节点 '{node['title'][:20]}...' (层级{level}) 的父节点是 '{tree_list[j]['title'][:20]}...' (层级{tree_list[j]['level']})")
                         break
                 
-                if not parent_found:
-                    # 没有找到合适的父节点，设为顶级节点
-                    node['parent_index'] = -1
-                    node['level'] = 1
-                    print(f"    节点 '{node['title'][:20]}...' 没有找到父节点，设为顶级节点")
+                # if not parent_found:
+                #     # 没有找到合适的父节点，设为顶级节点
+                #     node['parent_index'] = -1
+                #     node['level'] = 1
+                #     print(f"    节点 '{node['title'][:20]}...' 没有找到父节点，设为顶级节点")
             
-            tree_list.append(node)
+            # tree_list.append(node)
         
         # 验证并修复层级连续性 - 这个步骤是必需的！
         tree_list = self._normalize_hierarchy_levels(tree_list)
@@ -3992,6 +3715,59 @@ class PDFBookmarkTool:
         
         return True  # 默认认为可能是标题，让后续步骤进一步过滤
 
+    def _has_numeric_start(self, text: str) -> bool:
+        """
+        检查文本是否以数字开头
+        
+        Args:
+            text: 文本内容
+            
+        Returns:
+            bool: 是否以数字开头
+        """
+        text = text.strip()
+        if not text:
+            return False
+            
+        # 检查各种数字开头的模式
+        numeric_patterns = [
+            r'^\d+\.',          # 1. 2. 3.
+            r'^\d+\.\d+',       # 1.1 1.2 1.3
+            r'^\d+\s',          # 1 2 3 (后面跟空格)
+            r'^\d+、',          # 1、2、3、
+            r'^\(\d+\)',        # (1) (2) (3)
+            r'^第\d+[章节部分]',  # 第1章 第2节 第3部分
+        ]
+        
+        for pattern in numeric_patterns:
+            if re.match(pattern, text):
+                return True
+        
+        return False
+
+    def _should_filter_by_numeric_start(self, text: str) -> bool:
+        """
+        判断是否应该因为数字开头过滤掉某个文本
+        
+        Args:
+            text: 文本内容
+            
+        Returns:
+            bool: 是否应该过滤掉
+        """
+        # 如果没有启用数字开头过滤，则不过滤
+        if not self.require_numeric_start:
+            return False
+        
+        # 如果文本在包含标题列表中，则不过滤（包含标题不受数字开头过滤影响）
+        if self.include_titles:
+            for include_title in self.include_titles:
+                if include_title.strip() in text or text in include_title.strip():
+                    return False
+        
+        # 如果启用了数字开头过滤，且文本不以数字开头，则过滤掉
+        return not self._has_numeric_start(text)
+
 
 def main():
     parser = argparse.ArgumentParser(description="PDF书签工具")
@@ -4007,13 +3783,13 @@ def main():
     parser.add_argument("--no-level-info", action="store_true", help="不包含层级信息")
     
     # 书签创建相关参数
-    parser.add_argument("--disable-llm", action="store_true", help="禁用大模型语义过滤")
     parser.add_argument("--enable-enhanced-filter", action="store_true", help="启用增强本地过滤")
     parser.add_argument("--disable-font-filter", action="store_true", help="禁用字体大小过滤")
     parser.add_argument("--font-threshold", type=float, help="字体大小阈值")
     parser.add_argument("--debug", action="store_true", help="启用调试模式")
     parser.add_argument("--disable-x-filter", action="store_true", help="禁用X坐标过滤")
     parser.add_argument("--x-tolerance", type=float, default=5.0, help="X坐标容差(像素)")
+    parser.add_argument("--require-numeric-start", action="store_true", help="书签必须以数字开头")
     parser.add_argument("--exclude-titles", type=str, help="排除的标题列表(JSON格式)")
     parser.add_argument("--include-titles", type=str, help="包含的标题列表(JSON格式)")
     
@@ -4028,7 +3804,6 @@ def main():
         tool = PDFBookmarkTool(args.input_file)
         
         # 设置工具选项
-        tool.enable_llm = not args.disable_llm
         tool.enable_enhanced_filter = args.enable_enhanced_filter
         tool.enable_debug = args.debug
         tool.enable_x_coordinate_filter = not args.disable_x_filter
@@ -4047,10 +3822,8 @@ def main():
         if args.include_titles:
             tool.include_titles = safe_json_parse(args.include_titles, "include_titles")
         
-        # 如果禁用大模型且未明确禁用增强过滤，则自动启用增强过滤
-        if not tool.enable_llm and not args.enable_enhanced_filter:
-            print("大模型已禁用，自动启用增强本地过滤")
-            tool.enable_enhanced_filter = True
+        # 设置标题格式过滤选项
+        tool.require_numeric_start = args.require_numeric_start
         
         if args.extract_only:
             # 书签提取模式
