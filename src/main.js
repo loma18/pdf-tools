@@ -86,6 +86,25 @@ ipcMain.handle("select-output-file", async () => {
   return null;
 });
 
+ipcMain.handle("select-bookmark-file", async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: "选择书签文件",
+    filters: [
+      { name: "书签文件", extensions: ["json", "txt", "csv"] },
+      { name: "JSON文件", extensions: ["json"] },
+      { name: "文本文件", extensions: ["txt"] },
+      { name: "CSV文件", extensions: ["csv"] },
+      { name: "所有文件", extensions: ["*"] },
+    ],
+    properties: ["openFile"],
+  });
+
+  if (!result.canceled && result.filePaths.length > 0) {
+    return result.filePaths[0];
+  }
+  return null;
+});
+
 ipcMain.handle(
   "select-extract-output-file",
   async (event, extension = ".json") => {
@@ -159,6 +178,9 @@ ipcMain.handle("process-pdf", async (event, options) => {
     }
     if (options.requireNumericStart) {
       args.push("--require-numeric-start");
+    }
+    if (options.bookmarkFilePath) {
+      args.push("--bookmark-file", options.bookmarkFilePath);
     }
 
     console.log("Spawning Python process with args:", args);

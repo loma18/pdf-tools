@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // 文件选择相关
   selectInputFile: () => ipcRenderer.invoke("select-input-file"),
   selectOutputFile: () => ipcRenderer.invoke("select-output-file"),
+  selectBookmarkFile: () => ipcRenderer.invoke("select-bookmark-file"),
   selectExtractOutputFile: (extension) =>
     ipcRenderer.invoke("select-extract-output-file", extension),
 

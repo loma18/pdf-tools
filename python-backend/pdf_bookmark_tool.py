@@ -3771,6 +3771,290 @@ class PDFBookmarkTool:
         # 如果启用了数字开头过滤，且文本不以数字开头，则过滤掉
         return not self._has_numeric_start(text)
 
+    def parse_bookmark_file(self, bookmark_file_path: str) -> List[Dict]:
+        """
+        解析书签文件，支持JSON、TXT、CSV格式
+        
+        Args:
+            bookmark_file_path: 书签文件路径
+        
+        Returns:
+            解析后的书签列表，格式: [{'title': str, 'level': int, 'page': int}, ...]
+        """
+        if not os.path.exists(bookmark_file_path):
+            print(f"书签文件不存在: {bookmark_file_path}")
+            return []
+        
+        file_ext = os.path.splitext(bookmark_file_path)[1].lower()
+        
+        try:
+            if file_ext == '.json':
+                return self._parse_json_bookmark_file(bookmark_file_path)
+            elif file_ext == '.txt':
+                return self._parse_txt_bookmark_file(bookmark_file_path)
+            elif file_ext == '.csv':
+                return self._parse_csv_bookmark_file(bookmark_file_path)
+            else:
+                print(f"不支持的书签文件格式: {file_ext}")
+                return []
+        except Exception as e:
+            print(f"解析书签文件时发生错误: {str(e)}")
+            return []
+
+    def _parse_json_bookmark_file(self, file_path: str) -> List[Dict]:
+        """解析JSON格式的书签文件"""
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        bookmarks = []
+        for item in data:
+            if 'title' in item:
+                bookmark = {
+                    'title': item['title'],
+                    'level': item.get('level', 1),
+                    'page': item.get('page', 1)
+                }
+                bookmarks.append(bookmark)
+        
+        return bookmarks
+
+    def _parse_txt_bookmark_file(self, file_path: str) -> List[Dict]:
+        """解析TXT格式的书签文件"""
+        bookmarks = []
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith('=') or line == 'PDF书签列表':
+                continue
+            
+            # 计算缩进层级
+            original_line = line
+            level = 1
+            while line.startswith('  '):
+                level += 1
+                line = line[2:]
+            
+            # 提取标题和信息
+            title = line
+            page = 1
+            
+            # 尝试从括号中提取页面信息
+            if '(' in title and ')' in title:
+                import re
+                match = re.search(r'\(.*?页面\s*(\d+).*?\)', title)
+                if match:
+                    page = int(match.group(1))
+                    title = re.sub(r'\s*\(.*?\)', '', title).strip()
+            
+            if title:
+                bookmark = {
+                    'title': title,
+                    'level': level,
+                    'page': page
+                }
+                bookmarks.append(bookmark)
+        
+        return bookmarks
+
+    def _parse_csv_bookmark_file(self, file_path: str) -> List[Dict]:
+        """解析CSV格式的书签文件"""
+        import csv
+        bookmarks = []
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if 'title' in row and row['title']:
+                    bookmark = {
+                        'title': row['title'],
+                        'level': int(row.get('level', 1)) if row.get('level') else 1,
+                        'page': int(row.get('page', 1)) if row.get('page') else 1
+                    }
+                    bookmarks.append(bookmark)
+        
+        return bookmarks
+
+    def match_bookmarks_with_pdf_text(self, bookmark_titles: List[str], fuzzy_match: bool = True) -> List[Dict]:
+        """
+        根据书签标题列表在PDF中进行匹配
+        
+        Args:
+            bookmark_titles: 需要匹配的书签标题列表
+            fuzzy_match: 是否启用模糊匹配
+        
+        Returns:
+            匹配到的书签条目列表
+        """
+        print(f"开始匹配 {len(bookmark_titles)} 个书签标题...")
+        
+        # 获取所有页面的文本信息
+        all_text_blocks = []
+        for page_num in range(len(self.doc)):
+            page_text_blocks = self.extract_text_with_font_info(page_num)
+            for block in page_text_blocks:
+                block['page'] = page_num + 1
+            all_text_blocks.extend(page_text_blocks)
+        
+        matched_bookmarks = []
+        
+        for title in bookmark_titles:
+            matched_block = self._find_matching_text_block(title, all_text_blocks, fuzzy_match)
+            if matched_block:
+                matched_bookmarks.append(matched_block)
+                print(f"✅ 匹配成功: '{title}' -> 页面 {matched_block['page']}")
+            else:
+                print(f"❌ 未找到匹配: '{title}'")
+        
+        print(f"匹配完成，成功匹配 {len(matched_bookmarks)}/{len(bookmark_titles)} 个书签")
+        return matched_bookmarks
+
+    def _find_matching_text_block(self, target_title: str, text_blocks: List[Dict], fuzzy_match: bool = True) -> Optional[Dict]:
+        """
+        在文本块中查找匹配的标题
+        
+        Args:
+            target_title: 目标标题
+            text_blocks: 文本块列表
+            fuzzy_match: 是否启用模糊匹配
+        
+        Returns:
+            匹配到的文本块，包含书签信息
+        """
+        target_clean = self._clean_title_for_matching(target_title)
+        
+        # 优先进行精确匹配
+        for block in text_blocks:
+            block_text = block.get('text', '').strip()
+            block_clean = self._clean_title_for_matching(block_text)
+            
+            if block_clean == target_clean:
+                return {
+                    'title': target_title,  # 使用原始标题
+                    'page': block['page'],
+                    'level': 1,  # 默认层级，后续会根据书签文件调整
+                    'font_size': block.get('size', 12),
+                    'x': block.get('x', 0),
+                    'y': block.get('y', 0)
+                }
+        
+        # 如果启用模糊匹配
+        if fuzzy_match:
+            best_match = None
+            best_similarity = 0.8  # 相似度阈值
+            
+            for block in text_blocks:
+                block_text = block.get('text', '').strip()
+                similarity = self._calculate_text_similarity(target_clean, self._clean_title_for_matching(block_text))
+                
+                if similarity > best_similarity:
+                    best_similarity = similarity
+                    best_match = block
+            
+            if best_match:
+                return {
+                    'title': target_title,  # 使用原始标题
+                    'page': best_match['page'],
+                    'level': 1,  # 默认层级
+                    'font_size': best_match.get('size', 12),
+                    'x': best_match.get('x', 0),
+                    'y': best_match.get('y', 0)
+                }
+        
+        return None
+
+    def _clean_title_for_matching(self, title: str) -> str:
+        """清理标题用于匹配"""
+        import re
+        # 移除额外的空白字符
+        title = re.sub(r'\s+', ' ', title.strip())
+        # 移除常见的标点符号
+        title = re.sub(r'[。，、；：！？""''（）【】\[\](){}]', '', title)
+        return title.lower()
+
+    def _calculate_text_similarity(self, text1: str, text2: str) -> float:
+        """计算两个文本的相似度"""
+        # 简单的相似度计算，基于公共子串
+        if not text1 or not text2:
+            return 0.0
+        
+        # 计算最长公共子序列长度
+        def lcs_length(s1, s2):
+            m, n = len(s1), len(s2)
+            dp = [[0] * (n + 1) for _ in range(m + 1)]
+            
+            for i in range(1, m + 1):
+                for j in range(1, n + 1):
+                    if s1[i-1] == s2[j-1]:
+                        dp[i][j] = dp[i-1][j-1] + 1
+                    else:
+                        dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+            
+            return dp[m][n]
+        
+        lcs_len = lcs_length(text1, text2)
+        max_len = max(len(text1), len(text2))
+        
+        return lcs_len / max_len if max_len > 0 else 0.0
+
+    def process_with_bookmark_file(self, bookmark_file_path: str, output_path: Optional[str] = None) -> bool:
+        """
+        使用书签文件进行精确匹配处理
+        
+        Args:
+            bookmark_file_path: 书签文件路径
+            output_path: 输出文件路径
+        
+        Returns:
+            处理是否成功
+        """
+        print(f"使用书签文件进行处理: {bookmark_file_path}")
+        
+        # 确保PDF文档已打开
+        if not self.open_pdf():
+            print("❌ 无法打开PDF文件")
+            return False
+        
+        # 解析书签文件
+        bookmark_data = self.parse_bookmark_file(bookmark_file_path)
+        if not bookmark_data:
+            print("书签文件为空或解析失败")
+            return False
+        
+        print(f"从书签文件中读取到 {len(bookmark_data)} 个书签条目")
+        
+        # 提取标题列表进行匹配
+        bookmark_titles = [item['title'] for item in bookmark_data]
+        matched_bookmarks = self.match_bookmarks_with_pdf_text(bookmark_titles)
+        
+        if not matched_bookmarks:
+            print("未找到任何匹配的书签")
+            return False
+        
+        # 将书签文件中的层级信息应用到匹配结果
+        title_to_level = {item['title']: item['level'] for item in bookmark_data}
+        for bookmark in matched_bookmarks:
+            if bookmark['title'] in title_to_level:
+                bookmark['level'] = title_to_level[bookmark['title']]
+        
+        # 按页面和Y坐标排序
+        matched_bookmarks.sort(key=lambda x: (x['page'], -x.get('y', 0)))
+        
+        # 添加书签到PDF
+        success, result = self.add_bookmarks(matched_bookmarks)
+        if success:
+            # 保存PDF
+            if self.save_pdf(output_path):
+                print(f"✅ 基于书签文件的处理完成，共添加 {len(matched_bookmarks)} 个书签")
+                return True
+            else:
+                print("❌ 保存PDF文件失败")
+                return False
+        else:
+            print(f"❌ 添加书签失败: {result.get('error', '未知错误')}")
+            return False
+
 
 def main():
     parser = argparse.ArgumentParser(description="PDF书签工具")
@@ -3794,6 +4078,7 @@ def main():
     parser.add_argument("--require-numeric-start", action="store_true", help="书签必须以数字开头")
     parser.add_argument("--exclude-titles", type=str, help="排除的标题列表(JSON格式)")
     parser.add_argument("--include-titles", type=str, help="包含的标题列表(JSON格式)")
+    parser.add_argument("--bookmark-file", type=str, help="书签文件路径(JSON/TXT/CSV格式)")
     
     args = parser.parse_args()
     
@@ -3868,7 +4153,7 @@ def main():
                 sys.exit(1)
         
         else:
-            # 书签创建模式 - 统一使用新的自动书签处理流程
+            # 书签创建模式
             print(f"开始处理PDF文件: {args.input_file}")
             
             # 确定输出文件路径
@@ -3878,9 +4163,15 @@ def main():
                 base_name = os.path.splitext(args.input_file)[0]
                 output_path = f"{base_name}_with_bookmarks.pdf"
             
-            # 使用新的自动书签处理流程
-            print("使用自动书签处理流程...")
-            success = tool.new_auto_bookmark_process(output_path)
+            # 根据是否提供书签文件选择处理方式
+            if args.bookmark_file:
+                # 使用书签文件进行精确匹配
+                print(f"使用书签文件进行精确匹配: {args.bookmark_file}")
+                success = tool.process_with_bookmark_file(args.bookmark_file, output_path)
+            else:
+                # 使用自动书签处理流程
+                print("使用自动书签处理流程...")
+                success = tool.new_auto_bookmark_process(output_path)
             
             if success:
                 print(f"✅ PDF书签添加完成！")

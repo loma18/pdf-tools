@@ -37,6 +37,18 @@
                         <button id="browse-output" class="btn btn-secondary">浏览...</button>
                     </div>
                 </div>
+
+                <div class="file-input-group">
+                    <label for="bookmark-file">书签文件（可选）：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="bookmark-file" placeholder="选择书签文件进行精确匹配...">
+                        <button id="browse-bookmark" class="btn btn-secondary">浏览...</button>
+                        <button id="clear-bookmark" class="btn btn-secondary">清空</button>
+                    </div>
+                    <div class="help-text" style="margin-top: 8px; font-size: 12px; color: #666;">
+                        支持 JSON、TXT、CSV 格式的书签文件。提供后将根据文件中的标题进行精确匹配，而非自动识别。
+                    </div>
+                </div>
             </div>
 
             <div class="options-section">

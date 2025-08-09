@@ -19,6 +19,9 @@ class PDFBookmarkApp {
     this.outputFile = document.getElementById("output-file");
     this.browseInput = document.getElementById("browse-input");
     this.browseOutput = document.getElementById("browse-output");
+    this.bookmarkFile = document.getElementById("bookmark-file");
+    this.browseBookmark = document.getElementById("browse-bookmark");
+    this.clearBookmark = document.getElementById("clear-bookmark");
     this.enableFontFilter = document.getElementById("enable-font-filter");
     this.fontThreshold = document.getElementById("font-threshold");
     this.enableDebug = document.getElementById("enable-debug");
@@ -78,7 +81,13 @@ class PDFBookmarkApp {
     // 自动加书签功能事件
     this.browseInput.addEventListener("click", () => this.selectInputFile());
     this.browseOutput.addEventListener("click", () => this.selectOutputFile());
-    
+    this.browseBookmark.addEventListener("click", () =>
+      this.selectBookmarkFile()
+    );
+    this.clearBookmark.addEventListener("click", () =>
+      this.clearBookmarkFile()
+    );
+
     this.startProcess.addEventListener("click", () => this.startProcessing());
     this.stopProcess.addEventListener("click", () => this.stopProcessing());
     this.openFolder.addEventListener("click", () => this.openOutputFolder());
@@ -131,7 +140,9 @@ class PDFBookmarkApp {
     }
 
     if (this.clearExtractLog) {
-      this.clearExtractLog.addEventListener("click", () => this.clearExtractLogOutput());
+      this.clearExtractLog.addEventListener("click", () =>
+        this.clearExtractLogOutput()
+      );
     }
 
     // 文件输入变化事件
@@ -149,20 +160,28 @@ class PDFBookmarkApp {
   initRealtimeLogListeners() {
     // 监听实时处理日志
     this.processLogHandler = (event, logData) => {
-      const { message, timestamp, type = 'info' } = logData;
-      
+      const { message, timestamp, type = "info" } = logData;
+
       // 判断日志类型
       let logType = type;
-      if (message.includes("✅") || message.includes("成功") || message.includes("完成")) {
+      if (
+        message.includes("✅") ||
+        message.includes("成功") ||
+        message.includes("完成")
+      ) {
         logType = "success";
-      } else if (message.includes("❌") || message.includes("失败") || message.includes("错误")) {
+      } else if (
+        message.includes("❌") ||
+        message.includes("失败") ||
+        message.includes("错误")
+      ) {
         logType = "error";
       } else if (message.includes("⚠️") || message.includes("警告")) {
         logType = "warning";
       }
-      
+
       this.appendLog(message, logType);
-      
+
       // 简单的进度估算（基于关键词）
       if (message.includes("步骤1") || message.includes("提取文本")) {
         this.updateProgress(20, "正在提取文本...");
@@ -179,20 +198,28 @@ class PDFBookmarkApp {
 
     // 监听实时提取日志
     this.extractLogHandler = (event, logData) => {
-      const { message, timestamp, type = 'info' } = logData;
-      
+      const { message, timestamp, type = "info" } = logData;
+
       // 判断日志类型
       let logType = type;
-      if (message.includes("✅") || message.includes("成功") || message.includes("完成")) {
+      if (
+        message.includes("✅") ||
+        message.includes("成功") ||
+        message.includes("完成")
+      ) {
         logType = "success";
-      } else if (message.includes("❌") || message.includes("失败") || message.includes("错误")) {
+      } else if (
+        message.includes("❌") ||
+        message.includes("失败") ||
+        message.includes("错误")
+      ) {
         logType = "error";
       } else if (message.includes("⚠️") || message.includes("警告")) {
         logType = "warning";
       }
-      
+
       this.appendExtractLog(message, logType);
-      
+
       // 简单的进度估算
       if (message.includes("打开PDF") || message.includes("分析")) {
         this.updateExtractProgress(30, "正在分析PDF...");
@@ -247,6 +274,23 @@ class PDFBookmarkApp {
     }
   }
 
+  async selectBookmarkFile() {
+    try {
+      const filePath = await window.electronAPI.selectBookmarkFile();
+      if (filePath) {
+        this.bookmarkFile.value = filePath;
+        this.appendLog(`已选择书签文件: ${filePath}`, "info");
+      }
+    } catch (error) {
+      this.appendLog("选择书签文件失败: " + error.message, "error");
+    }
+  }
+
+  clearBookmarkFile() {
+    this.bookmarkFile.value = "";
+    this.appendLog("已清空书签文件", "info");
+  }
+
   onInputFileChange() {
     // 根据输入文件自动生成输出文件名
     if (this.inputFile.value) {
@@ -279,6 +323,7 @@ class PDFBookmarkApp {
       const options = {
         inputPath: this.inputFile.value,
         outputPath: this.outputFile.value,
+        bookmarkFilePath: this.bookmarkFile.value || null,
         enableFontFilter: this.enableFontFilter.checked,
         fontThreshold: this.fontThreshold.value
           ? parseFloat(this.fontThreshold.value)
@@ -533,6 +578,8 @@ class PDFBookmarkApp {
     this.stopProcess.disabled = !isProcessing;
     this.browseInput.disabled = isProcessing;
     this.browseOutput.disabled = isProcessing;
+    this.browseBookmark.disabled = isProcessing;
+    this.clearBookmark.disabled = isProcessing;
     this.openFolder.disabled = isProcessing || !this.outputFile.value;
   }
 
