@@ -291,6 +291,27 @@
                 <span id="app-version">v1.0.0</span>
                 <span class="separator">|</span>
                 <span>PDF书签工具</span>
+                <span class="separator">|</span>
+                <button id="diagnose-env" class="btn btn-link">环境诊断</button>
+            </div>
+        </div>
+
+        <!-- 诊断信息模态框 -->
+        <div id="diagnostic-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>环境诊断信息</h3>
+                    <span class="modal-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="diagnostic-content">
+                        <p>正在检查环境...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="copyDiagnostics()">复制诊断信息</button>
+                    <button class="btn btn-primary" onclick="closeDiagnosticModal()">关闭</button>
+                </div>
             </div>
         </div>
     </div>

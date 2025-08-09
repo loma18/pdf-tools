@@ -1,7 +1,7 @@
 {
   "name": "pdf-bookmark-tool",
-  "version": "3.0.0",
-  "description": "PDF自动书签工具 - 智能识别PDF目录结构，自动添加多层级书签",
+  "version": "3.2.0",
+  "description": "PDF自动书签工具 - 智能识别PDF目录结构，自动添加多层级书签，内置Python环境",
   "main": "src/main.js",
   "homepage": "./",
   "author": "PDF Tools Team",
@@ -15,7 +15,9 @@
     "build-linux": "electron-builder --linux",
     "dist": "npm run build",
     "pack": "electron-builder --dir",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "setup-python": "node scripts/setup-python.js",
+    "build-with-python": "npm run setup-python && npm run build"
   },
   "devDependencies": {
     "electron": "^28.0.0",
@@ -23,7 +25,8 @@
   },
   "dependencies": {
     "axios": "^1.6.0",
-    "electron-store": "^8.1.0"
+    "electron-store": "^8.1.0",
+    "@bjia56/portable-python-3.11": "^0.1.26"
   },
   "build": {
     "appId": "com.pdftools.bookmark",
@@ -46,6 +49,10 @@
       {
         "from": "python-backend/",
         "to": "python-backend/"
+      },
+      {
+        "from": "node_modules/@bjia56/portable-python-3.11/",
+        "to": "portable-python/"
       }
     ],
     "win": {

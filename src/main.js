@@ -6,6 +6,279 @@ const fs = require("fs");
 let mainWindow;
 let pythonProcess = null;
 
+// 获取嵌入式Python路径
+function getEmbeddedPythonPath() {
+  try {
+    // 在开发环境中，直接使用require
+    if (process.env.NODE_ENV === 'development' || !app.isPackaged) {
+      const portablePython = require("@bjia56/portable-python-3.11");
+      return portablePython;
+    }
+    
+    // 在打包环境中，从extraResources加载
+    const portablePythonDir = path.join(process.resourcesPath, "portable-python");
+    
+    // 根据平台确定可执行文件路径
+    let pythonExe;
+    if (process.platform === 'win32') {
+      // Windows: 查找python.exe
+      const candidates = fs.readdirSync(portablePythonDir).filter(dir => 
+        dir.includes('python') && dir.includes('windows')
+      );
+      if (candidates.length > 0) {
+        pythonExe = path.join(portablePythonDir, candidates[0], 'bin', 'python.exe');
+      }
+    } else if (process.platform === 'darwin') {
+      // macOS: 查找python可执行文件
+      const candidates = fs.readdirSync(portablePythonDir).filter(dir => 
+        dir.includes('python') && dir.includes('macos')
+      );
+      if (candidates.length > 0) {
+        pythonExe = path.join(portablePythonDir, candidates[0], 'bin', 'python3');
+      }
+    } else {
+      // Linux: 查找python可执行文件
+      const candidates = fs.readdirSync(portablePythonDir).filter(dir => 
+        dir.includes('python') && dir.includes('linux')
+      );
+      if (candidates.length > 0) {
+        pythonExe = path.join(portablePythonDir, candidates[0], 'bin', 'python3');
+      }
+    }
+    
+    if (pythonExe && fs.existsSync(pythonExe)) {
+      return pythonExe;
+    }
+    
+    return null;
+  } catch (error) {
+    console.log("Embedded Python not available:", error.message);
+    return null;
+  }
+}
+
+// 获取Python后端路径的函数
+function getPythonBackendPath() {
+  // 在开发环境中
+  if (process.env.NODE_ENV === 'development' || !app.isPackaged) {
+    return path.join(__dirname, "../python-backend");
+  }
+  
+  // 在打包后的应用中，Python文件位于extraResources中
+  return path.join(process.resourcesPath, "python-backend");
+}
+
+// 获取Python脚本路径
+function getPythonScriptPath() {
+  return path.join(getPythonBackendPath(), "pdf_bookmark_tool.py");
+}
+
+// 检查Python是否可用（优先使用嵌入式Python）
+function checkPythonAvailability() {
+  return new Promise((resolve) => {
+    // 首先尝试嵌入式Python
+    const embeddedPython = getEmbeddedPythonPath();
+    if (embeddedPython && fs.existsSync(embeddedPython)) {
+      console.log("Using embedded Python:", embeddedPython);
+      
+      // 验证嵌入式Python是否可以正常工作
+      const checkProcess = spawn(embeddedPython, ['--version'], { 
+        stdio: 'pipe',
+        shell: false 
+      });
+      
+      checkProcess.on('close', (code) => {
+        if (code === 0) {
+          resolve({ command: embeddedPython, type: 'embedded' });
+        } else {
+          console.log("Embedded Python validation failed, trying system Python");
+          checkSystemPython(resolve);
+        }
+      });
+      
+      checkProcess.on('error', (error) => {
+        console.log("Embedded Python error:", error.message);
+        checkSystemPython(resolve);
+      });
+    } else {
+      console.log("Embedded Python not found, trying system Python");
+      checkSystemPython(resolve);
+    }
+  });
+}
+
+// 检查系统Python
+function checkSystemPython(resolve) {
+  const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+  const checkProcess = spawn(pythonCmd, ['--version'], { 
+    stdio: 'pipe',
+    shell: true 
+  });
+  
+  checkProcess.on('close', (code) => {
+    if (code === 0) {
+      resolve({ command: pythonCmd, type: 'system' });
+    } else {
+      // 尝试另一个命令
+      const altCmd = pythonCmd === 'python' ? 'python3' : 'python';
+      const altProcess = spawn(altCmd, ['--version'], { 
+        stdio: 'pipe',
+        shell: true 
+      });
+      
+      altProcess.on('close', (altCode) => {
+        resolve(altCode === 0 ? { command: altCmd, type: 'system' } : null);
+      });
+      
+      altProcess.on('error', () => {
+        resolve(null);
+      });
+    }
+  });
+  
+  checkProcess.on('error', () => {
+    // 尝试另一个命令
+    const altCmd = pythonCmd === 'python' ? 'python3' : 'python';
+    const altProcess = spawn(altCmd, ['--version'], { 
+      stdio: 'pipe',
+      shell: true 
+    });
+    
+    altProcess.on('close', (altCode) => {
+      resolve(altCode === 0 ? { command: altCmd, type: 'system' } : null);
+    });
+    
+    altProcess.on('error', () => {
+      resolve(null);
+    });
+  });
+}
+
+// 安装Python依赖
+function installPythonDependencies(pythonInfo) {
+  return new Promise((resolve) => {
+    if (!pythonInfo || pythonInfo.type !== 'embedded') {
+      // 系统Python不需要安装依赖
+      resolve(true);
+      return;
+    }
+
+    console.log("Checking Python dependencies for embedded Python...");
+    
+    // 检查是否已安装所有必需的依赖
+    const checkProcess = spawn(pythonInfo.command, ['-c', 'import fitz, dotenv; print("All dependencies available")'], {
+      stdio: 'pipe',
+      shell: false
+    });
+
+    let checkOutput = '';
+    let checkError = '';
+
+    checkProcess.stdout.on('data', (data) => {
+      checkOutput += data.toString();
+    });
+
+    checkProcess.stderr.on('data', (data) => {
+      checkError += data.toString();
+    });
+
+    checkProcess.on('close', (code) => {
+      if (code === 0) {
+        console.log("✅ All Python dependencies already available");
+        resolve(true);
+      } else {
+        console.log("⚠️ Some dependencies missing in embedded Python, installing...");
+        console.log("Check error:", checkError);
+        
+        // 安装依赖，使用多个PyPI源
+        installWithMultipleSources(pythonInfo).then(success => {
+          if (success) {
+            console.log("✅ Python dependencies installed successfully");
+            resolve(true);
+          } else {
+            console.log("⚠️ Failed to install dependencies, but continuing anyway");
+            console.log("💡 PDF processing may fail - please ensure dependencies are available");
+            resolve(true); // 仍然尝试继续，可能用户有其他方式安装了依赖
+          }
+        });
+      }
+    });
+
+    checkProcess.on('error', (err) => {
+      console.error("❌ Check process error:", err.message);
+      console.log("💡 Continuing anyway - dependencies may be available through other means");
+      resolve(true);
+    });
+  });
+}
+
+// 使用多个源安装依赖
+function installWithMultipleSources(pythonInfo) {
+  const sources = [
+    'https://pypi.org/simple/',  // 官方源
+    null,  // 默认源
+    'https://pypi.douban.com/simple/',  // 豆瓣源
+  ];
+  
+  return new Promise((resolve) => {
+    let sourceIndex = 0;
+    
+    function tryNextSource() {
+      if (sourceIndex >= sources.length) {
+        console.error("❌ All PyPI sources failed");
+        resolve(false);
+        return;
+      }
+      
+      const source = sources[sourceIndex];
+      const args = ['-m', 'pip', 'install', 'PyMuPDF', 'python-dotenv'];  // 安装两个包
+      
+      if (source) {
+        args.push('-i', source);
+        console.log(`💡 Trying PyPI source: ${source}`);
+      } else {
+        console.log("💡 Trying default PyPI source");
+      }
+      
+      const installProcess = spawn(pythonInfo.command, args, {
+        stdio: 'pipe',
+        shell: false
+      });
+
+      let installOutput = '';
+      let installError = '';
+
+      installProcess.stdout.on('data', (data) => {
+        installOutput += data.toString();
+      });
+
+      installProcess.stderr.on('data', (data) => {
+        installError += data.toString();
+      });
+
+      installProcess.on('close', (installCode) => {
+        if (installCode === 0) {
+          console.log("✅ All dependencies installed successfully");
+          resolve(true);
+        } else {
+          console.log(`❌ Installation failed with source ${source || 'default'}`);
+          console.log("Error:", installError);
+          sourceIndex++;
+          setTimeout(tryNextSource, 1000); // 等待1秒后尝试下一个源
+        }
+      });
+
+      installProcess.on('error', (err) => {
+        console.error(`❌ Install process error with source ${source || 'default'}:`, err.message);
+        sourceIndex++;
+        setTimeout(tryNextSource, 1000); // 等待1秒后尝试下一个源
+      });
+    }
+    
+    tryNextSource();
+  });
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -141,15 +414,44 @@ ipcMain.handle(
 );
 
 ipcMain.handle("process-pdf", async (event, options) => {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     if (pythonProcess) {
       pythonProcess.kill();
     }
 
-    const pythonScript = path.join(
-      __dirname,
-      "../python-backend/pdf_bookmark_tool.py"
-    );
+    // 检查Python脚本是否存在
+    const pythonScript = getPythonScriptPath();
+    if (!fs.existsSync(pythonScript)) {
+      resolve({
+        success: false,
+        error: `Python脚本不存在: ${pythonScript}`,
+        output: "",
+      });
+      return;
+    }
+
+    // 检查Python是否可用
+    const pythonInfo = await checkPythonAvailability();
+    if (!pythonInfo) {
+      resolve({
+        success: false,
+        error: "系统中未找到Python环境，且嵌入式Python不可用。请安装Python 3.7+并添加到系统PATH中。",
+        output: "",
+      });
+      return;
+    }
+
+    // 安装Python依赖（仅对嵌入式Python）
+    const depsInstalled = await installPythonDependencies(pythonInfo);
+    if (!depsInstalled) {
+      resolve({
+        success: false,
+        error: "Python依赖安装失败。请检查网络连接或使用系统Python环境。",
+        output: "",
+      });
+      return;
+    }
+
     const args = [pythonScript, options.inputPath];
 
     if (options.outputPath) {
@@ -183,18 +485,20 @@ ipcMain.handle("process-pdf", async (event, options) => {
       args.push("--bookmark-file", options.bookmarkFilePath);
     }
 
-    console.log("Spawning Python process with args:", args);
-    console.log("Manual control options:", {
-      excludeTitles: options.excludeTitles,
-      includeTitles: options.includeTitles,
-    });
-    pythonProcess = spawn("python", args, {
-      cwd: path.dirname(pythonScript),
-      shell: true,
+    console.log("Spawning Python process:", pythonInfo.command);
+    console.log("Python type:", pythonInfo.type);
+    console.log("Script path:", pythonScript);
+    console.log("Working directory:", getPythonBackendPath());
+    console.log("Args:", args);
+    
+    pythonProcess = spawn(pythonInfo.command, args, {
+      cwd: getPythonBackendPath(),
+      shell: pythonInfo.type === 'system', // 嵌入式Python不需要shell
       encoding: "utf8",
       env: {
         ...process.env,
         PYTHONIOENCODING: "utf-8",
+        PYTHONPATH: getPythonBackendPath(),
       },
     });
 
@@ -261,9 +565,15 @@ ipcMain.handle("process-pdf", async (event, options) => {
 
     pythonProcess.on("error", (err) => {
       pythonProcess = null;
+      
+      let errorMessage = err.message;
+      if (err.code === 'ENOENT') {
+        errorMessage = `无法启动Python进程: ${pythonInfo.command}。${pythonInfo.type === 'embedded' ? '嵌入式Python损坏' : '请确保Python已正确安装并添加到系统PATH中'}。`;
+      }
+      
       resolve({
         success: false,
-        error: err.message,
+        error: errorMessage,
         output: output,
       });
     });
@@ -271,15 +581,44 @@ ipcMain.handle("process-pdf", async (event, options) => {
 });
 
 ipcMain.handle("extract-bookmarks", async (event, options) => {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     if (pythonProcess) {
       pythonProcess.kill();
     }
 
-    const pythonScript = path.join(
-      __dirname,
-      "../python-backend/pdf_bookmark_tool.py"
-    );
+    // 检查Python脚本是否存在
+    const pythonScript = getPythonScriptPath();
+    if (!fs.existsSync(pythonScript)) {
+      resolve({
+        success: false,
+        error: `Python脚本不存在: ${pythonScript}`,
+        output: "",
+      });
+      return;
+    }
+
+    // 检查Python是否可用
+    const pythonInfo = await checkPythonAvailability();
+    if (!pythonInfo) {
+      resolve({
+        success: false,
+        error: "系统中未找到Python环境，且嵌入式Python不可用。请安装Python 3.7+并添加到系统PATH中。",
+        output: "",
+      });
+      return;
+    }
+
+    // 安装Python依赖（仅对嵌入式Python）
+    const depsInstalled = await installPythonDependencies(pythonInfo);
+    if (!depsInstalled) {
+      resolve({
+        success: false,
+        error: "Python依赖安装失败。请检查网络连接或使用系统Python环境。",
+        output: "",
+      });
+      return;
+    }
+
     const args = [pythonScript, options.inputPath, "--extract-only"];
 
     if (options.outputPath) {
@@ -295,12 +634,14 @@ ipcMain.handle("extract-bookmarks", async (event, options) => {
       args.push("--no-level-info");
     }
 
-    pythonProcess = spawn("python", args, {
-      cwd: path.dirname(pythonScript),
+    pythonProcess = spawn(pythonInfo.command, args, {
+      cwd: getPythonBackendPath(),
+      shell: pythonInfo.type === 'system', // 嵌入式Python不需要shell
       encoding: "utf8",
       env: {
         ...process.env,
         PYTHONIOENCODING: "utf-8",
+        PYTHONPATH: getPythonBackendPath(),
       },
     });
 
@@ -397,9 +738,15 @@ ipcMain.handle("extract-bookmarks", async (event, options) => {
 
     pythonProcess.on("error", (err) => {
       pythonProcess = null;
+      
+      let errorMessage = err.message;
+      if (err.code === 'ENOENT') {
+        errorMessage = `无法启动Python进程: ${pythonInfo.command}。${pythonInfo.type === 'embedded' ? '嵌入式Python损坏' : '请确保Python已正确安装并添加到系统PATH中'}。`;
+      }
+      
       resolve({
         success: false,
-        error: err.message,
+        error: errorMessage,
         output: output,
       });
     });
@@ -445,4 +792,92 @@ ipcMain.handle("get-app-info", async () => {
     version: packageJson.version,
     electronVersion: process.versions.electron,
   };
+});
+
+// 添加诊断功能
+ipcMain.handle("diagnose-environment", async () => {
+  const diagnostics = {
+    timestamp: new Date().toISOString(),
+    isPackaged: app.isPackaged,
+    platform: process.platform,
+    pythonBackendPath: getPythonBackendPath(),
+    pythonScriptPath: getPythonScriptPath(),
+    resourcesPath: app.isPackaged ? process.resourcesPath : "N/A (development)",
+    embeddedPython: {},
+    pythonEnvironment: {},
+    fileChecks: {}
+  };
+
+  // 检查嵌入式Python
+  try {
+    const embeddedPython = getEmbeddedPythonPath();
+    diagnostics.embeddedPython.available = !!embeddedPython;
+    diagnostics.embeddedPython.path = embeddedPython || "未找到";
+    
+    if (embeddedPython) {
+      diagnostics.embeddedPython.exists = fs.existsSync(embeddedPython);
+      
+      if (diagnostics.embeddedPython.exists) {
+        // 尝试获取嵌入式Python版本
+        const versionProcess = spawn(embeddedPython, ['--version'], { 
+          stdio: 'pipe',
+          shell: false 
+        });
+        
+        versionProcess.stdout.on('data', (data) => {
+          diagnostics.embeddedPython.version = data.toString().trim();
+        });
+        
+        versionProcess.stderr.on('data', (data) => {
+          diagnostics.embeddedPython.version = data.toString().trim();
+        });
+      }
+    }
+  } catch (error) {
+    diagnostics.embeddedPython.error = error.message;
+  }
+
+  // 检查文件是否存在
+  try {
+    diagnostics.fileChecks.pythonBackendExists = fs.existsSync(getPythonBackendPath());
+    diagnostics.fileChecks.pythonScriptExists = fs.existsSync(getPythonScriptPath());
+    
+    if (diagnostics.fileChecks.pythonBackendExists) {
+      const backendFiles = fs.readdirSync(getPythonBackendPath());
+      diagnostics.fileChecks.backendFiles = backendFiles;
+    }
+  } catch (error) {
+    diagnostics.fileChecks.error = error.message;
+  }
+
+  // 检查Python环境
+  try {
+    const pythonInfo = await checkPythonAvailability();
+    if (pythonInfo) {
+      diagnostics.pythonEnvironment.command = pythonInfo.command;
+      diagnostics.pythonEnvironment.type = pythonInfo.type;
+      diagnostics.pythonEnvironment.available = true;
+      
+      // 获取Python版本信息
+      const versionProcess = spawn(pythonInfo.command, ['--version'], { 
+        stdio: 'pipe',
+        shell: pythonInfo.type === 'system'
+      });
+      
+      versionProcess.stdout.on('data', (data) => {
+        diagnostics.pythonEnvironment.version = data.toString().trim();
+      });
+      
+      versionProcess.stderr.on('data', (data) => {
+        diagnostics.pythonEnvironment.version = data.toString().trim();
+      });
+    } else {
+      diagnostics.pythonEnvironment.available = false;
+      diagnostics.pythonEnvironment.command = "未找到";
+    }
+  } catch (error) {
+    diagnostics.pythonEnvironment.error = error.message;
+  }
+
+  return diagnostics;
 });

@@ -24,6 +24,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // 应用信息
   getAppInfo: () => ipcRenderer.invoke("get-app-info"),
 
+  // 诊断功能
+  diagnoseEnvironment: () => ipcRenderer.invoke("diagnose-environment"),
+
   // 实时日志监听
   onProcessLog: (callback) => ipcRenderer.on("process-log", callback),
   onExtractLog: (callback) => ipcRenderer.on("extract-log", callback),

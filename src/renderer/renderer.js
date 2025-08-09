@@ -93,6 +93,28 @@ class PDFBookmarkApp {
     this.openFolder.addEventListener("click", () => this.openOutputFolder());
     this.clearLog.addEventListener("click", () => this.clearProcessLog());
 
+    // 诊断功能事件
+    const diagnoseBtn = document.getElementById("diagnose-env");
+    if (diagnoseBtn) {
+      diagnoseBtn.addEventListener("click", () => this.showDiagnostics());
+    }
+
+    // 模态框关闭事件
+    const modalClose = document.querySelector(".modal-close");
+    if (modalClose) {
+      modalClose.addEventListener("click", () => this.closeDiagnosticModal());
+    }
+
+    // 点击模态框外部关闭
+    const modal = document.getElementById("diagnostic-modal");
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          this.closeDiagnosticModal();
+        }
+      });
+    }
+
     // 手动控制事件
     if (this.addExcludeTitle) {
       this.addExcludeTitle.addEventListener("click", () => {
@@ -667,6 +689,306 @@ class PDFBookmarkApp {
       this.extractLogOutput.innerHTML = "";
       this.appendExtractLog("日志已清空", "info");
     }
+  }
+
+  // 显示诊断信息
+  async showDiagnostics() {
+    const modal = document.getElementById("diagnostic-modal");
+    const content = document.getElementById("diagnostic-content");
+
+    if (!modal || !content) return;
+
+    // 显示模态框
+    modal.style.display = "block";
+    content.innerHTML = "<p>正在检查环境...</p>";
+
+    try {
+      const diagnostics = await window.electronAPI.diagnoseEnvironment();
+      content.innerHTML = this.formatDiagnostics(diagnostics);
+    } catch (error) {
+      content.innerHTML = `<p class="status-error">获取诊断信息失败: ${error.message}</p>`;
+    }
+  }
+
+  // 格式化诊断信息
+  formatDiagnostics(diagnostics) {
+    let html = '<div class="diagnostic-sections">';
+
+    // 基本信息
+    html += '<div class="diagnostic-section">';
+    html += "<h4>基本信息</h4>";
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">诊断时间:</span>`;
+    html += `<span class="diagnostic-value">${new Date(
+      diagnostics.timestamp
+    ).toLocaleString()}</span>`;
+    html += `</div>`;
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">打包状态:</span>`;
+    html += `<span class="diagnostic-value ${
+      diagnostics.isPackaged ? "status-success" : "status-warning"
+    }">${diagnostics.isPackaged ? "已打包" : "开发模式"}</span>`;
+    html += `</div>`;
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">操作系统:</span>`;
+    html += `<span class="diagnostic-value">${diagnostics.platform}</span>`;
+    html += `</div>`;
+    html += "</div>";
+
+    // 嵌入式Python
+    html += '<div class="diagnostic-section">';
+    html += "<h4>嵌入式Python</h4>";
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">是否可用:</span>`;
+    const embeddedStatus = diagnostics.embeddedPython.available
+      ? "status-success"
+      : "status-warning";
+    html += `<span class="diagnostic-value ${embeddedStatus}">${
+      diagnostics.embeddedPython.available ? "✅ 可用" : "⚠️ 不可用"
+    }</span>`;
+    html += `</div>`;
+
+    if (diagnostics.embeddedPython.available) {
+      html += `<div class="diagnostic-item">`;
+      html += `<span class="diagnostic-label">Python路径:</span>`;
+      html += `<span class="diagnostic-value">${diagnostics.embeddedPython.path}</span>`;
+      html += `</div>`;
+      html += `<div class="diagnostic-item">`;
+      html += `<span class="diagnostic-label">文件存在:</span>`;
+      const existsStatus = diagnostics.embeddedPython.exists
+        ? "status-success"
+        : "status-error";
+      html += `<span class="diagnostic-value ${existsStatus}">${
+        diagnostics.embeddedPython.exists ? "✅ 存在" : "❌ 不存在"
+      }</span>`;
+      html += `</div>`;
+
+      if (diagnostics.embeddedPython.version) {
+        html += `<div class="diagnostic-item">`;
+        html += `<span class="diagnostic-label">Python版本:</span>`;
+        html += `<span class="diagnostic-value">${diagnostics.embeddedPython.version}</span>`;
+        html += `</div>`;
+      }
+    }
+
+    if (diagnostics.embeddedPython.error) {
+      html += `<div class="diagnostic-item">`;
+      html += `<span class="diagnostic-label">错误信息:</span>`;
+      html += `<span class="diagnostic-value status-error">${diagnostics.embeddedPython.error}</span>`;
+      html += `</div>`;
+    }
+    html += "</div>";
+
+    // Python环境
+    html += '<div class="diagnostic-section">';
+    html += "<h4>当前Python环境</h4>";
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">Python命令:</span>`;
+    const pythonStatus = diagnostics.pythonEnvironment.available
+      ? "status-success"
+      : "status-error";
+    html += `<span class="diagnostic-value ${pythonStatus}">${diagnostics.pythonEnvironment.command}</span>`;
+    html += `</div>`;
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">Python可用性:</span>`;
+    html += `<span class="diagnostic-value ${pythonStatus}">${
+      diagnostics.pythonEnvironment.available ? "✅ 可用" : "❌ 不可用"
+    }</span>`;
+    html += `</div>`;
+
+    if (diagnostics.pythonEnvironment.type) {
+      html += `<div class="diagnostic-item">`;
+      html += `<span class="diagnostic-label">Python类型:</span>`;
+      const typeColor =
+        diagnostics.pythonEnvironment.type === "embedded"
+          ? "status-success"
+          : "status-warning";
+      const typeText =
+        diagnostics.pythonEnvironment.type === "embedded"
+          ? "🔗 嵌入式"
+          : "🖥️ 系统";
+      html += `<span class="diagnostic-value ${typeColor}">${typeText}</span>`;
+      html += `</div>`;
+    }
+
+    if (diagnostics.pythonEnvironment.version) {
+      html += `<div class="diagnostic-item">`;
+      html += `<span class="diagnostic-label">Python版本:</span>`;
+      html += `<span class="diagnostic-value">${diagnostics.pythonEnvironment.version}</span>`;
+      html += `</div>`;
+    }
+    if (diagnostics.pythonEnvironment.error) {
+      html += `<div class="diagnostic-item">`;
+      html += `<span class="diagnostic-label">错误信息:</span>`;
+      html += `<span class="diagnostic-value status-error">${diagnostics.pythonEnvironment.error}</span>`;
+      html += `</div>`;
+    }
+    html += "</div>";
+
+    // 文件路径
+    html += '<div class="diagnostic-section">';
+    html += "<h4>文件路径</h4>";
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">Python后端目录:</span>`;
+    html += `<span class="diagnostic-value">${diagnostics.pythonBackendPath}</span>`;
+    html += `</div>`;
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">Python脚本路径:</span>`;
+    html += `<span class="diagnostic-value">${diagnostics.pythonScriptPath}</span>`;
+    html += `</div>`;
+    if (diagnostics.isPackaged) {
+      html += `<div class="diagnostic-item">`;
+      html += `<span class="diagnostic-label">资源路径:</span>`;
+      html += `<span class="diagnostic-value">${diagnostics.resourcesPath}</span>`;
+      html += `</div>`;
+    }
+    html += "</div>";
+
+    // 文件检查
+    html += '<div class="diagnostic-section">';
+    html += "<h4>文件检查</h4>";
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">后端目录存在:</span>`;
+    const backendStatus = diagnostics.fileChecks.pythonBackendExists
+      ? "status-success"
+      : "status-error";
+    html += `<span class="diagnostic-value ${backendStatus}">${
+      diagnostics.fileChecks.pythonBackendExists ? "✅ 存在" : "❌ 不存在"
+    }</span>`;
+    html += `</div>`;
+    html += `<div class="diagnostic-item">`;
+    html += `<span class="diagnostic-label">Python脚本存在:</span>`;
+    const scriptStatus = diagnostics.fileChecks.pythonScriptExists
+      ? "status-success"
+      : "status-error";
+    html += `<span class="diagnostic-value ${scriptStatus}">${
+      diagnostics.fileChecks.pythonScriptExists ? "✅ 存在" : "❌ 不存在"
+    }</span>`;
+    html += `</div>`;
+
+    if (
+      diagnostics.fileChecks.backendFiles &&
+      diagnostics.fileChecks.backendFiles.length > 0
+    ) {
+      html += `<div class="diagnostic-item">`;
+      html += `<span class="diagnostic-label">后端文件列表:</span>`;
+      html += `<span class="diagnostic-value">${diagnostics.fileChecks.backendFiles.join(
+        ", "
+      )}</span>`;
+      html += `</div>`;
+    }
+
+    if (diagnostics.fileChecks.error) {
+      html += `<div class="diagnostic-item">`;
+      html += `<span class="diagnostic-label">文件检查错误:</span>`;
+      html += `<span class="diagnostic-value status-error">${diagnostics.fileChecks.error}</span>`;
+      html += `</div>`;
+    }
+    html += "</div>";
+
+    // 解决方案建议
+    html += '<div class="diagnostic-section">';
+    html += "<h4>状态总结</h4>";
+
+    if (
+      diagnostics.embeddedPython.available &&
+      diagnostics.embeddedPython.exists
+    ) {
+      html += '<div class="diagnostic-item">';
+      html +=
+        '<span class="diagnostic-value status-success">✅ 嵌入式Python可用，无需额外安装</span>';
+      html += "</div>";
+    } else if (
+      diagnostics.pythonEnvironment.available &&
+      diagnostics.pythonEnvironment.type === "system"
+    ) {
+      html += '<div class="diagnostic-item">';
+      html +=
+        '<span class="diagnostic-value status-success">✅ 系统Python可用</span>';
+      html += "</div>";
+    } else {
+      html += '<div class="diagnostic-item">';
+      html +=
+        '<span class="diagnostic-value status-error">❌ 无可用Python环境</span><br>';
+      html +=
+        '<span class="diagnostic-value">建议：重新下载安装完整版本的应用程序</span>';
+      html += "</div>";
+    }
+
+    if (!diagnostics.fileChecks.pythonScriptExists) {
+      html += '<div class="diagnostic-item">';
+      html +=
+        '<span class="diagnostic-value status-error">❌ Python脚本不存在</span><br>';
+      html +=
+        '<span class="diagnostic-value">应用安装可能不完整，请重新下载安装</span>';
+      html += "</div>";
+    }
+
+    html += "</div>";
+    html += "</div>";
+
+    return html;
+  }
+
+  // 关闭诊断模态框
+  closeDiagnosticModal() {
+    const modal = document.getElementById("diagnostic-modal");
+    if (modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  // 复制诊断信息
+  async copyDiagnostics() {
+    try {
+      const diagnostics = await window.electronAPI.diagnoseEnvironment();
+      const text = JSON.stringify(diagnostics, null, 2);
+      await navigator.clipboard.writeText(text);
+
+      // 显示复制成功的提示
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = "已复制!";
+      button.style.background = "#059669";
+
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.style.background = "";
+      }, 2000);
+    } catch (error) {
+      console.error("复制失败:", error);
+      alert("复制失败: " + error.message);
+    }
+  }
+}
+
+// 全局函数，供HTML中使用
+function closeDiagnosticModal() {
+  const modal = document.getElementById("diagnostic-modal");
+  if (modal) {
+    modal.style.display = "none";
+  }
+}
+
+async function copyDiagnostics() {
+  try {
+    const diagnostics = await window.electronAPI.diagnoseEnvironment();
+    const text = JSON.stringify(diagnostics, null, 2);
+    await navigator.clipboard.writeText(text);
+
+    // 显示复制成功的提示
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = "已复制!";
+    button.style.background = "#059669";
+
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.style.background = "";
+    }, 2000);
+  } catch (error) {
+    console.error("复制失败:", error);
+    alert("复制失败: " + error.message);
   }
 }
 
