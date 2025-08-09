@@ -17,7 +17,10 @@
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
     "setup-python": "node scripts/setup-python.js",
-    "build-with-python": "npm run setup-python && npm run build"
+    "build-with-python": "npm run setup-python && npm run build",
+    "build-with-python-win": "npm run setup-python && npm run build-win",
+    "build-with-python-mac": "npm run setup-python && npm run build-mac",
+    "build-with-python-linux": "npm run setup-python && npm run build-linux"
   },
   "devDependencies": {
     "electron": "^28.0.0",

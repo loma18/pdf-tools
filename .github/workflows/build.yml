@@ -1,4 +1,4 @@
-name: 🏗️ 构建跨平台应用
+name: 🏗️ 构建跨平台应用 (嵌入式Python)
 
 on:
   push:
@@ -17,19 +17,19 @@ jobs:
         include:
           - os: windows-latest
             platform: windows
-            build_script: yarn build-win
+            build_script: yarn build-with-python-win
             artifact_pattern: "dist/*.exe"
             artifact_name: windows-installer
             
           - os: macos-latest
             platform: macos
-            build_script: yarn build-mac
+            build_script: yarn build-with-python-mac
             artifact_pattern: "dist/*.dmg"
             artifact_name: macos-installer
             
           - os: ubuntu-latest
             platform: linux
-            build_script: yarn build-linux
+            build_script: yarn build-with-python-linux
             artifact_pattern: "dist/*.AppImage"
             artifact_name: linux-appimage
 
@@ -43,20 +43,36 @@ jobs:
         node-version: '18'
         cache: 'yarn'
 
-    - name: 🐍 设置Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-
     - name: 📦 安装Node.js依赖
       run: yarn install --frozen-lockfile
 
-    - name: 🐍 安装Python依赖
+    - name: 🐍 设置嵌入式Python环境
       run: |
-        cd python-backend
-        pip install -r requirements.txt
-        cd ..
+        echo "🐍 开始设置嵌入式Python环境..."
+        yarn setup-python
+        echo "✅ 嵌入式Python环境设置完成"
+
+    - name: 🔍 验证嵌入式Python环境
+      shell: bash
+      run: |
+        echo "🔍 验证嵌入式Python安装..."
+        if [ -d "node_modules/@bjia56/portable-python-3.11" ]; then
+          echo "✅ portable-python包已安装"
+          
+          # 查找Python可执行文件
+          if find node_modules/@bjia56/portable-python-3.11 -name "python*" -type f 2>/dev/null | grep -q .; then
+            echo "✅ Python可执行文件已找到"
+            
+            # 列出Python可执行文件
+            echo "📍 Python可执行文件位置:"
+            find node_modules/@bjia56/portable-python-3.11 -name "python*" -type f 2>/dev/null | head -5
+          else
+            echo "⚠️ 未找到Python可执行文件"
+          fi
+        else
+          echo "❌ portable-python包未找到"
+          exit 1
+        fi
 
     - name: 🔧 准备构建环境
       run: node build-setup.js
@@ -157,14 +173,23 @@ jobs:
     steps:
     - name: 📊 构建状态汇总
       run: |
-        echo "构建状态汇总："
+        echo "🐍 嵌入式Python构建状态汇总："
         echo "Build job: ${{ needs.build.result }}"
         
         if [ "${{ needs.build.result }}" == "success" ]; then
-          echo "✅ 所有平台构建成功"
+          echo "✅ 所有平台构建成功 (包含嵌入式Python环境)"
+          echo "📦 构建产物包含:"
+          echo "   - Electron应用程序"
+          echo "   - 嵌入式Python 3.11运行时"
+          echo "   - PyMuPDF + python-dotenv依赖"
+          echo "   - 零依赖安装，开箱即用"
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             echo "🚀 已自动发布到GitHub Releases"
           fi
         else
           echo "❌ 构建过程中出现问题"
+          echo "💡 可能的原因:"
+          echo "   - 嵌入式Python下载失败"
+          echo "   - 依赖安装网络问题"
+          echo "   - electron-builder配置问题"
         fi
