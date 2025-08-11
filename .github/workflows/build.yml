@@ -17,19 +17,19 @@ jobs:
         include:
           - os: windows-latest
             platform: windows
-            build_script: yarn build-with-python-win
+            build_script: yarn build-win
             artifact_pattern: "dist/*.exe"
             artifact_name: windows-installer
             
           - os: macos-latest
             platform: macos
-            build_script: yarn build-with-python-mac
+            build_script: yarn build-mac
             artifact_pattern: "dist/*.dmg"
             artifact_name: macos-installer
             
           - os: ubuntu-latest
             platform: linux
-            build_script: yarn build-with-python-linux
+            build_script: yarn build-linux
             artifact_pattern: "dist/*.AppImage"
             artifact_name: linux-appimage
 
@@ -50,7 +50,7 @@ jobs:
       run: |
         echo "🐍 开始设置嵌入式Python环境..."
         yarn setup-python
-        echo "✅ 嵌入式Python环境设置完成"
+        echo "✅ 嵌入式Python环境设置完成 (requirements.txt 已安装到便携 Python)"
 
     - name: 🔍 验证嵌入式Python环境
       shell: bash
@@ -181,7 +181,7 @@ jobs:
           echo "📦 构建产物包含:"
           echo "   - Electron应用程序"
           echo "   - 嵌入式Python 3.11运行时"
-          echo "   - PyMuPDF + python-dotenv依赖"
+          echo "   - requirements.txt 中的依赖（如 PyMuPDF、python-dotenv、requests 等）"
           echo "   - 零依赖安装，开箱即用"
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             echo "🚀 已自动发布到GitHub Releases"

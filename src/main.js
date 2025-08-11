@@ -6,6 +6,31 @@ const fs = require("fs");
 let mainWindow;
 let pythonProcess = null;
 
+// 递归查找目录中的Python可执行文件
+function findPythonBinaryInDir(rootDir) {
+  try {
+    const stack = [rootDir];
+    while (stack.length) {
+      const current = stack.pop();
+      const items = fs.readdirSync(current, { withFileTypes: true });
+      for (const it of items) {
+        const p = path.join(current, it.name);
+        if (it.isDirectory()) {
+          stack.push(p);
+        } else {
+          const base = path.basename(p);
+          if (process.platform === 'win32') {
+            if (base.toLowerCase() === 'python.exe') return p;
+          } else if (process.platform === 'darwin' || process.platform === 'linux') {
+            if (base === 'python3' || base === 'python') return p;
+          }
+        }
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
 // 获取嵌入式Python路径
 function getEmbeddedPythonPath() {
   try {
@@ -18,10 +43,13 @@ function getEmbeddedPythonPath() {
     // 在打包环境中，从extraResources加载
     const portablePythonDir = path.join(process.resourcesPath, "portable-python");
     
-    // 根据平台确定可执行文件路径
+    // 优先使用递归搜索，适配不同目录命名
+    const found = findPythonBinaryInDir(portablePythonDir);
+    if (found && fs.existsSync(found)) return found;
+    
+    // 兼容旧逻辑：根据平台确定可执行文件路径
     let pythonExe;
     if (process.platform === 'win32') {
-      // Windows: 查找python.exe
       const candidates = fs.readdirSync(portablePythonDir).filter(dir => 
         dir.includes('python') && dir.includes('windows')
       );
@@ -29,15 +57,13 @@ function getEmbeddedPythonPath() {
         pythonExe = path.join(portablePythonDir, candidates[0], 'bin', 'python.exe');
       }
     } else if (process.platform === 'darwin') {
-      // macOS: 查找python可执行文件
       const candidates = fs.readdirSync(portablePythonDir).filter(dir => 
-        dir.includes('python') && dir.includes('macos')
+        dir.includes('python') && (dir.includes('macos') || dir.includes('darwin') || dir.includes('osx'))
       );
       if (candidates.length > 0) {
         pythonExe = path.join(portablePythonDir, candidates[0], 'bin', 'python3');
       }
     } else {
-      // Linux: 查找python可执行文件
       const candidates = fs.readdirSync(portablePythonDir).filter(dir => 
         dir.includes('python') && dir.includes('linux')
       );
@@ -166,41 +192,40 @@ function installPythonDependencies(pythonInfo) {
     console.log("Checking Python dependencies for embedded Python...");
     
     // 检查是否已安装所有必需的依赖
-    const checkProcess = spawn(pythonInfo.command, ['-c', 'import fitz, dotenv; print("All dependencies available")'], {
-      stdio: 'pipe',
-      shell: false
-    });
+    const checkProcess = spawn(
+      pythonInfo.command,
+      [
+        "-c",
+        'import fitz, dotenv, requests; print("All dependencies available")',
+      ],
+      {
+        stdio: "pipe",
+        shell: false,
+      }
+    );
 
-    let checkOutput = '';
-    let checkError = '';
+    let checkOutput = "";
+    let checkError = "";
 
-    checkProcess.stdout.on('data', (data) => {
+    checkProcess.stdout.on("data", (data) => {
       checkOutput += data.toString();
     });
 
-    checkProcess.stderr.on('data', (data) => {
+    checkProcess.stderr.on("data", (data) => {
       checkError += data.toString();
     });
 
-    checkProcess.on('close', (code) => {
+    checkProcess.on("close", (code) => {
       if (code === 0) {
         console.log("✅ All Python dependencies already available");
         resolve(true);
       } else {
-        console.log("⚠️ Some dependencies missing in embedded Python, installing...");
+        console.log(
+          "⚠️ Some dependencies missing in embedded Python (but build should have bundled them). Error:"
+        );
         console.log("Check error:", checkError);
-        
-        // 安装依赖，使用多个PyPI源
-        installWithMultipleSources(pythonInfo).then(success => {
-          if (success) {
-            console.log("✅ Python dependencies installed successfully");
-            resolve(true);
-          } else {
-            console.log("⚠️ Failed to install dependencies, but continuing anyway");
-            console.log("💡 PDF processing may fail - please ensure dependencies are available");
-            resolve(true); // 仍然尝试继续，可能用户有其他方式安装了依赖
-          }
-        });
+        // 即使检测失败，也继续运行，避免首启联网安装
+        resolve(true);
       }
     });
 

@@ -46,52 +46,60 @@ try {
 
     pythonProcess.on("close", (code) => {
       if (code === 0) {
-        console.log("🔧 Installing Python dependencies...");
-
-        // 安装必需的依赖
-        const installProcess = spawn(
-          portablePython,
-          [
-            "-m",
-            "pip",
-            "install",
-            "PyMuPDF",
-            "python-dotenv",
-            "-i",
-            "https://pypi.org/simple/",
-          ],
-          {
-            stdio: "inherit",
-            shell: false,
-          }
+        console.log(
+          "🔧 Installing Python dependencies from requirements.txt..."
         );
+
+        // 依据 requirements.txt 安装依赖，写入便携 Python 的 site-packages
+        const requirementsPath = path.join(
+          __dirname,
+          "..",
+          "python-backend",
+          "requirements.txt"
+        );
+        const requirementsExists = fs.existsSync(requirementsPath);
+
+        const args = [
+          "-m",
+          "pip",
+          "install",
+          "--prefer-binary",
+          "--no-cache-dir",
+        ];
+        if (requirementsExists) {
+          args.push("-r", requirementsPath);
+        } else {
+          // 兜底：最少安装运行所需
+          args.push("PyMuPDF", "python-dotenv", "requests");
+        }
+
+        // 使用官方源安装，构建机需联网；安装后被打包进 extraResources
+        const installProcess = spawn(portablePython, args, {
+          stdio: "inherit",
+          shell: false,
+        });
 
         installProcess.on("close", (installCode) => {
           if (installCode === 0) {
-            console.log("🎉 Embedded Python setup complete!");
-            console.log("");
-            console.log("💡 Benefits:");
             console.log(
-              "   - Users no longer need to install Python separately"
+              "🎉 Embedded Python deps installed into portable runtime!"
             );
-            console.log(
-              "   - Consistent Python environment across all installations"
-            );
-            console.log("   - Automatic dependency management");
-            console.log("   - PyMuPDF and python-dotenv pre-installed");
             console.log("");
             console.log("📋 Next steps:");
             console.log("   1. Build the application: npm run build");
-            console.log("   2. Test the embedded Python functionality");
+            console.log(
+              "   2. The packaged app will contain all Python deps (offline ready)"
+            );
           } else {
             console.error("❌ Python dependencies installation failed");
             console.log("");
             console.log("🔧 Troubleshooting:");
-            console.log("   - Check internet connection");
             console.log(
-              "   - Dependencies will be installed automatically on first use"
+              "   - Ensure the build machine can access PyPI during prebuild"
             );
-            console.log("   - Try running the application to complete setup");
+            console.log("   - Check the wheel availability for this platform");
+            console.log("   - You can rerun: npm run setup-python");
+            process.exit(1);
           }
         });
 
@@ -99,11 +107,9 @@ try {
           console.error("❌ Dependency installation error:", err.message);
           console.log("");
           console.log("🔧 Troubleshooting:");
-          console.log("   - This may be expected on first run");
-          console.log(
-            "   - Python dependencies will be installed automatically"
-          );
-          console.log("   - Try running the application to complete setup");
+          console.log("   - Ensure network connectivity for the build machine");
+          console.log("   - Try running the application build again");
+          process.exit(1);
         });
       } else {
         console.error("❌ Python verification failed with code:", code);
@@ -118,6 +124,7 @@ try {
       console.log("   - This may be expected on first run");
       console.log("   - Python dependencies will be installed automatically");
       console.log("   - Try running the application to complete setup");
+      process.exit(1);
     });
   } else {
     console.error("❌ Python executable not found at:", portablePython);
@@ -130,6 +137,7 @@ try {
     console.log(
       "   3. Try reinstalling: npm uninstall @bjia56/portable-python-3.11 && npm install @bjia56/portable-python-3.11"
     );
+    process.exit(1);
   }
 } catch (error) {
   console.error("❌ Setup failed:", error.message);
