@@ -134,9 +134,8 @@ class PDFBookmarkTool:
         
         # 新增配置选项
         self.enable_debug = False  # 是否启用调试模式
-        self.enable_x_coordinate_filter = True  # 是否启用X坐标过滤
-        self.title_x_coordinate = None  # 文档标题的X坐标参考值
-        self.x_coordinate_tolerance = 5.0  # X坐标容差（像素）
+        self.document_leftmost_x = None  # PDF文件所有内容的最左边x坐标
+        self.x_coordinate_tolerance = 2.0  # X坐标容差（像素）
         
         # 手动控制选项
         self.exclude_titles = []  # 手动排除的标题列表
@@ -682,11 +681,10 @@ class PDFBookmarkTool:
         """
         toc_entries = []
         
-        # 设置文档标题的X坐标作为参考
-        if self.enable_x_coordinate_filter:
-            first_page_blocks = self.extract_text_with_font_info(0)
-            self.title_x_coordinate = self.detect_document_title_x_coordinate(first_page_blocks)
-            print(f"检测到文档标题X坐标参考值: {self.title_x_coordinate}")
+        # 设置PDF文件最左边x坐标作为参考
+        first_page_blocks = self.extract_text_with_font_info(0)
+        self.document_leftmost_x = self.detect_document_leftmost_x_coordinate(first_page_blocks)
+        print(f"检测到PDF文件最左边x坐标参考值: {self.document_leftmost_x}")
         
         # 进行正常的标题提取逻辑
         print("开始自动识别标题...")
@@ -719,13 +717,13 @@ class PDFBookmarkTool:
                             text_x = bbox[0] if text_x == 0 else text_x
                             text_y = bbox[1] if text_y == 0 else text_y
                     
-                    # X坐标对齐检查
-                    if self.enable_x_coordinate_filter and self.title_x_coordinate is not None:
-                        x_diff = abs(text_x - self.title_x_coordinate)
+                    # X坐标对齐检查：标题必须与PDF文件最左边对齐
+                    if self.document_leftmost_x is not None:
+                        x_diff = abs(text_x - self.document_leftmost_x)
                         
                         if x_diff > self.x_coordinate_tolerance:
                             # X坐标不对齐，跳过这个潜在标题
-                            print(f"跳过标题 '{text[:20]}...' - X坐标不对齐: {text_x:.1f} vs {self.title_x_coordinate:.1f}, 差异={x_diff:.1f}")
+                            print(f"跳过标题 '{text[:20]}...' - X坐标不对齐: {text_x:.1f} vs {self.document_leftmost_x:.1f}, 差异={x_diff:.1f}")
                             continue
                         else:
                             print(f"自动识别标题 '{text[:20]}...' - X坐标对齐: {text_x:.1f}, 差异={x_diff:.1f}")
@@ -850,7 +848,7 @@ class PDFBookmarkTool:
             return False
         
         # 2. X坐标对齐检查（最重要的结构化条件）
-        if self.enable_x_coordinate_filter and self.title_x_coordinate is not None:
+        if self.document_leftmost_x is not None:
             # 从正确的位置获取x坐标
             text_x = block.get('position', {}).get('x', 0)
             if text_x == 0:
@@ -858,13 +856,13 @@ class PDFBookmarkTool:
                 bbox = block.get('bbox', [0, 0, 0, 0])
                 text_x = bbox[0] if len(bbox) >= 1 else 0
             
-            x_diff = abs(text_x - self.title_x_coordinate)
+            x_diff = abs(text_x - self.document_leftmost_x)
             
             if x_diff > self.x_coordinate_tolerance:
-                print(f"  ❌ X坐标不对齐: 文本X={text_x:.1f}, 标题X={self.title_x_coordinate:.1f}, 差异={x_diff:.1f}")
+                print(f"  ❌ X坐标不对齐: 文本X={text_x:.1f}, 标题X={self.document_leftmost_x:.1f}, 差异={x_diff:.1f}")
                 return False
             else:
-                print(f"  ✅ X坐标对齐: 文本X={text_x:.1f}, 标题X={self.title_x_coordinate:.1f}, 差异={x_diff:.1f}")
+                print(f"  ✅ X坐标对齐: 文本X={text_x:.1f}, 标题X={self.document_leftmost_x:.1f}, 差异={x_diff:.1f}")
         
         # 3. 字体大小检查（标题通常字体较大）
         font_size = block.get('size', 0)
@@ -2898,81 +2896,45 @@ class PDFBookmarkTool:
         # 默认为第一层
         return 1
 
-    def detect_document_title_x_coordinate(self, text_blocks: List[Dict]) -> float:
+    def detect_document_leftmost_x_coordinate(self, text_blocks: List[Dict]) -> float:
         """
-        检测文档标题的X坐标作为参考
+        检测PDF文件所有内容的最左边x坐标
         
         Args:
             text_blocks: 所有文本块
             
         Returns:
-            float: 文档标题的X坐标
+            float: PDF文件所有内容的最左边x坐标
         """
-        # 策略1: 找到字号最大的文本块作为文档标题
-        title_candidates = []
-        
-        for block in text_blocks:
-            size = block.get('size', 0)
-            if size > 0:
-                title_candidates.append({
-                    'text': block['text'],
-                    'size': size,
-                    'x': block.get('position', {}).get('x', 0),
-                    'page': block.get('page', 1)
-                })
-        
-        if not title_candidates:
-            print("⚠️ 无法找到文档标题，使用默认X坐标")
-            self.document_title_text = None
+        if not text_blocks:
+            print("⚠️ 无法找到文本块，使用默认X坐标")
             return 0
         
-        # 按字号排序，取最大的几个
-        title_candidates.sort(key=lambda x: x['size'], reverse=True)
+        # 收集所有文本块的x坐标
+        all_x_coords = []
         
-        # 取前3个最大字号的文本块
-        top_candidates = title_candidates[:3]
-        
-        # 优先选择第一页的标题
-        first_page_titles = [c for c in top_candidates if c['page'] == 1]
-        if first_page_titles:
-            selected_title = first_page_titles[0]
-        else:
-            selected_title = top_candidates[0]
-        
-        title_x = selected_title['x']
-        title_text = selected_title['text']
-        
-        # 记录文档标题文本，避免将其添加为书签
-        self.document_title_text = title_text.strip()
-        
-        print(f"📍 检测到文档标题X坐标: {title_x:.1f} (文档标题: '{title_text[:30]}...')")
-        print(f"📍 文档标题将被排除，不会添加为书签")
-        
-        # 策略2: 验证并调整X坐标
-        # 收集所有可能的标题X坐标
-        potential_title_x_coords = []
         for block in text_blocks:
-            text = block['text'].strip()
-            # 检查是否符合标题模式
-            for pattern in self.toc_patterns:
-                if re.match(pattern, text):
-                    x_coord = block.get('position', {}).get('x', 0)
-                    if x_coord > 0:
-                        potential_title_x_coords.append(x_coord)
-                    break
-        
-        if potential_title_x_coords:
-            # 找到最常见的X坐标
-            from collections import Counter
-            x_counter = Counter([round(x, 1) for x in potential_title_x_coords])
-            most_common_x = x_counter.most_common(1)[0][0]
+            # 获取文本块的x坐标
+            x_coordinate = block.get('position', {}).get('x', 0)
+            if x_coordinate == 0:
+                bbox = block.get('bbox', [0, 0, 0, 0])
+                if len(bbox) >= 4:
+                    x_coordinate = bbox[0]
             
-            # 如果最常见的X坐标与检测到的标题X坐标相近，使用最常见的
-            if abs(most_common_x - title_x) <= self.x_coordinate_tolerance * 2:
-                title_x = most_common_x
-                print(f"📍 根据标题模式调整X坐标为: {title_x:.1f}")
+            if x_coordinate > 0:
+                all_x_coords.append(x_coordinate)
         
-        return title_x
+        if not all_x_coords:
+            print("⚠️ 无法找到有效的x坐标，使用默认值")
+            return 0
+        
+        # 找到最左边的x坐标
+        leftmost_x = min(all_x_coords)
+        
+        print(f"📍 检测到PDF文件最左边x坐标: {leftmost_x:.1f}")
+        print(f"📍 所有标题必须与此坐标对齐（容差: {self.x_coordinate_tolerance}px）")
+        
+        return leftmost_x
 
     def extract_existing_bookmarks(self):
         """
@@ -3214,10 +3176,9 @@ class PDFBookmarkTool:
         
         print(f"  总共提取了 {len(all_text_blocks)} 个文本块")
         
-        # 检测文档标题的X坐标（如果启用了x坐标过滤）
-        if self.enable_x_coordinate_filter:
-            self.title_x_coordinate = self.detect_document_title_x_coordinate(all_text_blocks)
-            print(f"  检测到的标题X坐标: {self.title_x_coordinate}")
+        # 检测PDF文件所有内容的最左边x坐标
+        self.document_leftmost_x = self.detect_document_leftmost_x_coordinate(all_text_blocks)
+        print(f"  检测到的PDF最左边x坐标: {self.document_leftmost_x}")
         
         # 根据x坐标过滤
         filtered_blocks = []
@@ -3252,9 +3213,9 @@ class PDFBookmarkTool:
                 print(f"    跳过非数字开头的文本: '{text[:30]}...'")
                 continue
             
-            # X坐标过滤
-            if self.enable_x_coordinate_filter and self.title_x_coordinate is not None:
-                x_diff = abs(x_coordinate - self.title_x_coordinate)
+            # X坐标过滤：标题必须与PDF文件最左边对齐
+            if self.document_leftmost_x is not None:
+                x_diff = abs(x_coordinate - self.document_leftmost_x)
                 if x_diff > self.x_coordinate_tolerance:
                     print(f"    跳过X坐标不对齐的文本: '{text[:30]}...' (x={x_coordinate:.1f}, 差异={x_diff:.1f})")
                     continue
@@ -3569,8 +3530,18 @@ class PDFBookmarkTool:
         toc_list = []
         
         for node in tree_list:
+            # 如果启用了数字开头要求，优先使用数字序列确定的层级
+            level = node['level']
+            if self.require_numeric_start:
+                numbers = node.get('number_sequence', [])
+                if numbers:
+                    # 数字序列的长度就是层级，但最多7层
+                    level = min(len(numbers), 7)
+                    if level != node['level']:
+                        print(f"    根据数字序列调整书签层级: '{node['title'][:30]}...' {node['level']} -> {level}")
+            
             toc_entry = [
-                node['level'],
+                level,
                 node['title'],
                 node['target_page']
             ]
@@ -3579,6 +3550,10 @@ class PDFBookmarkTool:
         # 最终的层级修复 - 确保完全符合PyMuPDF要求
         print("  进行最终的TOC层级修复...")
         toc_list = self._final_toc_level_fix(toc_list)
+        
+        # 检查数字序列书签的层级一致性
+        print("  检查数字序列书签的层级一致性...")
+        toc_list = self._ensure_numeric_sequence_hierarchy(toc_list)
         
         try:
             # 验证TOC结构
@@ -3689,6 +3664,108 @@ class PDFBookmarkTool:
         print(f"    最终TOC层级分布: {dict(sorted(level_counts.items()))}")
         
         return verified_toc
+    
+    def _ensure_numeric_sequence_hierarchy(self, toc_list: List) -> List:
+        """
+        确保数字序列书签的层级一致性
+        例如：3.1.1.1 和 3.1.1.2 应该是同级关系，不能是父子关系
+        
+        Args:
+            toc_list: TOC列表，格式为 [[level, title, page], ...]
+            
+        Returns:
+            List: 修复后的TOC列表
+        """
+        if not toc_list or not self.require_numeric_start:
+            return toc_list
+        
+        print("    检查数字序列书签的层级一致性...")
+        
+        # 提取所有带数字序列的标题
+        numeric_titles = []
+        for i, item in enumerate(toc_list):
+            level, title, page = item
+            # 检查标题是否以数字开头
+            if re.match(r'^\d+(\.\d+)*', title.strip()):
+                numeric_titles.append({
+                    'index': i,
+                    'level': level,
+                    'title': title,
+                    'page': page,
+                    'numbers': self._extract_number_sequence(title)
+                })
+        
+        if not numeric_titles:
+            print("    没有发现数字序列标题，跳过层级一致性检查")
+            return toc_list
+        
+        print(f"    发现 {len(numeric_titles)} 个数字序列标题")
+        
+        # 检查相邻数字序列标题的层级关系
+        for i in range(len(numeric_titles) - 1):
+            current = numeric_titles[i]
+            next_title = numeric_titles[i + 1]
+            
+            current_numbers = current['numbers']
+            next_numbers = next_title['numbers']
+            
+            # 检查是否是连续的兄弟节点
+            if self._are_sibling_numbers(current_numbers, next_numbers):
+                # 确保它们是同级
+                if current['level'] != next_title['level']:
+                    # 调整下一个标题的层级，使其与当前标题同级
+                    new_level = current['level']
+                    print(f"    调整层级一致性: '{next_title['title'][:30]}...' {next_title['level']} -> {new_level} (与 '{current['title'][:30]}...' 同级)")
+                    
+                    # 更新TOC列表中的层级
+                    toc_list[next_title['index']][0] = new_level
+                    next_title['level'] = new_level
+        
+        print("    数字序列层级一致性检查完成")
+        return toc_list
+    
+    def _extract_number_sequence(self, title: str) -> List[int]:
+        """
+        从标题中提取数字序列
+        
+        Args:
+            title: 标题文本
+            
+        Returns:
+            List[int]: 数字序列
+        """
+        numbers = []
+        # 匹配数字序列，如 "1.2.3.4" 或 "1 2 3 4"
+        matches = re.findall(r'\d+', title)
+        for match in matches:
+            numbers.append(int(match))
+        return numbers
+    
+    def _are_sibling_numbers(self, numbers1: List[int], numbers2: List[int]) -> bool:
+        """
+        判断两个数字序列是否是兄弟关系
+        
+        Args:
+            numbers1: 第一个数字序列
+            numbers2: 第二个数字序列
+            
+        Returns:
+            bool: 是否是兄弟关系
+        """
+        if len(numbers1) != len(numbers2):
+            return False
+        
+        # 检查除了最后一个数字外，其他数字是否相同
+        for i in range(len(numbers1) - 1):
+            if numbers1[i] != numbers2[i]:
+                return False
+        
+        # 最后一个数字应该连续或接近
+        last1 = numbers1[-1]
+        last2 = numbers2[-1]
+        
+        # 允许一定的跳跃（比如 1, 2, 5 这种情况）
+        return abs(last2 - last1) <= 2
     
     def _is_potential_title_text(self, text: str) -> bool:
         """
@@ -4073,8 +4150,7 @@ def main():
     parser.add_argument("--disable-font-filter", action="store_true", help="禁用字体大小过滤")
     parser.add_argument("--font-threshold", type=float, help="字体大小阈值")
     parser.add_argument("--debug", action="store_true", help="启用调试模式")
-    parser.add_argument("--disable-x-filter", action="store_true", help="禁用X坐标过滤")
-    parser.add_argument("--x-tolerance", type=float, default=5.0, help="X坐标容差(像素)")
+    
     parser.add_argument("--require-numeric-start", action="store_true", help="书签必须以数字开头")
     parser.add_argument("--exclude-titles", type=str, help="排除的标题列表(JSON格式)")
     parser.add_argument("--include-titles", type=str, help="包含的标题列表(JSON格式)")
@@ -4092,8 +4168,6 @@ def main():
         
         # 设置工具选项
         tool.enable_debug = args.debug
-        tool.enable_x_coordinate_filter = not args.disable_x_filter
-        tool.x_coordinate_tolerance = args.x_tolerance
         
         # 设置字体过滤选项
         if args.disable_font_filter:

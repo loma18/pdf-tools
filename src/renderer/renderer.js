@@ -352,8 +352,7 @@ class PDFBookmarkApp {
           : null,
         disableFontFilter: !this.enableFontFilter.checked,
         enableDebug: this.enableDebug.checked,
-        enableXFilter: this.enableXFilter.checked,
-        xTolerance: parseFloat(this.xTolerance.value) || 2.0,
+
         requireNumericStart: this.requireNumericStart.checked,
         excludeTitles: excludeTitles,
         includeTitles: includeTitles,

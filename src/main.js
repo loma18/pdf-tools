@@ -491,12 +491,7 @@ ipcMain.handle("process-pdf", async (event, options) => {
     if (options.enableDebug) {
       args.push("--debug");
     }
-    if (!options.enableXFilter) {
-      args.push("--disable-x-filter");
-    }
-    if (options.xTolerance && options.xTolerance !== 5.0) {
-      args.push("--x-tolerance", options.xTolerance.toString());
-    }
+
     if (options.excludeTitles && options.excludeTitles.length > 0) {
       args.push("--exclude-titles", JSON.stringify(options.excludeTitles));
     }

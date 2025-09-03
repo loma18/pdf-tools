@@ -68,8 +68,7 @@ def debug_with_direct_call():
         # 设置工具选项
         # tool.enable_debug = True  # 启用调试模式
         tool.enable_enhanced_filter = True  # 是否启用增强过滤
-        tool.enable_x_coordinate_filter = True  # 启用X坐标过滤
-        tool.x_coordinate_tolerance = 5.0  # X坐标容差
+
         tool.require_numeric_start = True  # 是否要求数字开头
         tool.enable_font_size_filter = True
         tool.font_size_threshold = 9.0  # 字体大小阈值
@@ -113,8 +112,7 @@ def debug_with_custom_options():
         # 自定义调试设置
         tool.enable_debug = True
         tool.enable_enhanced_filter = True  # 启用增强过滤
-        tool.enable_x_coordinate_filter = True
-        tool.x_coordinate_tolerance = 3.0  # 更严格的X坐标容差
+
         tool.require_numeric_start = True  # 启用数字开头要求（测试新功能）
         tool.font_size_threshold = 12.0  # 设置字体大小阈值
         
@@ -122,8 +120,7 @@ def debug_with_custom_options():
         print(f"📁 输出文件: {output_file}")
         print(f"🔍 调试模式: {tool.enable_debug}")
         print(f"🔍 增强过滤: {tool.enable_enhanced_filter}")
-        print(f"🔍 X坐标过滤: {tool.enable_x_coordinate_filter}")
-        print(f"🔍 X坐标容差: {tool.x_coordinate_tolerance}")
+
         print(f"🔍 数字开头要求: {tool.require_numeric_start}")
         print(f"🔍 字体大小阈值: {tool.font_size_threshold}")
         print()
