@@ -42,6 +42,33 @@ class PDFBookmarkApp {
     this.excludeTitles = document.getElementById("exclude-titles");
     this.includeTitles = document.getElementById("include-titles");
 
+    // 书签文件辅助加书签相关元素
+    this.bfaInputFile = document.getElementById("bfa-input-file");
+    this.bfaOutputFile = document.getElementById("bfa-output-file");
+    this.bfaBookmarkFile = document.getElementById("bfa-bookmark-file");
+    this.bfaBrowseInput = document.getElementById("bfa-browse-input");
+    this.bfaBrowseOutput = document.getElementById("bfa-browse-output");
+    this.bfaBrowseBookmark = document.getElementById("bfa-browse-bookmark");
+    this.bfaStartProcess = document.getElementById("bfa-start-process");
+    this.bfaStopProcess = document.getElementById("bfa-stop-process");
+    this.bfaOpenFolder = document.getElementById("bfa-open-folder");
+    this.bfaLogOutput = document.getElementById("bfa-log-output");
+    this.bfaClearLog = document.getElementById("bfa-clear-log");
+
+    // markdown辅助加书签相关元素
+    this.maInputFile = document.getElementById("ma-input-file");
+    this.maOutputFile = document.getElementById("ma-output-file");
+    this.maMarkdownFile = document.getElementById("ma-markdown-file");
+    this.maBrowseInput = document.getElementById("ma-browse-input");
+    this.maBrowseOutput = document.getElementById("ma-browse-output");
+    this.maBrowseMarkdown = document.getElementById("ma-browse-markdown");
+    this.maStartProcess = document.getElementById("ma-start-process");
+    this.maStopProcess = document.getElementById("ma-stop-process");
+    this.maOpenFolder = document.getElementById("ma-open-folder");
+    this.maLogOutput = document.getElementById("ma-log-output");
+    this.maClearLog = document.getElementById("ma-clear-log");
+    this.markdownPreview = document.getElementById("markdown-preview");
+
     // 自动提取书签相关元素
     this.extractInputFile = document.getElementById("extract-input-file");
     this.extractOutputFile = document.getElementById("extract-output-file");
@@ -81,17 +108,57 @@ class PDFBookmarkApp {
     // 自动加书签功能事件
     this.browseInput.addEventListener("click", () => this.selectInputFile());
     this.browseOutput.addEventListener("click", () => this.selectOutputFile());
-    this.browseBookmark.addEventListener("click", () =>
-      this.selectBookmarkFile()
-    );
-    this.clearBookmark.addEventListener("click", () =>
-      this.clearBookmarkFile()
-    );
 
     this.startProcess.addEventListener("click", () => this.startProcessing());
     this.stopProcess.addEventListener("click", () => this.stopProcessing());
     this.openFolder.addEventListener("click", () => this.openOutputFolder());
     this.clearLog.addEventListener("click", () => this.clearProcessLog());
+
+    // 书签文件辅助加书签功能事件
+    if (this.bfaBrowseInput) {
+      this.bfaBrowseInput.addEventListener("click", () => this.selectBfaInputFile());
+    }
+    if (this.bfaBrowseOutput) {
+      this.bfaBrowseOutput.addEventListener("click", () => this.selectBfaOutputFile());
+    }
+    if (this.bfaBrowseBookmark) {
+      this.bfaBrowseBookmark.addEventListener("click", () => this.selectBfaBookmarkFile());
+    }
+    if (this.bfaStartProcess) {
+      this.bfaStartProcess.addEventListener("click", () => this.startBfaProcessing());
+    }
+    if (this.bfaStopProcess) {
+      this.bfaStopProcess.addEventListener("click", () => this.stopBfaProcessing());
+    }
+    if (this.bfaOpenFolder) {
+      this.bfaOpenFolder.addEventListener("click", () => this.openBfaOutputFolder());
+    }
+    if (this.bfaClearLog) {
+      this.bfaClearLog.addEventListener("click", () => this.clearBfaLog());
+    }
+
+    // markdown辅助加书签功能事件
+    if (this.maBrowseInput) {
+      this.maBrowseInput.addEventListener("click", () => this.selectMaInputFile());
+    }
+    if (this.maBrowseOutput) {
+      this.maBrowseOutput.addEventListener("click", () => this.selectMaOutputFile());
+    }
+    if (this.maBrowseMarkdown) {
+      this.maBrowseMarkdown.addEventListener("click", () => this.selectMaMarkdownFile());
+    }
+    if (this.maStartProcess) {
+      this.maStartProcess.addEventListener("click", () => this.startMaProcessing());
+    }
+    if (this.maStopProcess) {
+      this.maStopProcess.addEventListener("click", () => this.stopMaProcessing());
+    }
+    if (this.maOpenFolder) {
+      this.maOpenFolder.addEventListener("click", () => this.openMaOutputFolder());
+    }
+    if (this.maClearLog) {
+      this.maClearLog.addEventListener("click", () => this.clearMaLog());
+    }
 
     // 诊断功能事件
     const diagnoseBtn = document.getElementById("diagnose-env");
@@ -169,6 +236,15 @@ class PDFBookmarkApp {
 
     // 文件输入变化事件
     this.inputFile.addEventListener("change", () => this.onInputFileChange());
+    if (this.bfaInputFile) {
+      this.bfaInputFile.addEventListener("change", () => this.onBfaInputFileChange());
+    }
+    if (this.maInputFile) {
+      this.maInputFile.addEventListener("change", () => this.onMaInputFileChange());
+    }
+    if (this.maMarkdownFile) {
+      this.maMarkdownFile.addEventListener("change", () => this.onMaMarkdownFileChange());
+    }
     this.extractInputFile.addEventListener("change", () =>
       this.onExtractInputFileChange()
     );
@@ -180,7 +256,7 @@ class PDFBookmarkApp {
   }
 
   initRealtimeLogListeners() {
-    // 监听实时处理日志
+    // 监听实时处理日志（自动加书签模式）
     this.processLogHandler = (event, logData) => {
       const { message, timestamp, type = "info" } = logData;
 
@@ -202,7 +278,7 @@ class PDFBookmarkApp {
         logType = "warning";
       }
 
-      this.appendLog(message, logType);
+      this.addLogMessage(message, logType, "default");
 
       // 简单的进度估算（基于关键词）
       if (message.includes("步骤1") || message.includes("提取文本")) {
@@ -252,9 +328,83 @@ class PDFBookmarkApp {
       }
     };
 
+    // 监听markdown辅助加书签日志
+    this.maLogHandler = (event, logData) => {
+      const { message, timestamp, type = "info" } = logData;
+
+      // 判断日志类型
+      let logType = type;
+      if (
+        message.includes("✅") ||
+        message.includes("成功") ||
+        message.includes("完成")
+      ) {
+        logType = "success";
+      } else if (
+        message.includes("❌") ||
+        message.includes("失败") ||
+        message.includes("错误")
+      ) {
+        logType = "error";
+      } else if (message.includes("⚠️") || message.includes("警告")) {
+        logType = "warning";
+      }
+
+      this.addLogMessage(message, logType, "ma");
+
+      // 简单的进度估算（基于关键词）
+      if (message.includes("开始markdown辅助加书签处理") || message.includes("解析Markdown")) {
+        this.updateMaProgress(20, "正在解析Markdown文件...");
+      } else if (message.includes("匹配") || message.includes("书签标题")) {
+        this.updateMaProgress(50, "正在匹配书签...");
+      } else if (message.includes("处理") || message.includes("添加书签")) {
+        this.updateMaProgress(80, "正在添加书签...");
+      } else if (message.includes("保存") || message.includes("完成")) {
+        this.updateMaProgress(100, "处理完成");
+      }
+    };
+
+    // 监听书签文件辅助加书签日志
+    this.bfaLogHandler = (event, logData) => {
+      const { message, timestamp, type = "info" } = logData;
+
+      // 判断日志类型
+      let logType = type;
+      if (
+        message.includes("✅") ||
+        message.includes("成功") ||
+        message.includes("完成")
+      ) {
+        logType = "success";
+      } else if (
+        message.includes("❌") ||
+        message.includes("失败") ||
+        message.includes("错误")
+      ) {
+        logType = "error";
+      } else if (message.includes("⚠️") || message.includes("警告")) {
+        logType = "warning";
+      }
+
+      this.addLogMessage(message, logType, "bfa");
+
+      // 简单的进度估算（基于关键词）
+      if (message.includes("开始书签文件辅助加书签处理") || message.includes("解析书签文件")) {
+        this.updateBfaProgress(20, "正在解析书签文件...");
+      } else if (message.includes("匹配") || message.includes("书签标题")) {
+        this.updateBfaProgress(50, "正在匹配书签...");
+      } else if (message.includes("处理") || message.includes("添加书签")) {
+        this.updateBfaProgress(80, "正在添加书签...");
+      } else if (message.includes("保存") || message.includes("完成")) {
+        this.updateBfaProgress(100, "处理完成");
+      }
+    };
+
     // 注册监听器
     window.electronAPI.onProcessLog(this.processLogHandler);
     window.electronAPI.onExtractLog(this.extractLogHandler);
+    window.electronAPI.onMALog(this.maLogHandler);
+    window.electronAPI.onBFALog(this.bfaLogHandler);
   }
 
   // 标签页切换
@@ -639,6 +789,30 @@ class PDFBookmarkApp {
     if (progressText) progressText.textContent = text;
   }
 
+  updateMaProgress(percent, text) {
+    const progressFill = document.querySelector(
+      "#markdown-assisted .progress-fill"
+    );
+    const progressText = document.querySelector(
+      "#markdown-assisted .progress-text"
+    );
+
+    if (progressFill) progressFill.style.width = percent + "%";
+    if (progressText) progressText.textContent = text;
+  }
+
+  updateBfaProgress(percent, text) {
+    const progressFill = document.querySelector(
+      "#bookmark-file-assisted .progress-fill"
+    );
+    const progressText = document.querySelector(
+      "#bookmark-file-assisted .progress-text"
+    );
+
+    if (progressFill) progressFill.style.width = percent + "%";
+    if (progressText) progressText.textContent = text;
+  }
+
   appendLog(message, type = "info") {
     const timestamp = new Date().toLocaleTimeString();
     const logLine = `[${timestamp}] ${message}`;
@@ -927,6 +1101,362 @@ class PDFBookmarkApp {
     html += "</div>";
 
     return html;
+  }
+
+  // ==================== 书签文件辅助加书签功能 ====================
+  
+  // 选择书签文件辅助加书签的输入文件
+  async selectBfaInputFile() {
+    try {
+      const filePath = await window.electronAPI.selectInputFile();
+      if (filePath) {
+        this.bfaInputFile.value = filePath;
+        this.onBfaInputFileChange();
+      }
+    } catch (error) {
+      console.error("选择文件失败:", error);
+      this.addLogMessage("选择文件失败: " + error.message, "error", "bfa");
+    }
+  }
+
+  // 选择书签文件辅助加书签的输出文件
+  async selectBfaOutputFile() {
+    try {
+      const filePath = await window.electronAPI.selectOutputFile();
+      if (filePath) {
+        this.bfaOutputFile.value = filePath;
+      }
+    } catch (error) {
+      console.error("选择输出文件失败:", error);
+      this.addLogMessage("选择输出文件失败: " + error.message, "error", "bfa");
+    }
+  }
+
+  // 选择书签文件
+  async selectBfaBookmarkFile() {
+    try {
+      const filePath = await window.electronAPI.selectBookmarkFile();
+      if (filePath) {
+        this.bfaBookmarkFile.value = filePath;
+      }
+    } catch (error) {
+      console.error("选择书签文件失败:", error);
+      this.addLogMessage("选择书签文件失败: " + error.message, "error", "bfa");
+    }
+  }
+
+  // 书签文件辅助加书签输入文件变化处理
+  onBfaInputFileChange() {
+    const inputPath = this.bfaInputFile.value;
+    if (inputPath && !this.bfaOutputFile.value) {
+      this.bfaOutputFile.value = inputPath.replace(/\.pdf$/i, "_with_bookmarks.pdf");
+    }
+  }
+
+  // 开始书签文件辅助加书签处理
+  async startBfaProcessing() {
+    if (this.isProcessing) {
+      this.addLogMessage("已有任务在处理中，请等待完成", "warning", "bfa");
+      return;
+    }
+
+    const inputFile = this.bfaInputFile.value.trim();
+    const outputFile = this.bfaOutputFile.value.trim();
+    const bookmarkFile = this.bfaBookmarkFile.value.trim();
+
+    if (!inputFile) {
+      this.addLogMessage("请选择PDF文件", "error", "bfa");
+      return;
+    }
+
+    if (!bookmarkFile) {
+      this.addLogMessage("请选择书签文件", "error", "bfa");
+      return;
+    }
+
+    if (!outputFile) {
+      this.addLogMessage("请指定输出文件路径", "error", "bfa");
+      return;
+    }
+
+    try {
+      this.isProcessing = true;
+      this.updateBfaProcessingState(true);
+      this.clearBfaLog();
+
+      this.addLogMessage("开始书签文件辅助加书签处理...", "info", "bfa");
+      this.addLogMessage(`输入文件: ${inputFile}`, "info", "bfa");
+      this.addLogMessage(`书签文件: ${bookmarkFile}`, "info", "bfa");
+      this.addLogMessage(`输出文件: ${outputFile}`, "info", "bfa");
+
+      const result = await window.electronAPI.processPDF({
+        inputFile,
+        outputFile,
+        bookmarkFile,
+        mode: "bookmark-file-assisted"
+      });
+
+      if (result.success) {
+        this.addLogMessage("✅ 书签文件辅助加书签处理完成!", "success", "bfa");
+        this.bfaOpenFolder.disabled = false;
+      } else {
+        this.addLogMessage(`❌ 处理失败: ${result.error}`, "error", "bfa");
+      }
+    } catch (error) {
+      console.error("处理失败:", error);
+      this.addLogMessage(`❌ 处理失败: ${error.message}`, "error", "bfa");
+    } finally {
+      this.isProcessing = false;
+      this.updateBfaProcessingState(false);
+    }
+  }
+
+  // 停止书签文件辅助加书签处理
+  stopBfaProcessing() {
+    // 这里可以添加停止逻辑
+    this.addLogMessage("停止处理", "info", "bfa");
+  }
+
+  // 打开书签文件辅助加书签输出文件夹
+  async openBfaOutputFolder() {
+    const outputFile = this.bfaOutputFile.value;
+    if (outputFile) {
+      try {
+        await window.electronAPI.openFolder(outputFile);
+      } catch (error) {
+        console.error("打开文件夹失败:", error);
+        this.addLogMessage("打开文件夹失败: " + error.message, "error", "bfa");
+      }
+    }
+  }
+
+  // 清空书签文件辅助加书签日志
+  clearBfaLog() {
+    if (this.bfaLogOutput) {
+      this.bfaLogOutput.innerHTML = "";
+    }
+  }
+
+  // 更新书签文件辅助加书签处理状态
+  updateBfaProcessingState(isProcessing) {
+    if (this.bfaStartProcess) {
+      this.bfaStartProcess.disabled = isProcessing;
+    }
+    if (this.bfaStopProcess) {
+      this.bfaStopProcess.disabled = !isProcessing;
+    }
+  }
+
+  // ==================== Markdown辅助加书签功能 ====================
+  
+  // 选择Markdown辅助加书签的输入文件
+  async selectMaInputFile() {
+    try {
+      const filePath = await window.electronAPI.selectInputFile();
+      if (filePath) {
+        this.maInputFile.value = filePath;
+        this.onMaInputFileChange();
+      }
+    } catch (error) {
+      console.error("选择文件失败:", error);
+      this.addLogMessage("选择文件失败: " + error.message, "error", "ma");
+    }
+  }
+
+  // 选择Markdown辅助加书签的输出文件
+  async selectMaOutputFile() {
+    try {
+      const filePath = await window.electronAPI.selectOutputFile();
+      if (filePath) {
+        this.maOutputFile.value = filePath;
+      }
+    } catch (error) {
+      console.error("选择输出文件失败:", error);
+      this.addLogMessage("选择输出文件失败: " + error.message, "error", "ma");
+    }
+  }
+
+  // 选择Markdown文件
+  async selectMaMarkdownFile() {
+    try {
+      const filePath = await window.electronAPI.selectMarkdownFile();
+      if (filePath) {
+        this.maMarkdownFile.value = filePath;
+        this.onMaMarkdownFileChange();
+      }
+    } catch (error) {
+      console.error("选择Markdown文件失败:", error);
+      this.addLogMessage("选择Markdown文件失败: " + error.message, "error", "ma");
+    }
+  }
+
+  // Markdown辅助加书签输入文件变化处理
+  onMaInputFileChange() {
+    const inputPath = this.maInputFile.value;
+    if (inputPath && !this.maOutputFile.value) {
+      this.maOutputFile.value = inputPath.replace(/\.pdf$/i, "_with_bookmarks.pdf");
+    }
+  }
+
+  // Markdown文件变化处理
+  async onMaMarkdownFileChange() {
+    const markdownFile = this.maMarkdownFile.value;
+    if (markdownFile) {
+      try {
+        // 解析Markdown文件并显示预览
+        const result = await window.electronAPI.parseMarkdownFile(markdownFile);
+        if (result.success) {
+          this.displayMarkdownPreview(result.headings);
+        } else {
+          this.addLogMessage(`解析Markdown文件失败: ${result.error}`, "error", "ma");
+        }
+      } catch (error) {
+        console.error("解析Markdown文件失败:", error);
+        this.addLogMessage("解析Markdown文件失败: " + error.message, "error", "ma");
+      }
+    }
+  }
+
+  // 显示Markdown预览
+  displayMarkdownPreview(headings) {
+    if (!this.markdownPreview) return;
+
+    if (!headings || headings.length === 0) {
+      this.markdownPreview.innerHTML = '<p class="help-text">未找到标题</p>';
+      return;
+    }
+
+    let html = '';
+    headings.forEach((heading, index) => {
+      html += `
+        <div class="markdown-preview-item level-${heading.level}">
+          <span class="markdown-preview-prefix">${heading.prefix}</span>
+          <span class="markdown-preview-title">${heading.originalTitle}</span>
+          <span class="markdown-preview-level">(级别 ${heading.level})</span>
+        </div>
+      `;
+    });
+
+    this.markdownPreview.innerHTML = html;
+  }
+
+  // 开始Markdown辅助加书签处理
+  async startMaProcessing() {
+    if (this.isProcessing) {
+      this.addLogMessage("已有任务在处理中，请等待完成", "warning", "ma");
+      return;
+    }
+
+    const inputFile = this.maInputFile.value.trim();
+    const outputFile = this.maOutputFile.value.trim();
+    const markdownFile = this.maMarkdownFile.value.trim();
+
+    if (!inputFile) {
+      this.addLogMessage("请选择PDF文件", "error", "ma");
+      return;
+    }
+
+    if (!markdownFile) {
+      this.addLogMessage("请选择Markdown文件", "error", "ma");
+      return;
+    }
+
+    if (!outputFile) {
+      this.addLogMessage("请指定输出文件路径", "error", "ma");
+      return;
+    }
+
+    try {
+      this.isProcessing = true;
+      this.updateMaProcessingState(true);
+      this.clearMaLog();
+
+      this.addLogMessage("开始Markdown辅助加书签处理...", "info", "ma");
+      this.addLogMessage(`输入文件: ${inputFile}`, "info", "ma");
+      this.addLogMessage(`Markdown文件: ${markdownFile}`, "info", "ma");
+      this.addLogMessage(`输出文件: ${outputFile}`, "info", "ma");
+
+      const result = await window.electronAPI.processPDF({
+        inputFile,
+        outputFile,
+        markdownFile,
+        mode: "markdown-assisted"
+      });
+
+      if (result.success) {
+        this.addLogMessage("✅ Markdown辅助加书签处理完成!", "success", "ma");
+        this.maOpenFolder.disabled = false;
+      } else {
+        this.addLogMessage(`❌ 处理失败: ${result.error}`, "error", "ma");
+      }
+    } catch (error) {
+      console.error("处理失败:", error);
+      this.addLogMessage(`❌ 处理失败: ${error.message}`, "error", "ma");
+    } finally {
+      this.isProcessing = false;
+      this.updateMaProcessingState(false);
+    }
+  }
+
+  // 停止Markdown辅助加书签处理
+  stopMaProcessing() {
+    // 这里可以添加停止逻辑
+    this.addLogMessage("停止处理", "info", "ma");
+  }
+
+  // 打开Markdown辅助加书签输出文件夹
+  async openMaOutputFolder() {
+    const outputFile = this.maOutputFile.value;
+    if (outputFile) {
+      try {
+        await window.electronAPI.openFolder(outputFile);
+      } catch (error) {
+        console.error("打开文件夹失败:", error);
+        this.addLogMessage("打开文件夹失败: " + error.message, "error", "ma");
+      }
+    }
+  }
+
+  // 清空Markdown辅助加书签日志
+  clearMaLog() {
+    if (this.maLogOutput) {
+      this.maLogOutput.innerHTML = "";
+    }
+  }
+
+  // 更新Markdown辅助加书签处理状态
+  updateMaProcessingState(isProcessing) {
+    if (this.maStartProcess) {
+      this.maStartProcess.disabled = isProcessing;
+    }
+    if (this.maStopProcess) {
+      this.maStopProcess.disabled = !isProcessing;
+    }
+  }
+
+  // 添加日志消息（支持不同tab）
+  addLogMessage(message, type = "info", tab = "default") {
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement("div");
+    logEntry.className = `log-entry log-${type}`;
+    logEntry.innerHTML = `<span class="log-time">[${timestamp}]</span> ${message}`;
+
+    let logOutput;
+    switch (tab) {
+      case "bfa":
+        logOutput = this.bfaLogOutput;
+        break;
+      case "ma":
+        logOutput = this.maLogOutput;
+        break;
+      default:
+        logOutput = this.logOutput;
+    }
+
+    if (logOutput) {
+      logOutput.appendChild(logEntry);
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
   }
 
   // 关闭诊断模态框

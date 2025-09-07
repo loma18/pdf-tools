@@ -16,6 +16,8 @@
         <!-- 标签页导航 -->
         <div class="tab-nav">
             <button class="tab-button active" data-tab="add-bookmarks">自动加书签</button>
+            <button class="tab-button" data-tab="bookmark-file-assisted">书签文件辅助加书签</button>
+            <button class="tab-button" data-tab="markdown-assisted">markdown辅助加书签</button>
             <button class="tab-button" data-tab="extract-bookmarks">自动提取书签</button>
         </div>
 
@@ -38,17 +40,7 @@
                     </div>
                 </div>
 
-                <div class="file-input-group">
-                    <label for="bookmark-file">书签文件（可选）：</label>
-                    <div class="file-input-wrapper">
-                        <input type="text" id="bookmark-file" placeholder="选择书签文件进行精确匹配...">
-                        <button id="browse-bookmark" class="btn btn-secondary">浏览...</button>
-                        <button id="clear-bookmark" class="btn btn-secondary">清空</button>
-                    </div>
-                    <div class="help-text" style="margin-top: 8px; font-size: 12px; color: #666;">
-                        支持 JSON、TXT、CSV 格式的书签文件。提供后将根据文件中的标题进行精确匹配，而非自动识别。
-                    </div>
-                </div>
+
             </div>
 
             <div class="options-section">
@@ -183,6 +175,131 @@
                     <button id="clear-log" class="btn btn-secondary btn-small">清空日志</button>
                 </div>
                 <div id="log-output" class="log-output"></div>
+            </div>
+        </div>
+
+        <!-- 书签文件辅助加书签标签页 -->
+        <div id="bookmark-file-assisted" class="tab-content">
+            <div class="input-section">
+                <div class="file-input-group">
+                    <label for="bfa-input-file">选择PDF文件：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="bfa-input-file" placeholder="请选择PDF文件..." readonly>
+                        <button id="bfa-browse-input" class="btn btn-secondary">浏览...</button>
+                    </div>
+                </div>
+
+                <div class="file-input-group">
+                    <label for="bfa-output-file">输出文件路径：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="bfa-output-file" placeholder="自动生成输出路径...">
+                        <button id="bfa-browse-output" class="btn btn-secondary">浏览...</button>
+                    </div>
+                </div>
+
+                <div class="file-input-group">
+                    <label for="bfa-bookmark-file">书签文件：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="bfa-bookmark-file" placeholder="选择书签文件..." readonly>
+                        <button id="bfa-browse-bookmark" class="btn btn-secondary">浏览...</button>
+                    </div>
+                    <div class="help-text" style="margin-top: 8px; font-size: 12px; color: #666;">
+                        支持 JSON、TXT、CSV 格式的书签文件。必填项。
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button id="bfa-start-process" class="btn btn-primary">
+                    <span class="btn-text">开始处理</span>
+                </button>
+                <button id="bfa-stop-process" class="btn btn-danger" disabled>
+                    <span class="btn-text">停止处理</span>
+                </button>
+                <button id="bfa-open-folder" class="btn btn-secondary" disabled>
+                    <span class="btn-text">打开文件夹</span>
+                </button>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="progress-text">准备就绪</div>
+            </div>
+
+            <div class="log-section">
+                <div class="log-header">
+                    <h3>处理日志</h3>
+                    <button id="bfa-clear-log" class="btn btn-secondary btn-small">清空日志</button>
+                </div>
+                <div id="bfa-log-output" class="log-output"></div>
+            </div>
+        </div>
+
+        <!-- markdown辅助加书签标签页 -->
+        <div id="markdown-assisted" class="tab-content">
+            <div class="input-section">
+                <div class="file-input-group">
+                    <label for="ma-input-file">选择PDF文件：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="ma-input-file" placeholder="请选择PDF文件..." readonly>
+                        <button id="ma-browse-input" class="btn btn-secondary">浏览...</button>
+                    </div>
+                </div>
+
+                <div class="file-input-group">
+                    <label for="ma-output-file">输出文件路径：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="ma-output-file" placeholder="自动生成输出路径...">
+                        <button id="ma-browse-output" class="btn btn-secondary">浏览...</button>
+                    </div>
+                </div>
+
+                <div class="file-input-group">
+                    <label for="ma-markdown-file">Markdown文件：</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="ma-markdown-file" placeholder="选择Markdown文件..." readonly>
+                        <button id="ma-browse-markdown" class="btn btn-secondary">浏览...</button>
+                    </div>
+                    <div class="help-text" style="margin-top: 8px; font-size: 12px; color: #666;">
+                        从Markdown文件中解析标题结构，自动生成带数字前缀的书签。必填项。
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h3>Markdown解析预览</h3>
+                <div id="markdown-preview" class="markdown-preview">
+                    <p class="help-text">选择Markdown文件后将显示解析的标题结构</p>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button id="ma-start-process" class="btn btn-primary">
+                    <span class="btn-text">开始处理</span>
+                </button>
+                <button id="ma-stop-process" class="btn btn-danger" disabled>
+                    <span class="btn-text">停止处理</span>
+                </button>
+                <button id="ma-open-folder" class="btn btn-secondary" disabled>
+                    <span class="btn-text">打开文件夹</span>
+                </button>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="progress-text">准备就绪</div>
+            </div>
+
+            <div class="log-section">
+                <div class="log-header">
+                    <h3>处理日志</h3>
+                    <button id="ma-clear-log" class="btn btn-secondary btn-small">清空日志</button>
+                </div>
+                <div id="ma-log-output" class="log-output"></div>
             </div>
         </div>
 

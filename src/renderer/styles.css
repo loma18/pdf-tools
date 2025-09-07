@@ -730,3 +730,71 @@ body {
           padding: 15px;
         }
 }
+
+/* Markdown预览样式 */
+.markdown-preview {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.markdown-preview .help-text {
+  color: #64748b;
+  font-style: italic;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.markdown-preview-item {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #4f46e5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-preview-item.level-1 {
+  border-left-color: #4f46e5;
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+.markdown-preview-item.level-2 {
+  border-left-color: #7c3aed;
+  margin-left: 20px;
+  font-weight: 500;
+}
+
+.markdown-preview-item.level-3 {
+  border-left-color: #ec4899;
+  margin-left: 40px;
+  font-weight: 400;
+}
+
+.markdown-preview-item.level-4 {
+  border-left-color: #f59e0b;
+  margin-left: 60px;
+  font-weight: 400;
+}
+
+.markdown-preview-title {
+  color: #1e293b;
+  font-weight: inherit;
+}
+
+.markdown-preview-prefix {
+  color: #64748b;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.markdown-preview-level {
+  color: #94a3b8;
+  font-size: 0.9em;
+  margin-left: 8px;
+}

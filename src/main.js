@@ -403,6 +403,22 @@ ipcMain.handle("select-bookmark-file", async () => {
   return null;
 });
 
+ipcMain.handle("select-markdown-file", async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: "选择Markdown文件",
+    filters: [
+      { name: "Markdown文件", extensions: ["md", "markdown"] },
+      { name: "所有文件", extensions: ["*"] },
+    ],
+    properties: ["openFile"],
+  });
+
+  if (!result.canceled && result.filePaths.length > 0) {
+    return result.filePaths[0];
+  }
+  return null;
+});
+
 ipcMain.handle(
   "select-extract-output-file",
   async (event, extension = ".json") => {
@@ -477,32 +493,43 @@ ipcMain.handle("process-pdf", async (event, options) => {
       return;
     }
 
-    const args = [pythonScript, options.inputPath];
+    const args = [pythonScript, options.inputFile || options.inputPath];
 
-    if (options.outputPath) {
-      args.push("-o", options.outputPath);
+    // 根据处理模式设置不同的参数
+    if (options.mode === "bookmark-file-assisted") {
+      args.push("--bookmark-file-assisted");
+      if (options.bookmarkFile) {
+        args.push("--bookmark-file", options.bookmarkFile);
+      }
+    } else if (options.mode === "markdown-assisted") {
+      args.push("--markdown-assisted");
+      if (options.markdownFile) {
+        args.push("--markdown-file", options.markdownFile);
+      }
+    } else {
+      // 原有的自动加书签模式
+      if (options.disableFontFilter) {
+        args.push("--disable-font-filter");
+      }
+      if (options.fontThreshold) {
+        args.push("--font-threshold", options.fontThreshold.toString());
+      }
+      if (options.excludeTitles && options.excludeTitles.length > 0) {
+        args.push("--exclude-titles", JSON.stringify(options.excludeTitles));
+      }
+      if (options.includeTitles && options.includeTitles.length > 0) {
+        args.push("--include-titles", JSON.stringify(options.includeTitles));
+      }
+      if (options.requireNumericStart) {
+        args.push("--require-numeric-start");
+      }
     }
-    if (options.disableFontFilter) {
-      args.push("--disable-font-filter");
-    }
-    if (options.fontThreshold) {
-      args.push("--font-threshold", options.fontThreshold.toString());
+
+    if (options.outputFile || options.outputPath) {
+      args.push("-o", options.outputFile || options.outputPath);
     }
     if (options.enableDebug) {
       args.push("--debug");
-    }
-
-    if (options.excludeTitles && options.excludeTitles.length > 0) {
-      args.push("--exclude-titles", JSON.stringify(options.excludeTitles));
-    }
-    if (options.includeTitles && options.includeTitles.length > 0) {
-      args.push("--include-titles", JSON.stringify(options.includeTitles));
-    }
-    if (options.requireNumericStart) {
-      args.push("--require-numeric-start");
-    }
-    if (options.bookmarkFilePath) {
-      args.push("--bookmark-file", options.bookmarkFilePath);
     }
 
     console.log("Spawning Python process:", pythonInfo.command);
@@ -534,7 +561,15 @@ ipcMain.handle("process-pdf", async (event, options) => {
         // 按行分割并发送每一行
         const lines = text.split("\n").filter((line) => line.trim());
         lines.forEach((line) => {
-          mainWindow.webContents.send("process-log", {
+          // 根据处理模式发送不同的日志事件
+          let logEvent = "process-log";
+          if (options.mode === "markdown-assisted") {
+            logEvent = "ma-log";
+          } else if (options.mode === "bookmark-file-assisted") {
+            logEvent = "bfa-log";
+          }
+          
+          mainWindow.webContents.send(logEvent, {
             message: line.trim(),
             timestamp: new Date().toISOString(),
           });
@@ -550,7 +585,15 @@ ipcMain.handle("process-pdf", async (event, options) => {
       if (mainWindow && !mainWindow.isDestroyed()) {
         const lines = text.split("\n").filter((line) => line.trim());
         lines.forEach((line) => {
-          mainWindow.webContents.send("process-log", {
+          // 根据处理模式发送不同的日志事件
+          let logEvent = "process-log";
+          if (options.mode === "markdown-assisted") {
+            logEvent = "ma-log";
+          } else if (options.mode === "bookmark-file-assisted") {
+            logEvent = "bfa-log";
+          }
+          
+          mainWindow.webContents.send(logEvent, {
             message: line.trim(),
             timestamp: new Date().toISOString(),
             type: "error",
@@ -900,4 +943,123 @@ ipcMain.handle("diagnose-environment", async () => {
   }
 
   return diagnostics;
+});
+
+// 添加Markdown文件解析API
+ipcMain.handle("parse-markdown-file", async (event, filePath) => {
+  return new Promise(async (resolve) => {
+    // 检查Python脚本是否存在
+    const pythonScript = getPythonScriptPath();
+    if (!fs.existsSync(pythonScript)) {
+      resolve({
+        success: false,
+        error: `Python脚本不存在: ${pythonScript}`,
+        headings: []
+      });
+      return;
+    }
+
+    // 检查Python是否可用
+    const pythonInfo = await checkPythonAvailability();
+    if (!pythonInfo) {
+      resolve({
+        success: false,
+        error: "系统中未找到Python环境，且嵌入式Python不可用。请安装Python 3.7+并添加到系统PATH中。",
+        headings: []
+      });
+      return;
+    }
+
+    // 安装Python依赖（仅对嵌入式Python）
+    const depsInstalled = await installPythonDependencies(pythonInfo);
+    if (!depsInstalled) {
+      resolve({
+        success: false,
+        error: "Python依赖安装失败。请检查网络连接或使用系统Python环境。",
+        headings: []
+      });
+      return;
+    }
+
+    const args = [pythonScript, "--parse-markdown", filePath];
+    
+    console.log("Spawning Python process for markdown parsing:", pythonInfo.command);
+    console.log("Args:", args);
+    
+    const markdownProcess = spawn(pythonInfo.command, args, {
+      cwd: getPythonBackendPath(),
+      shell: pythonInfo.type === 'system',
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PYTHONIOENCODING: "utf-8",
+        PYTHONPATH: getPythonBackendPath(),
+      },
+    });
+
+    let output = "";
+    let error = "";
+
+    markdownProcess.stdout.on("data", (data) => {
+      output += data.toString("utf8");
+    });
+
+    markdownProcess.stderr.on("data", (data) => {
+      error += data.toString("utf8");
+    });
+
+    markdownProcess.on("close", (code) => {
+      console.log(`Markdown parsing process exited with code ${code}`);
+      console.log("Output:", output);
+      console.log("Error:", error);
+
+      if (code === 0) {
+        try {
+          // 尝试解析JSON输出 - 直接解析整个输出
+          const result = JSON.parse(output.trim());
+          resolve({
+            success: true,
+            headings: result.headings || [],
+            output: output
+          });
+        } catch (parseError) {
+          console.error("JSON parse error:", parseError);
+          console.error("Output that failed to parse:", output);
+          resolve({
+            success: false,
+            error: `JSON解析失败: ${parseError.message}`,
+            headings: []
+          });
+        }
+      } else {
+        resolve({
+          success: false,
+          error: error || `进程退出，代码: ${code}`,
+          headings: []
+        });
+      }
+    });
+
+    // 添加超时处理
+    setTimeout(() => {
+      if (markdownProcess && !markdownProcess.killed) {
+        console.log("Markdown parsing process timeout, killing process");
+        markdownProcess.kill();
+        resolve({
+          success: false,
+          error: "解析超时",
+          headings: []
+        });
+      }
+    }, 30000); // 30秒超时
+
+    markdownProcess.on("error", (err) => {
+      console.error("Markdown parsing process error:", err);
+      resolve({
+        success: false,
+        error: `进程启动失败: ${err.message}`,
+        headings: []
+      });
+    });
+  });
 });

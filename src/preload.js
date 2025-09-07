@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   selectInputFile: () => ipcRenderer.invoke("select-input-file"),
   selectOutputFile: () => ipcRenderer.invoke("select-output-file"),
   selectBookmarkFile: () => ipcRenderer.invoke("select-bookmark-file"),
+  selectMarkdownFile: () => ipcRenderer.invoke("select-markdown-file"),
   selectExtractOutputFile: (extension) =>
     ipcRenderer.invoke("select-extract-output-file", extension),
 
@@ -27,11 +28,20 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // 诊断功能
   diagnoseEnvironment: () => ipcRenderer.invoke("diagnose-environment"),
 
+  // Markdown文件解析
+  parseMarkdownFile: (filePath) => ipcRenderer.invoke("parse-markdown-file", filePath),
+
   // 实时日志监听
   onProcessLog: (callback) => ipcRenderer.on("process-log", callback),
   onExtractLog: (callback) => ipcRenderer.on("extract-log", callback),
+  onMALog: (callback) => ipcRenderer.on("ma-log", callback),
+  onBFALog: (callback) => ipcRenderer.on("bfa-log", callback),
   removeProcessLogListener: (callback) =>
     ipcRenderer.removeListener("process-log", callback),
   removeExtractLogListener: (callback) =>
     ipcRenderer.removeListener("extract-log", callback),
+  removeMALogListener: (callback) =>
+    ipcRenderer.removeListener("ma-log", callback),
+  removeBFALogListener: (callback) =>
+    ipcRenderer.removeListener("bfa-log", callback),
 }); 

@@ -3953,22 +3953,156 @@ class PDFBookmarkTool:
         
         return bookmarks
 
-    def match_bookmarks_with_pdf_text(self, bookmark_titles: List[str], fuzzy_match: bool = True) -> List[Dict]:
+    def parse_markdown_file(self, markdown_file_path: str, silent: bool = False) -> List[Dict]:
+        """
+        解析Markdown文件，提取标题结构并生成带数字前缀的书签
+        
+        Args:
+            markdown_file_path: Markdown文件路径
+            silent: 是否静默模式（不输出调试信息）
+            
+        Returns:
+            解析后的书签列表，每个书签包含title、level、numeric_prefix等字段
+        """
+        if not silent:
+            print(f"开始解析Markdown文件: {markdown_file_path}")
+        
+        if not os.path.exists(markdown_file_path):
+            if not silent:
+                print(f"错误：Markdown文件不存在: {markdown_file_path}")
+            return []
+        
+        bookmarks = []
+        level_counters = {}  # 用于跟踪各级别的计数器
+        
+        try:
+            with open(markdown_file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            lines = content.split('\n')
+            in_code_block = False  # 标记是否在代码块中
+            
+            for line in lines:
+                original_line = line
+                line = line.strip()
+                
+                # 检查是否进入或退出代码块
+                if line.startswith('```'):
+                    in_code_block = not in_code_block
+                    continue
+                
+                # 如果在代码块中，跳过所有内容
+                if in_code_block:
+                    continue
+                
+                # 检查是否是标题行（以#开头）
+                if line.startswith('#'):
+                    # 计算标题级别（#的数量）
+                    level = 0
+                    while level < len(line) and line[level] == '#':
+                        level += 1
+                    
+                    # 提取标题文本（去掉#和空格）
+                    title = line[level:].strip()
+                    
+                    if title:  # 确保标题不为空
+                        # 更新计数器
+                        # 重置所有更深层级的计数器
+                        if level_counters:
+                            max_level = max(level_counters.keys())
+                            for i in range(level + 1, max_level + 1):
+                                if i in level_counters:
+                                    del level_counters[i]
+                        
+                        # 增加当前级别的计数器
+                        level_counters[level] = level_counters.get(level, 0) + 1
+                        
+                        # 生成数字前缀
+                        numeric_prefix_parts = []
+                        for i in range(1, level + 1):
+                            if i in level_counters:
+                                numeric_prefix_parts.append(str(level_counters[i]))
+                        
+                        numeric_prefix = '.'.join(numeric_prefix_parts)
+                        # 检查标题是否已经包含数字前缀，避免重复
+                        if title.strip().startswith(numeric_prefix + ' '):
+                            full_title = title  # 标题已经包含数字前缀
+                        else:
+                            full_title = f"{numeric_prefix} {title}"
+                        
+                        bookmark = {
+                            'title': title,  # 原始标题
+                            'originalTitle': title,  # 前端期望的字段名
+                            'full_title': full_title,  # 带数字前缀的完整标题
+                            'level': level,
+                            'numeric_prefix': numeric_prefix,
+                            'prefix': numeric_prefix,  # 前端期望的字段名
+                            'page': 1  # 默认页面，后续会通过匹配更新
+                        }
+                        
+                        bookmarks.append(bookmark)
+                        if not silent:
+                            print(f"  解析标题: {full_title} (级别: {level})")
+            
+            if not silent:
+                print(f"Markdown解析完成，共提取 {len(bookmarks)} 个标题")
+            return bookmarks
+            
+        except Exception as e:
+            if not silent:
+                print(f"解析Markdown文件失败: {e}")
+            return []
+
+    def match_bookmarks_with_pdf_text(self, bookmark_titles: List[str], fuzzy_match: bool = True, remove_all_spaces: bool = False) -> List[Dict]:
         """
         根据书签标题列表在PDF中进行匹配
         
         Args:
             bookmark_titles: 需要匹配的书签标题列表
             fuzzy_match: 是否启用模糊匹配
+            remove_all_spaces: 在比较前是否移除所有空格（仅在特定模式下启用）
         
         Returns:
             匹配到的书签条目列表
         """
         print(f"开始匹配 {len(bookmark_titles)} 个书签标题...")
         
-        # 获取所有页面的文本信息
+        # 获取所有页面的文本信息 - 包括行级别的文本
         all_text_blocks = []
         for page_num in range(len(self.doc)):
+            page = self.doc[page_num]
+            text_dict = page.get_text("dict")
+            
+            # 先提取行级别的文本
+            for block in text_dict["blocks"]:
+                if "lines" in block:
+                    for line in block["lines"]:
+                        line_text = ""
+                        line_fonts = []
+                        
+                        for span in line["spans"]:
+                            span_text = span["text"]
+                            line_text += span_text
+                            line_fonts.append({
+                                "size": span.get("size", 0),
+                                "font": span.get("font", ""),
+                                "flags": span.get("flags", 0)
+                            })
+                        
+                        if line_text.strip():
+                            # 计算主要字体大小
+                            main_size = max([f["size"] for f in line_fonts]) if line_fonts else 0
+                            line_bbox = line.get("bbox", [0, 0, 0, 0])
+                            
+                            all_text_blocks.append({
+                                "text": line_text.strip(),
+                                "size": main_size,
+                                "page": page_num + 1,
+                                "x": line_bbox[0],
+                                "y": line_bbox[1]
+                            })
+            
+            # 然后提取合并后的块级别文本（作为备选）
             page_text_blocks = self.extract_text_with_font_info(page_num)
             for block in page_text_blocks:
                 block['page'] = page_num + 1
@@ -3977,7 +4111,7 @@ class PDFBookmarkTool:
         matched_bookmarks = []
         
         for title in bookmark_titles:
-            matched_block = self._find_matching_text_block(title, all_text_blocks, fuzzy_match)
+            matched_block = self._find_matching_text_block(title, all_text_blocks, fuzzy_match, remove_all_spaces)
             if matched_block:
                 matched_bookmarks.append(matched_block)
                 print(f"✅ 匹配成功: '{title}' -> 页面 {matched_block['page']}")
@@ -3987,7 +4121,7 @@ class PDFBookmarkTool:
         print(f"匹配完成，成功匹配 {len(matched_bookmarks)}/{len(bookmark_titles)} 个书签")
         return matched_bookmarks
 
-    def _find_matching_text_block(self, target_title: str, text_blocks: List[Dict], fuzzy_match: bool = True) -> Optional[Dict]:
+    def _find_matching_text_block(self, target_title: str, text_blocks: List[Dict], fuzzy_match: bool = True, remove_all_spaces: bool = False) -> Optional[Dict]:
         """
         在文本块中查找匹配的标题
         
@@ -3995,16 +4129,31 @@ class PDFBookmarkTool:
             target_title: 目标标题
             text_blocks: 文本块列表
             fuzzy_match: 是否启用模糊匹配
+            remove_all_spaces: 在比较前是否移除所有空格
         
         Returns:
             匹配到的文本块，包含书签信息
         """
         target_clean = self._clean_title_for_matching(target_title)
+        if remove_all_spaces:
+            import re
+            target_clean = target_clean.replace(' ', '')
+            # 去除数字前缀末尾且后面不是数字的点号，例如 "1.测试" -> "1测试"
+            target_clean = re.sub(r'^(\d+(?:\.\d+)*)\.(?!\d)', r'\1', target_clean)
+            # 同时处理PDF中可能存在的点号格式，例如 "1.新增功能说明" -> "1新增功能说明"
+            target_clean = re.sub(r'^(\d+(?:\.\d+)*)\.', r'\1', target_clean)
         
         # 优先进行精确匹配
         for block in text_blocks:
             block_text = block.get('text', '').strip()
             block_clean = self._clean_title_for_matching(block_text)
+            if remove_all_spaces:
+                import re
+                block_clean = block_clean.replace(' ', '')
+                # 去除数字前缀末尾且后面不是数字的点号
+                block_clean = re.sub(r'^(\d+(?:\.\d+)*)\.(?!\d)', r'\1', block_clean)
+                # 同时处理PDF中可能存在的点号格式
+                block_clean = re.sub(r'^(\d+(?:\.\d+)*)\.', r'\1', block_clean)
             
             if block_clean == target_clean:
                 return {
@@ -4016,20 +4165,60 @@ class PDFBookmarkTool:
                     'y': block.get('y', 0)
                 }
         
+        # 尝试匹配带数字前缀的版本（用于markdown辅助加书签）
+        # 如果目标标题不包含数字前缀，尝试匹配带前缀的版本
+        if not self._has_numeric_prefix(target_title):
+            for block in text_blocks:
+                block_text = block.get('text', '').strip()
+                block_clean = self._clean_title_for_matching(block_text)
+                
+                # 检查是否匹配带数字前缀的版本
+                if self._matches_with_numeric_prefix(block_clean, target_clean):
+                    return {
+                        'title': target_title,  # 使用原始标题
+                        'page': block['page'],
+                        'level': 1,  # 默认层级
+                    'font_size': block.get('size', 12),
+                    'x': block.get('x', 0),
+                    'y': block.get('y', 0)
+                }
+        
         # 如果启用模糊匹配
         if fuzzy_match:
             best_match = None
-            best_similarity = 0.8  # 相似度阈值
+            best_similarity = 0.0
+            best_score = 0.0
             
             for block in text_blocks:
                 block_text = block.get('text', '').strip()
-                similarity = self._calculate_text_similarity(target_clean, self._clean_title_for_matching(block_text))
+                block_clean = self._clean_title_for_matching(block_text)
                 
-                if similarity > best_similarity:
+                # 计算基础相似度
+                similarity = self._calculate_text_similarity(target_clean, block_clean)
+                
+                # 计算综合评分
+                score = similarity
+                
+                # 如果PDF文本包含目标标题（忽略数字前缀），给予高分
+                if self._contains_title_ignoring_prefix(block_clean, target_clean):
+                    score = max(score, 0.9)  # 高相似度
+                
+                # 如果PDF文本以目标标题开头（忽略数字前缀），给予更高分
+                if self._starts_with_title_ignoring_prefix(block_clean, target_clean):
+                    score = max(score, 0.95)  # 更高相似度
+                
+                # 如果PDF文本完全匹配目标标题（忽略数字前缀），给予最高分
+                if self._exact_match_ignoring_prefix(block_clean, target_clean):
+                    score = max(score, 1.0)  # 完全匹配
+                
+                # 优先选择评分最高的匹配
+                if score > best_score:
+                    best_score = score
                     best_similarity = similarity
                     best_match = block
             
-            if best_match:
+            # 只有评分足够高才返回匹配结果
+            if best_match and best_score >= 0.7:
                 return {
                     'title': target_title,  # 使用原始标题
                     'page': best_match['page'],
@@ -4048,7 +4237,32 @@ class PDFBookmarkTool:
         title = re.sub(r'\s+', ' ', title.strip())
         # 移除常见的标点符号
         title = re.sub(r'[。，、；：！？""''（）【】\[\](){}]', '', title)
+        # 标准化全角/半角字符
+        title = self._normalize_unicode_chars(title)
         return title.lower()
+    
+    def _normalize_unicode_chars(self, text: str) -> str:
+        """标准化Unicode字符，将全角字符转换为半角字符，并处理常见的字符变体"""
+        import unicodedata
+        
+        # 使用NFKC标准化，将全角字符转换为半角字符
+        normalized = unicodedata.normalize('NFKC', text)
+        
+        # 处理常见的字符变体
+        char_mappings = {
+            '⽤': '用',  # U+2F50 -> U+7528
+            '⽇': '日',  # U+2F51 -> U+65E5  
+            '⾯': '面',  # U+2FAE -> U+9762
+            '⾃': '自',  # U+2F83 -> U+81EA
+            '⽂': '文',  # U+2F58 -> U+6587
+            '⽀': '支',  # U+2F59 -> U+652F
+            '⽆': '无',  # U+2F8B -> U+65E0
+        }
+        
+        for old_char, new_char in char_mappings.items():
+            normalized = normalized.replace(old_char, new_char)
+        
+        return normalized
 
     def _calculate_text_similarity(self, text1: str, text2: str) -> float:
         """计算两个文本的相似度"""
@@ -4074,6 +4288,43 @@ class PDFBookmarkTool:
         max_len = max(len(text1), len(text2))
         
         return lcs_len / max_len if max_len > 0 else 0.0
+
+    def _has_numeric_prefix(self, title: str) -> bool:
+        """检查标题是否包含数字前缀"""
+        import re
+        # 检查是否以数字开头（如 "1. 标题" 或 "1.1 标题"）
+        return bool(re.match(r'^\d+(\.\d+)*\s+', title.strip()))
+
+    def _matches_with_numeric_prefix(self, target_clean: str, block_clean: str) -> bool:
+        """检查是否匹配带数字前缀的版本"""
+        import re
+        # 从block_clean中移除数字前缀，然后与target_clean比较
+        block_without_prefix = re.sub(r'^\d+(\.\d+)*\s+', '', block_clean)
+        return block_without_prefix == target_clean
+
+    def _contains_title_ignoring_prefix(self, block_clean: str, target_clean: str) -> bool:
+        """检查PDF文本是否包含目标标题（忽略数字前缀）"""
+        import re
+        # 从block_clean中移除数字前缀
+        block_without_prefix = re.sub(r'^\d+(\.\d+)*\s+', '', block_clean)
+        # 检查是否包含目标标题
+        return target_clean in block_without_prefix or block_without_prefix in target_clean
+    
+    def _starts_with_title_ignoring_prefix(self, block_clean: str, target_clean: str) -> bool:
+        """检查PDF文本是否以目标标题开头（忽略数字前缀）"""
+        import re
+        # 从block_clean中移除数字前缀
+        block_without_prefix = re.sub(r'^\d+(\.\d+)*\s+', '', block_clean)
+        # 检查是否以目标标题开头
+        return block_without_prefix.startswith(target_clean)
+    
+    def _exact_match_ignoring_prefix(self, block_clean: str, target_clean: str) -> bool:
+        """检查PDF文本是否完全匹配目标标题（忽略数字前缀）"""
+        import re
+        # 从block_clean中移除数字前缀
+        block_without_prefix = re.sub(r'^\d+(\.\d+)*\s+', '', block_clean)
+        # 检查是否完全匹配
+        return block_without_prefix == target_clean
 
     def process_with_bookmark_file(self, bookmark_file_path: str, output_path: Optional[str] = None) -> bool:
         """
@@ -4132,14 +4383,77 @@ class PDFBookmarkTool:
             print(f"❌ 添加书签失败: {result.get('error', '未知错误')}")
             return False
 
+    def process_with_markdown_file(self, markdown_file_path: str, output_path: Optional[str] = None) -> bool:
+        """
+        使用Markdown文件进行书签处理
+        
+        Args:
+            markdown_file_path: Markdown文件路径
+            output_path: 输出文件路径
+        
+        Returns:
+            处理是否成功
+        """
+        print(f"使用Markdown文件进行处理: {markdown_file_path}")
+        
+        # 确保PDF文档已打开
+        if not self.open_pdf():
+            print("❌ 无法打开PDF文件")
+            return False
+        
+        # 解析Markdown文件
+        markdown_bookmarks = self.parse_markdown_file(markdown_file_path)
+        if not markdown_bookmarks:
+            print("Markdown文件为空或解析失败")
+            return False
+        
+        print(f"从Markdown文件中解析到 {len(markdown_bookmarks)} 个标题")
+        
+        # 提取标题列表进行匹配（使用带数字前缀的完整标题，并禁用模糊匹配）
+        bookmark_titles = [item.get('full_title', item.get('title')) for item in markdown_bookmarks]
+        matched_bookmarks = self.match_bookmarks_with_pdf_text(bookmark_titles, fuzzy_match=False, remove_all_spaces=True)
+        
+        if not matched_bookmarks:
+            print("未找到任何匹配的书签")
+            return False
+        
+        # 将Markdown中的层级信息和数字前缀应用到匹配结果（以完整标题作为键）
+        title_to_markdown = {item.get('full_title', item.get('title')): item for item in markdown_bookmarks}
+        for bookmark in matched_bookmarks:
+            if bookmark.get('title') in title_to_markdown:
+                markdown_item = title_to_markdown[bookmark.get('title')]
+                bookmark['level'] = markdown_item['level']
+                # 使用带数字前缀的完整标题作为书签标题
+                bookmark['title'] = markdown_item['full_title']
+        
+        # 按页面和Y坐标排序
+        matched_bookmarks.sort(key=lambda x: (x['page'], -x.get('y', 0)))
+        
+        # 添加书签到PDF
+        success, result = self.add_bookmarks(matched_bookmarks)
+        if success:
+            # 保存PDF
+            if self.save_pdf(output_path):
+                print(f"✅ 基于Markdown文件的处理完成，共添加 {len(matched_bookmarks)} 个书签")
+                return True
+            else:
+                print("❌ 保存PDF文件失败")
+                return False
+        else:
+            print(f"❌ 添加书签失败: {result.get('error', '未知错误')}")
+            return False
+
 
 def main():
     parser = argparse.ArgumentParser(description="PDF书签工具")
-    parser.add_argument("input_file", help="输入PDF文件路径")
+    parser.add_argument("input_file", nargs='?', help="输入PDF文件路径")
     parser.add_argument("-o", "--output", help="输出文件路径")
     
     # 处理模式选择
     parser.add_argument("--extract-only", action="store_true", help="仅提取现有书签，不创建新书签")
+    parser.add_argument("--bookmark-file-assisted", action="store_true", help="书签文件辅助加书签模式")
+    parser.add_argument("--markdown-assisted", action="store_true", help="markdown辅助加书签模式")
+    parser.add_argument("--parse-markdown", type=str, help="仅解析Markdown文件并输出标题结构")
     
     # 书签提取相关参数
     parser.add_argument("--format", choices=['json', 'txt', 'csv'], default='json', help="导出格式 (默认: json)")
@@ -4155,16 +4469,27 @@ def main():
     parser.add_argument("--exclude-titles", type=str, help="排除的标题列表(JSON格式)")
     parser.add_argument("--include-titles", type=str, help="包含的标题列表(JSON格式)")
     parser.add_argument("--bookmark-file", type=str, help="书签文件路径(JSON/TXT/CSV格式)")
+    parser.add_argument("--markdown-file", type=str, help="markdown文件路径")
     
     args = parser.parse_args()
     
-    # 检查输入文件
-    if not os.path.exists(args.input_file):
-        print(f"错误：文件 '{args.input_file}' 不存在")
-        sys.exit(1)
+    # 对于parse-markdown模式，不需要PDF文件
+    if not args.parse_markdown:
+        # 检查输入文件
+        if not args.input_file:
+            print("错误：需要提供输入PDF文件路径")
+            sys.exit(1)
+        if not os.path.exists(args.input_file):
+            print(f"错误：文件 '{args.input_file}' 不存在")
+            sys.exit(1)
+    else:
+        # parse_markdown模式，input_file可能为None，这是正常的
+        pass
     
     try:
-        tool = PDFBookmarkTool(args.input_file)
+        # 对于parse-markdown模式，使用虚拟PDF路径
+        pdf_path = args.input_file if not args.parse_markdown else "dummy.pdf"
+        tool = PDFBookmarkTool(pdf_path)
         
         # 设置工具选项
         tool.enable_debug = args.debug
@@ -4226,9 +4551,14 @@ def main():
                 print("❌ 书签提取失败!")
                 sys.exit(1)
         
-        else:
-            # 书签创建模式
-            print(f"开始处理PDF文件: {args.input_file}")
+        elif args.bookmark_file_assisted:
+            # 书签文件辅助加书签模式
+            print(f"开始书签文件辅助加书签处理: {args.input_file}")
+            
+            # 检查必需参数
+            if not args.bookmark_file:
+                print("❌ 错误：书签文件辅助加书签模式需要提供 --bookmark-file 参数")
+                sys.exit(1)
             
             # 确定输出文件路径
             if args.output:
@@ -4237,21 +4567,96 @@ def main():
                 base_name = os.path.splitext(args.input_file)[0]
                 output_path = f"{base_name}_with_bookmarks.pdf"
             
-            # 根据是否提供书签文件选择处理方式
-            if args.bookmark_file:
                 # 使用书签文件进行精确匹配
                 print(f"使用书签文件进行精确匹配: {args.bookmark_file}")
                 success = tool.process_with_bookmark_file(args.bookmark_file, output_path)
+            
+            if success:
+                print(f"✅ 书签文件辅助加书签完成！")
+                print(f"PDF已保存到: {output_path}")
             else:
+                print("❌ 书签文件辅助加书签失败!")
+                sys.exit(1)
+                
+        elif args.markdown_assisted:
+            # markdown辅助加书签模式
+            print(f"开始markdown辅助加书签处理: {args.input_file}")
+            
+            # 检查必需参数
+            if not args.markdown_file:
+                print("❌ 错误：markdown辅助加书签模式需要提供 --markdown-file 参数")
+                sys.exit(1)
+            
+            # 确定输出文件路径
+            if args.output:
+                output_path = args.output
+            else:
+                base_name = os.path.splitext(args.input_file)[0]
+                output_path = f"{base_name}_with_bookmarks.pdf"
+            
+            # 使用Markdown文件进行处理
+            print(f"使用Markdown文件进行处理: {args.markdown_file}")
+            success = tool.process_with_markdown_file(args.markdown_file, output_path)
+            
+            if success:
+                print(f"✅ markdown辅助加书签完成！")
+                print(f"PDF已保存到: {output_path}")
+            else:
+                print("❌ markdown辅助加书签失败!")
+                sys.exit(1)
+        
+        elif args.parse_markdown:
+            # 仅解析Markdown文件模式
+            # 检查Markdown文件是否存在
+            if not os.path.exists(args.parse_markdown):
+                result = {
+                    "success": False,
+                    "error": f"Markdown文件 '{args.parse_markdown}' 不存在",
+                    "headings": []
+                }
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+                sys.exit(1)
+            
+            # 创建临时工具实例来解析Markdown
+            temp_tool = PDFBookmarkTool("dummy.pdf")  # 临时文件，不会被使用
+            headings = temp_tool.parse_markdown_file(args.parse_markdown, silent=True)
+            
+            if headings:
+                # 输出JSON格式的结果
+                result = {
+                    "success": True,
+                    "headings": headings
+                }
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+            else:
+                result = {
+                    "success": False,
+                    "error": "Markdown解析失败或未找到标题",
+                    "headings": []
+                }
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+                sys.exit(1)
+        
+        else:
+            # 自动加书签模式（原有的自动书签处理流程）
+            print(f"开始自动加书签处理: {args.input_file}")
+            
+            # 确定输出文件路径
+            if args.output:
+                output_path = args.output
+            else:
+                base_name = os.path.splitext(args.input_file)[0]
+                output_path = f"{base_name}_with_bookmarks.pdf"
+            
                 # 使用自动书签处理流程
                 print("使用自动书签处理流程...")
                 success = tool.new_auto_bookmark_process(output_path)
             
             if success:
-                print(f"✅ PDF书签添加完成！")
+                print(f"✅ 自动加书签完成！")
                 print(f"PDF已保存到: {output_path}")
             else:
-                print("❌ 处理失败!")
+                print("❌ 自动加书签失败!")
                 sys.exit(1)
     
     except Exception as e:
