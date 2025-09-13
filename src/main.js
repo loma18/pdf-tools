@@ -493,19 +493,41 @@ ipcMain.handle("process-pdf", async (event, options) => {
       return;
     }
 
-    const args = [pythonScript, options.inputFile || options.inputPath];
+    // 验证必需参数
+    if (!options.inputPath) {
+      resolve({
+        success: false,
+        error: "缺少输入文件路径参数",
+        output: "",
+      });
+      return;
+    }
+
+    const args = [pythonScript, options.inputPath];
 
     // 根据处理模式设置不同的参数
     if (options.mode === "bookmark-file-assisted") {
       args.push("--bookmark-file-assisted");
-      if (options.bookmarkFile) {
-        args.push("--bookmark-file", options.bookmarkFile);
+      if (!options.bookmarkFile) {
+        resolve({
+          success: false,
+          error: "书签文件辅助加书签模式需要提供书签文件路径",
+          output: "",
+        });
+        return;
       }
+      args.push("--bookmark-file", options.bookmarkFile);
     } else if (options.mode === "markdown-assisted") {
       args.push("--markdown-assisted");
-      if (options.markdownFile) {
-        args.push("--markdown-file", options.markdownFile);
+      if (!options.markdownFile) {
+        resolve({
+          success: false,
+          error: "markdown辅助加书签模式需要提供markdown文件路径",
+          output: "",
+        });
+        return;
       }
+      args.push("--markdown-file", options.markdownFile);
     } else {
       // 原有的自动加书签模式
       if (options.disableFontFilter) {
@@ -525,8 +547,8 @@ ipcMain.handle("process-pdf", async (event, options) => {
       }
     }
 
-    if (options.outputFile || options.outputPath) {
-      args.push("-o", options.outputFile || options.outputPath);
+    if (options.outputPath) {
+      args.push("-o", options.outputPath);
     }
     if (options.enableDebug) {
       args.push("--debug");

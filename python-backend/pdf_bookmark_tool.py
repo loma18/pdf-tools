@@ -4648,9 +4648,9 @@ def main():
                 base_name = os.path.splitext(args.input_file)[0]
                 output_path = f"{base_name}_with_bookmarks.pdf"
             
-                # 使用自动书签处理流程
-                print("使用自动书签处理流程...")
-                success = tool.new_auto_bookmark_process(output_path)
+            # 使用自动书签处理流程
+            print("使用自动书签处理流程...")
+            success = tool.new_auto_bookmark_process(output_path)
             
             if success:
                 print(f"✅ 自动加书签完成！")

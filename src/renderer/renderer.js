@@ -1191,8 +1191,8 @@ class PDFBookmarkApp {
       this.addLogMessage(`输出文件: ${outputFile}`, "info", "bfa");
 
       const result = await window.electronAPI.processPDF({
-        inputFile,
-        outputFile,
+        inputPath: inputFile,
+        outputPath: outputFile,
         bookmarkFile,
         mode: "bookmark-file-assisted"
       });
@@ -1378,8 +1378,8 @@ class PDFBookmarkApp {
       this.addLogMessage(`输出文件: ${outputFile}`, "info", "ma");
 
       const result = await window.electronAPI.processPDF({
-        inputFile,
-        outputFile,
+        inputPath: inputFile,
+        outputPath: outputFile,
         markdownFile,
         mode: "markdown-assisted"
       });

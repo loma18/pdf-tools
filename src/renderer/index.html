@@ -15,14 +15,14 @@
 
         <!-- 标签页导航 -->
         <div class="tab-nav">
-            <button class="tab-button active" data-tab="add-bookmarks">自动加书签</button>
+            <button class="tab-button active" data-tab="markdown-assisted">markdown辅助加书签</button>
+            <button class="tab-button" data-tab="add-bookmarks" style="display: none;">自动加书签</button>
             <button class="tab-button" data-tab="bookmark-file-assisted">书签文件辅助加书签</button>
-            <button class="tab-button" data-tab="markdown-assisted">markdown辅助加书签</button>
             <button class="tab-button" data-tab="extract-bookmarks">自动提取书签</button>
         </div>
 
         <!-- 自动加书签标签页 -->
-        <div id="add-bookmarks" class="tab-content active">
+        <div id="add-bookmarks" class="tab-content" style="display: none;">
             <div class="input-section">
                 <div class="file-input-group">
                     <label for="input-file">选择PDF文件：</label>
@@ -238,7 +238,7 @@
         </div>
 
         <!-- markdown辅助加书签标签页 -->
-        <div id="markdown-assisted" class="tab-content">
+        <div id="markdown-assisted" class="tab-content active">
             <div class="input-section">
                 <div class="file-input-group">
                     <label for="ma-input-file">选择PDF文件：</label>
