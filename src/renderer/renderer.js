@@ -493,6 +493,7 @@ class PDFBookmarkApp {
       console.log("前端手动控制数据:", { excludeTitles, includeTitles });
 
       const options = {
+        mode: "auto", // 自动加书签模式
         inputPath: this.inputFile.value,
         outputPath: this.outputFile.value,
         bookmarkFilePath: this.bookmarkFile.value || null,

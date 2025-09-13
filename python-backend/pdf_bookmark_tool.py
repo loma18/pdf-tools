@@ -4567,9 +4567,9 @@ def main():
                 base_name = os.path.splitext(args.input_file)[0]
                 output_path = f"{base_name}_with_bookmarks.pdf"
             
-                # 使用书签文件进行精确匹配
-                print(f"使用书签文件进行精确匹配: {args.bookmark_file}")
-                success = tool.process_with_bookmark_file(args.bookmark_file, output_path)
+            # 使用书签文件进行精确匹配
+            print(f"使用书签文件进行精确匹配: {args.bookmark_file}")
+            success = tool.process_with_bookmark_file(args.bookmark_file, output_path)
             
             if success:
                 print(f"✅ 书签文件辅助加书签完成！")
