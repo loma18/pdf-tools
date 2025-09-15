@@ -5,6 +5,7 @@ class PDFBookmarkApp {
     this.initElements();
     this.initEventListeners();
     this.initRealtimeLogListeners();
+    this.initWindowStateListeners();
     this.loadAppInfo();
     this.currentTab = "add-bookmarks";
   }
@@ -13,6 +14,11 @@ class PDFBookmarkApp {
     // 标签页相关元素
     this.tabButtons = document.querySelectorAll(".tab-button");
     this.tabContents = document.querySelectorAll(".tab-content");
+
+    // 窗口控制按钮
+    this.minimizeBtn = document.getElementById("minimize-btn");
+    this.maximizeBtn = document.getElementById("maximize-btn");
+    this.closeBtn = document.getElementById("close-btn");
 
     // 自动加书签相关元素
     this.inputFile = document.getElementById("input-file");
@@ -98,6 +104,41 @@ class PDFBookmarkApp {
   }
 
   initEventListeners() {
+    // 窗口控制按钮事件
+    if (this.minimizeBtn) {
+      console.log("最小化按钮已找到，添加事件监听器");
+      this.minimizeBtn.addEventListener("click", (e) => {
+        console.log("最小化按钮被点击");
+        e.preventDefault();
+        e.stopPropagation();
+        this.minimizeWindow();
+      });
+    } else {
+      console.error("最小化按钮未找到");
+    }
+    if (this.maximizeBtn) {
+      console.log("最大化按钮已找到，添加事件监听器");
+      this.maximizeBtn.addEventListener("click", (e) => {
+        console.log("最大化按钮被点击");
+        e.preventDefault();
+        e.stopPropagation();
+        this.maximizeWindow();
+      });
+    } else {
+      console.error("最大化按钮未找到");
+    }
+    if (this.closeBtn) {
+      console.log("关闭按钮已找到，添加事件监听器");
+      this.closeBtn.addEventListener("click", (e) => {
+        console.log("关闭按钮被点击");
+        e.preventDefault();
+        e.stopPropagation();
+        this.closeWindow();
+      });
+    } else {
+      console.error("关闭按钮未找到");
+    }
+
     // 标签页切换
     this.tabButtons.forEach((button) => {
       button.addEventListener("click", () =>
@@ -678,9 +719,9 @@ class PDFBookmarkApp {
         this.openExtractFolder.disabled = false;
 
         // 显示书签预览（仅JSON格式）
-        if (result.bookmarks && this.exportFormat.value === "json") {
-          this.showBookmarkPreview(result.bookmarks);
-        }
+        // if (result.bookmarks && this.exportFormat.value === "json") {
+        //   this.showBookmarkPreview(result.bookmarks);
+        // }
       } else {
         this.appendExtractLog("❌ 提取失败: " + result.error, "error");
         this.updateExtractProgress(0, "提取失败");
@@ -1439,7 +1480,7 @@ class PDFBookmarkApp {
   addLogMessage(message, type = "info", tab = "default") {
     const timestamp = new Date().toLocaleTimeString();
     const logEntry = document.createElement("div");
-    logEntry.className = `log-entry log-${type}`;
+    logEntry.className = `log-entry`;
     logEntry.innerHTML = `<span class="log-time">[${timestamp}]</span> ${message}`;
 
     let logOutput;
@@ -1489,6 +1530,44 @@ class PDFBookmarkApp {
       console.error("复制失败:", error);
       alert("复制失败: " + error.message);
     }
+  }
+
+  // 窗口控制方法
+  async minimizeWindow() {
+    try {
+      await window.electronAPI.minimizeWindow();
+    } catch (error) {
+      console.error("最小化窗口失败:", error);
+    }
+  }
+
+  async maximizeWindow() {
+    try {
+      await window.electronAPI.maximizeWindow();
+    } catch (error) {
+      console.error("最大化窗口失败:", error);
+    }
+  }
+
+  async closeWindow() {
+    try {
+      await window.electronAPI.closeWindow();
+    } catch (error) {
+      console.error("关闭窗口失败:", error);
+    }
+  }
+
+  // 初始化窗口状态监听
+  initWindowStateListeners() {
+    // 监听窗口最大化状态变化
+    window.electronAPI.onWindowMaximized((event, isMaximized) => {
+      const container = document.querySelector('.container');
+      if (isMaximized) {
+        container.classList.add('maximized');
+      } else {
+        container.classList.remove('maximized');
+      }
+    });
   }
 }
 

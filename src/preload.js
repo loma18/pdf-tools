@@ -44,4 +44,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.removeListener("ma-log", callback),
   removeBFALogListener: (callback) =>
     ipcRenderer.removeListener("bfa-log", callback),
+
+  // 窗口控制相关
+  minimizeWindow: () => ipcRenderer.invoke("minimize-window"),
+  maximizeWindow: () => ipcRenderer.invoke("maximize-window"),
+  closeWindow: () => ipcRenderer.invoke("close-window"),
+  
+  // 窗口状态监听
+  onWindowMaximized: (callback) => ipcRenderer.on("window-maximized", callback),
+  removeWindowMaximizedListener: (callback) => ipcRenderer.removeListener("window-maximized", callback),
 }); 

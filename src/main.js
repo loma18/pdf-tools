@@ -308,6 +308,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 900,
+    frame: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -1084,4 +1085,29 @@ ipcMain.handle("parse-markdown-file", async (event, filePath) => {
       });
     });
   });
+});
+
+// 窗口控制事件处理
+ipcMain.handle("minimize-window", async () => {
+  if (mainWindow) {
+    mainWindow.minimize();
+  }
+});
+
+ipcMain.handle("maximize-window", async () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+      mainWindow.webContents.send("window-maximized", false);
+    } else {
+      mainWindow.maximize();
+      mainWindow.webContents.send("window-maximized", true);
+    }
+  }
+});
+
+ipcMain.handle("close-window", async () => {
+  if (mainWindow) {
+    mainWindow.close();
+  }
 });
