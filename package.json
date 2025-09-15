@@ -1,6 +1,6 @@
 {
   "name": "pdf-bookmark-tool",
-  "version": "3.3.0",
+  "version": "3.5.0",
   "description": "PDF自动书签工具 - 智能识别PDF目录结构，自动添加多层级书签，内置Python环境",
   "main": "src/main.js",
   "homepage": "./",
