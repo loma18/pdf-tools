@@ -1034,26 +1034,44 @@ ipcMain.handle("parse-markdown-file", async (event, filePath) => {
     markdownProcess.on("close", (code) => {
       console.log(`Markdown parsing process exited with code ${code}`);
       console.log("Output:", output);
-      console.log("Error:", error);
+      if (error) {
+        console.log("Error:", error);
+      }
 
-      if (code === 0) {
+      // 检查输出是否包含有效的JSON
+      const jsonMatch = output.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
         try {
-          // 尝试解析JSON输出 - 直接解析整个输出
-          const result = JSON.parse(output.trim());
-          resolve({
-            success: true,
-            headings: result.headings || [],
-            output: output
-          });
+          // 尝试解析JSON输出
+          const result = JSON.parse(jsonMatch[0]);
+          if (result.success && result.headings) {
+            resolve({
+              success: true,
+              headings: result.headings,
+              output: output
+            });
+            return;
+          } else if (result.error) {
+            resolve({
+              success: false,
+              error: result.error,
+              headings: []
+            });
+            return;
+          }
         } catch (parseError) {
           console.error("JSON parse error:", parseError);
           console.error("Output that failed to parse:", output);
-          resolve({
-            success: false,
-            error: `JSON解析失败: ${parseError.message}`,
-            headings: []
-          });
         }
+      }
+
+      // 如果JSON解析失败，检查退出码
+      if (code === 0) {
+        resolve({
+          success: false,
+          error: "解析成功但未找到有效结果",
+          headings: []
+        });
       } else {
         resolve({
           success: false,

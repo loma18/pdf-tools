@@ -3428,6 +3428,26 @@ class PDFBookmarkTool:
         
         return tree_list
     
+    def _get_numeric_prefix_level(self, title: str) -> int:
+        """
+        根据数字前缀确定层级
+        例如：
+        - "1 标题" -> 1 (1个数字)
+        - "1.1 标题" -> 2 (2个数字，用.分隔)
+        - "1.1.1 标题" -> 3 (3个数字，用.分隔)
+        """
+        import re
+        
+        # 提取数字前缀部分
+        match = re.match(r'^(\d+(?:\.\d+)*)', title.strip())
+        if match:
+            prefix = match.group(1)
+            # 计算点的数量 + 1 就是层级
+            level = prefix.count('.') + 1
+            return level
+        
+        return 1  # 默认层级
+
     def _normalize_hierarchy_levels(self, tree_list: List[Dict]) -> List[Dict]:
         """
         规范化层级，确保层级连续且符合PyMuPDF要求
@@ -3435,6 +3455,8 @@ class PDFBookmarkTool:
         1. 第一个条目必须是层级1
         2. 每个条目的层级不能比前面所有条目的最大层级大于1
         3. 不能有层级跳跃
+        
+        新增：根据数字前缀长度确定正确的层级关系
         
         Args:
             tree_list: 原始树列表
@@ -3446,6 +3468,17 @@ class PDFBookmarkTool:
             return tree_list
         
         print("  开始严格的层级规范化...")
+        
+        # 首先根据数字前缀重新计算所有节点的层级
+        print("  根据数字前缀重新计算层级...")
+        for i, node in enumerate(tree_list):
+            title = node['title']
+            numeric_level = self._get_numeric_prefix_level(title)
+            original_level = node['level']
+            
+            if numeric_level != original_level:
+                print(f"    节点{i+1} '{title[:30]}...' 层级从 {original_level} 调整为 {numeric_level} (基于数字前缀)")
+                node['level'] = numeric_level
         
         # 确保第一个条目是层级1
         if tree_list[0]['level'] != 1:
@@ -3980,6 +4013,9 @@ class PDFBookmarkTool:
                 content = f.read()
             
             lines = content.split('\n')
+            # 删除第一行（文件标题）
+            if lines:
+                lines = lines[1:]
             in_code_block = False  # 标记是否在代码块中
             
             for line in lines:
@@ -4004,6 +4040,8 @@ class PDFBookmarkTool:
                     
                     # 提取标题文本（去掉#和空格）
                     title = line[level:].strip()
+                    # 清理零宽度空格字符
+                    title = title.replace('\u200b', '').strip()
                     
                     if title:  # 确保标题不为空
                         # 更新计数器
@@ -4041,8 +4079,8 @@ class PDFBookmarkTool:
                         }
                         
                         bookmarks.append(bookmark)
-                        if not silent:
-                            print(f"  解析标题: {full_title} (级别: {level})")
+                        # if not silent:
+                        #     print(f"  解析标题: {full_title} (级别: {level})")
             
             if not silent:
                 print(f"Markdown解析完成，共提取 {len(bookmarks)} 个标题")
@@ -4075,6 +4113,7 @@ class PDFBookmarkTool:
             
             # 先提取行级别的文本
             for block in text_dict["blocks"]:
+                line_blocks = ""
                 if "lines" in block:
                     for line in block["lines"]:
                         line_text = ""
@@ -4101,6 +4140,8 @@ class PDFBookmarkTool:
                                 "x": line_bbox[0],
                                 "y": line_bbox[1]
                             })
+                        line_blocks += line_text
+                print(line_blocks)
             
             # 然后提取合并后的块级别文本（作为备选）
             page_text_blocks = self.extract_text_with_font_info(page_num)
@@ -4472,6 +4513,7 @@ def main():
     parser.add_argument("--markdown-file", type=str, help="markdown文件路径")
     
     args = parser.parse_args()
+    print(args)
     
     # 对于parse-markdown模式，不需要PDF文件
     if not args.parse_markdown:

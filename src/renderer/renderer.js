@@ -26,8 +26,8 @@ class PDFBookmarkApp {
     this.browseInput = document.getElementById("browse-input");
     this.browseOutput = document.getElementById("browse-output");
     this.bookmarkFile = document.getElementById("bookmark-file");
-    this.browseBookmark = document.getElementById("browse-bookmark");
-    this.clearBookmark = document.getElementById("clear-bookmark");
+    // this.browseBookmark = document.getElementById("browse-bookmark");
+    // this.clearBookmark = document.getElementById("clear-bookmark");
     this.enableFontFilter = document.getElementById("enable-font-filter");
     this.fontThreshold = document.getElementById("font-threshold");
     this.enableDebug = document.getElementById("enable-debug");
@@ -39,6 +39,13 @@ class PDFBookmarkApp {
     this.openFolder = document.getElementById("open-folder");
     this.logOutput = document.getElementById("log-output");
     this.clearLog = document.getElementById("clear-log");
+
+    // 调试：检查关键元素是否存在
+    console.log("关键元素检查:");
+    console.log("fontThreshold:", this.fontThreshold);
+    console.log("enableFontFilter:", this.enableFontFilter);
+    console.log("inputFile:", this.inputFile);
+    console.log("outputFile:", this.outputFile);
 
     // 手动控制相关元素
     this.excludeTitleInput = document.getElementById("exclude-title-input");
@@ -147,13 +154,25 @@ class PDFBookmarkApp {
     });
 
     // 自动加书签功能事件
-    this.browseInput.addEventListener("click", () => this.selectInputFile());
-    this.browseOutput.addEventListener("click", () => this.selectOutputFile());
+    if (this.browseInput) {
+      this.browseInput.addEventListener("click", () => this.selectInputFile());
+    }
+    if (this.browseOutput) {
+      this.browseOutput.addEventListener("click", () => this.selectOutputFile());
+    }
 
-    this.startProcess.addEventListener("click", () => this.startProcessing());
-    this.stopProcess.addEventListener("click", () => this.stopProcessing());
-    this.openFolder.addEventListener("click", () => this.openOutputFolder());
-    this.clearLog.addEventListener("click", () => this.clearProcessLog());
+    if (this.startProcess) {
+      this.startProcess.addEventListener("click", () => this.startProcessing());
+    }
+    if (this.stopProcess) {
+      this.stopProcess.addEventListener("click", () => this.stopProcessing());
+    }
+    if (this.openFolder) {
+      this.openFolder.addEventListener("click", () => this.openOutputFolder());
+    }
+    if (this.clearLog) {
+      this.clearLog.addEventListener("click", () => this.clearProcessLog());
+    }
 
     // 书签文件辅助加书签功能事件
     if (this.bfaBrowseInput) {
@@ -235,12 +254,16 @@ class PDFBookmarkApp {
         this.addIncludeTitleItem();
       });
     }
-    this.excludeTitleInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.addExcludeTitleItem();
-    });
-    this.includeTitleInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.addIncludeTitleItem();
-    });
+    if (this.excludeTitleInput) {
+      this.excludeTitleInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") this.addExcludeTitleItem();
+      });
+    }
+    if (this.includeTitleInput) {
+      this.includeTitleInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") this.addIncludeTitleItem();
+      });
+    }
 
     // 自动提取书签功能事件
     if (this.browseExtractInput) {
@@ -276,7 +299,9 @@ class PDFBookmarkApp {
     }
 
     // 文件输入变化事件
-    this.inputFile.addEventListener("change", () => this.onInputFileChange());
+    if (this.inputFile) {
+      this.inputFile.addEventListener("change", () => this.onInputFileChange());
+    }
     if (this.bfaInputFile) {
       this.bfaInputFile.addEventListener("change", () => this.onBfaInputFileChange());
     }
@@ -286,14 +311,18 @@ class PDFBookmarkApp {
     if (this.maMarkdownFile) {
       this.maMarkdownFile.addEventListener("change", () => this.onMaMarkdownFileChange());
     }
-    this.extractInputFile.addEventListener("change", () =>
-      this.onExtractInputFileChange()
-    );
+    if (this.extractInputFile) {
+      this.extractInputFile.addEventListener("change", () =>
+        this.onExtractInputFileChange()
+      );
+    }
 
     // 导出格式变化事件
-    this.exportFormat.addEventListener("change", () =>
-      this.onExportFormatChange()
-    );
+    if (this.exportFormat) {
+      this.exportFormat.addEventListener("change", () =>
+        this.onExportFormatChange()
+      );
+    }
   }
 
   initRealtimeLogListeners() {
@@ -506,10 +535,12 @@ class PDFBookmarkApp {
 
   onInputFileChange() {
     // 根据输入文件自动生成输出文件名
-    if (this.inputFile.value) {
+    if (this.inputFile && this.inputFile.value) {
       const inputPath = this.inputFile.value;
       const outputPath = inputPath.replace(/\.pdf$/i, "_with_bookmarks.pdf");
-      this.outputFile.value = outputPath;
+      if (this.outputFile) {
+        this.outputFile.value = outputPath;
+      }
 
       // 记录输出路径更新日志
       this.appendLog(`输出路径已更新为: ${outputPath}`, "info");
@@ -519,7 +550,7 @@ class PDFBookmarkApp {
   async startProcessing() {
     if (this.isProcessing) return;
 
-    if (!this.inputFile.value) {
+    if (!this.inputFile || !this.inputFile.value) {
       this.appendLog("请先选择输入PDF文件", "error");
       return;
     }
@@ -537,15 +568,15 @@ class PDFBookmarkApp {
         mode: "auto", // 自动加书签模式
         inputPath: this.inputFile.value,
         outputPath: this.outputFile.value,
-        bookmarkFilePath: this.bookmarkFile.value || null,
-        enableFontFilter: this.enableFontFilter.checked,
-        fontThreshold: this.fontThreshold.value
+        bookmarkFilePath: this.bookmarkFile?.value || null,
+        enableFontFilter: this.enableFontFilter ? this.enableFontFilter.checked : false,
+        fontThreshold: this.fontThreshold && this.fontThreshold.value
           ? parseFloat(this.fontThreshold.value)
           : null,
-        disableFontFilter: !this.enableFontFilter.checked,
-        enableDebug: this.enableDebug.checked,
+        disableFontFilter: this.enableFontFilter ? !this.enableFontFilter.checked : true,
+        enableDebug: this.enableDebug ? this.enableDebug.checked : false,
 
-        requireNumericStart: this.requireNumericStart.checked,
+        requireNumericStart: this.requireNumericStart ? this.requireNumericStart.checked : false,
         excludeTitles: excludeTitles,
         includeTitles: includeTitles,
       };
@@ -589,7 +620,7 @@ class PDFBookmarkApp {
   }
 
   async openOutputFolder() {
-    if (!this.outputFile.value) return;
+    if (!this.outputFile || !this.outputFile.value) return;
 
     try {
       await window.electronAPI.showInFolder(this.outputFile.value);
@@ -600,6 +631,7 @@ class PDFBookmarkApp {
 
   // 手动控制相关方法
   addExcludeTitleItem() {
+    if (!this.excludeTitleInput) return;
     const title = this.excludeTitleInput.value.trim();
     if (title) {
       this.addTitleItem(this.excludeTitles, title, "exclude");
@@ -608,6 +640,7 @@ class PDFBookmarkApp {
   }
 
   addIncludeTitleItem() {
+    if (!this.includeTitleInput) return;
     const title = this.includeTitleInput.value.trim();
     if (title) {
       this.addTitleItem(this.includeTitles, title, "include");
@@ -641,7 +674,7 @@ class PDFBookmarkApp {
   async selectExtractInputFile() {
     try {
       const filePath = await window.electronAPI.selectInputFile();
-      if (filePath) {
+      if (filePath && this.extractInputFile) {
         this.extractInputFile.value = filePath;
         this.onExtractInputFileChange();
       }
@@ -652,13 +685,13 @@ class PDFBookmarkApp {
 
   async selectExtractOutputFile() {
     try {
-      const format = this.exportFormat.value;
+      const format = this.exportFormat ? this.exportFormat.value : "json";
       const extension =
         format === "json" ? ".json" : format === "csv" ? ".csv" : ".txt";
       const filePath = await window.electronAPI.selectExtractOutputFile(
         extension
       );
-      if (filePath) {
+      if (filePath && this.extractOutputFile) {
         this.extractOutputFile.value = filePath;
       }
     } catch (error) {
@@ -668,13 +701,15 @@ class PDFBookmarkApp {
 
   onExtractInputFileChange() {
     // 根据输入文件自动生成输出文件名
-    if (this.extractInputFile.value) {
+    if (this.extractInputFile && this.extractInputFile.value) {
       const inputPath = this.extractInputFile.value;
-      const format = this.exportFormat.value;
+      const format = this.exportFormat ? this.exportFormat.value : "json";
       const extension =
         format === "json" ? ".json" : format === "csv" ? ".csv" : ".txt";
       const outputPath = inputPath.replace(/\.pdf$/i, `_bookmarks${extension}`);
-      this.extractOutputFile.value = outputPath;
+      if (this.extractOutputFile) {
+        this.extractOutputFile.value = outputPath;
+      }
 
       // 记录输出路径更新日志
       this.appendExtractLog(`输出路径已更新为: ${outputPath}`, "info");
@@ -689,7 +724,7 @@ class PDFBookmarkApp {
   async startExtraction() {
     if (this.isExtracting) return;
 
-    if (!this.extractInputFile.value) {
+    if (!this.extractInputFile || !this.extractInputFile.value) {
       this.appendExtractLog("请先选择包含书签的PDF文件", "error");
       return;
     }
@@ -700,10 +735,10 @@ class PDFBookmarkApp {
     try {
       const options = {
         inputPath: this.extractInputFile.value,
-        outputPath: this.extractOutputFile.value,
-        includePageInfo: this.includePageInfo.checked,
-        includeLevelInfo: this.includeLevelInfo.checked,
-        format: this.exportFormat.value,
+        outputPath: this.extractOutputFile ? this.extractOutputFile.value : "",
+        includePageInfo: this.includePageInfo ? this.includePageInfo.checked : false,
+        includeLevelInfo: this.includeLevelInfo ? this.includeLevelInfo.checked : false,
+        format: this.exportFormat ? this.exportFormat.value : "json",
       };
 
       this.appendExtractLog("开始提取书签...", "info");
@@ -751,7 +786,7 @@ class PDFBookmarkApp {
   }
 
   async openExtractOutputFolder() {
-    if (!this.extractOutputFile.value) return;
+    if (!this.extractOutputFile || !this.extractOutputFile.value) return;
 
     try {
       await window.electronAPI.showInFolder(this.extractOutputFile.value);
@@ -761,6 +796,8 @@ class PDFBookmarkApp {
   }
 
   showBookmarkPreview(bookmarks) {
+    if (!this.bookmarkPreview) return;
+    
     this.bookmarkPreview.innerHTML = "";
 
     bookmarks.forEach((bookmark) => {
@@ -771,10 +808,10 @@ class PDFBookmarkApp {
       )}`;
 
       let text = bookmark.title;
-      if (this.includePageInfo.checked && bookmark.page) {
+      if (this.includePageInfo && this.includePageInfo.checked && bookmark.page) {
         text += ` (第${bookmark.page}页)`;
       }
-      if (this.includeLevelInfo.checked && bookmark.level) {
+      if (this.includeLevelInfo && this.includeLevelInfo.checked && bookmark.level) {
         text += ` [层级${bookmark.level}]`;
       }
 
@@ -782,27 +819,29 @@ class PDFBookmarkApp {
       this.bookmarkPreview.appendChild(item);
     });
 
-    this.previewSection.style.display = "block";
+    if (this.previewSection) {
+      this.previewSection.style.display = "block";
+    }
   }
 
   // 状态管理方法
   updateProcessingState(isProcessing) {
-    this.startProcess.disabled = isProcessing;
-    this.stopProcess.disabled = !isProcessing;
-    this.browseInput.disabled = isProcessing;
-    this.browseOutput.disabled = isProcessing;
-    this.browseBookmark.disabled = isProcessing;
-    this.clearBookmark.disabled = isProcessing;
-    this.openFolder.disabled = isProcessing || !this.outputFile.value;
+    if (this.startProcess) this.startProcess.disabled = isProcessing;
+    if (this.stopProcess) this.stopProcess.disabled = !isProcessing;
+    if (this.browseInput) this.browseInput.disabled = isProcessing;
+    if (this.browseOutput) this.browseOutput.disabled = isProcessing;
+    // this.browseBookmark.disabled = isProcessing;
+    // this.clearBookmark.disabled = isProcessing;
+    if (this.openFolder) this.openFolder.disabled = isProcessing || !this.outputFile || !this.outputFile.value;
   }
 
   updateExtractionState(isExtracting) {
-    this.startExtract.disabled = isExtracting;
-    this.stopExtract.disabled = !isExtracting;
-    this.browseExtractInput.disabled = isExtracting;
-    this.browseExtractOutput.disabled = isExtracting;
-    this.openExtractFolder.disabled =
-      isExtracting || !this.extractOutputFile.value;
+    if (this.startExtract) this.startExtract.disabled = isExtracting;
+    if (this.stopExtract) this.stopExtract.disabled = !isExtracting;
+    if (this.browseExtractInput) this.browseExtractInput.disabled = isExtracting;
+    if (this.browseExtractOutput) this.browseExtractOutput.disabled = isExtracting;
+    if (this.openExtractFolder) this.openExtractFolder.disabled =
+      isExtracting || !this.extractOutputFile || !this.extractOutputFile.value;
   }
 
   updateProgress(percent, text) {
@@ -1363,6 +1402,12 @@ class PDFBookmarkApp {
   displayMarkdownPreview(headings) {
     if (!this.markdownPreview) return;
 
+    // 显示预览区域
+    const previewSection = document.querySelector('#markdown-assisted .preview-section');
+    if (previewSection) {
+      previewSection.style.display = "block";
+    }
+
     if (!headings || headings.length === 0) {
       this.markdownPreview.innerHTML = '<p class="help-text">未找到标题</p>';
       return;
@@ -1380,6 +1425,7 @@ class PDFBookmarkApp {
     });
 
     this.markdownPreview.innerHTML = html;
+    this.markdownPreview.style.display = "block";
   }
 
   // 开始Markdown辅助加书签处理

@@ -15,9 +15,10 @@ body {
 }
 
 .container {
-  height: 100%;
+  height: 100vh;
   width: 100%;
   margin: 0 auto;
+  padding-top: 50px;
   background: white;
   border-radius: 12px;
   overflow: hidden;
@@ -37,6 +38,10 @@ body {
   background: #8cb470ab;
   height: 50px;
   width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 }
 
 .top-header .dragBar {
@@ -126,7 +131,10 @@ body {
   text-align: center;
   padding: 30px 20px;
   cursor: move;
-  position: relative;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1001;
   user-select: none;
 }
 
@@ -146,6 +154,11 @@ body {
   transition: opacity 0.3s ease;
   pointer-events: none;
   z-index: -1;
+}
+
+.body {
+  height: 100%;
+  overflow: auto;
 }
 
 .header:hover::before {
